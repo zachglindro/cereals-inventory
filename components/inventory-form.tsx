@@ -1,27 +1,27 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { Button } from "@/components/ui/button";
 import {
   Form,
+  FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
-  FormControl,
-  FormDescription,
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
-  SelectTrigger,
-  SelectValue,
   SelectContent,
   SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 
 const typeOptions = ["white", "yellow", "sorghum", "special maize"] as const;
 const locationPlantedOptions = ["LBTR", "LBPD", "CMU"] as const;
@@ -33,9 +33,9 @@ const formSchema = z.object({
   year: z.number().int(),
   season: z.enum(seasonOptions),
   box_number: z.number().int().gte(0, { message: "Required" }),
-  location: z.string().min(1),
-  description: z.string().min(1),
-  pedigree: z.string().min(1),
+  location: z.string().min(1, "Required"),
+  description: z.string().min(1, "Required"),
+  pedigree: z.string().min(1, "Required"),
   weight: z.number().gte(0, { message: "Required" }),
   year_harvested: z.number().int(),
   comment: z.string(),
@@ -53,6 +53,7 @@ export function InventoryForm() {
       description: "",
       pedigree: "",
       year_harvested: new Date().getFullYear(),
+      comment: "",
     },
   });
 
@@ -64,6 +65,29 @@ export function InventoryForm() {
     <div className="border rounded-lg p-8 bg-white">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <FormField
+            control={form.control}
+            name="box_number"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Box Number</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    {...field}
+                    value={field.value === undefined ? "" : field.value}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      field.onChange(
+                        val === "" ? undefined : Math.max(0, Number(val))
+                      );
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           <FormField
             control={form.control}
             name="type"
@@ -168,27 +192,6 @@ export function InventoryForm() {
           />
           <FormField
             control={form.control}
-            name="box_number"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Box Number</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    {...field}
-                    value={field.value === undefined ? "" : field.value}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      field.onChange(val === "" ? undefined : Math.max(0, Number(val)));
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
             name="location"
             render={({ field }) => (
               <FormItem>
@@ -228,19 +231,6 @@ export function InventoryForm() {
           />
           <FormField
             control={form.control}
-            name="comment"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Comment</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
             name="weight"
             render={({ field }) => (
               <FormItem>
@@ -252,7 +242,9 @@ export function InventoryForm() {
                     value={field.value === undefined ? "" : field.value}
                     onChange={(e) => {
                       const val = e.target.value;
-                      field.onChange(val === "" ? undefined : Math.max(0, Number(val)));
+                      field.onChange(
+                        val === "" ? undefined : Math.max(0, Number(val))
+                      );
                     }}
                   />
                 </FormControl>
@@ -274,6 +266,20 @@ export function InventoryForm() {
                     onChange={(e) => field.onChange(Number(e.target.value))}
                   />
                 </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="comment"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Comment</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormDescription>optional</FormDescription>
                 <FormMessage />
               </FormItem>
             )}

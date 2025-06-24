@@ -1,9 +1,20 @@
+import { AppSidebar } from "@/components/app-sidebar";
 import { InventoryForm } from "@/components/inventory-form";
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
 
 export default function Home() {
   return (
-    <main className="flex flex-col items-center justify-center min-h-screen p-8 sm:p-20">
-      <InventoryForm />
-    </main>
+    <SidebarProvider>
+      <AppSidebar />
+      <main>
+        <SidebarTrigger />
+        <SidebarInset></SidebarInset>
+        <InventoryForm />
+      </main>
+    </SidebarProvider>
   );
 }
