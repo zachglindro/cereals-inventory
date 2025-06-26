@@ -1,13 +1,22 @@
 "use client";
 
+import { DataTable } from "@/app/bulk-add/data-table";
 import { AppSidebar } from "@/components/app-sidebar";
 import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { ColumnDef } from "@tanstack/react-table";
 import { FileSpreadsheet } from "lucide-react";
-import React, { useRef } from "react";
+import Papa from "papaparse";
+import React, { useRef, useState } from "react";
+import * as XLSX from "xlsx";
 
 export default function BulkAdd() {
   const inputRef = useRef<HTMLInputElement>(null);
+  const [data, setData] = useState<Record<string, unknown>[]>([]);
+  const [tableColumns, setTableColumns] = useState<
+    ColumnDef<Record<string, unknown>, unknown>[]
+  >([]);
+  const [importedFileName, setImportedFileName] = useState<string>("");
 
   const handleImportClick = () => {
     inputRef.current?.click();
@@ -16,7 +25,57 @@ export default function BulkAdd() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // Do work here
+      setImportedFileName(file.name);
+      const fileName = file.name.toLowerCase();
+
+      // Handle csv files
+      if (fileName.endsWith(".csv")) {
+        Papa.parse(file, {
+          header: false,
+          skipEmptyLines: true,
+          complete: (results) => {
+            const rows = results.data as unknown[][];
+            const headers = rows[0] as string[];
+            setTableColumns(
+              headers.map((h) => ({ accessorKey: h, header: h }))
+            );
+
+            const records = rows.slice(1).map((row) => {
+              const obj: Record<string, unknown> = {};
+              headers.forEach((h, i) => {
+                obj[h] = row[i];
+              });
+              return obj;
+            });
+            setData(records);
+          },
+        });
+        return;
+      }
+
+      // Handle xlsx files
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        const bytes = evt.target?.result;
+        if (bytes) {
+          const wb = XLSX.read(bytes, { type: "array" });
+          const ws = wb.Sheets[wb.SheetNames[0]];
+          const rows = XLSX.utils.sheet_to_json<unknown[]>(ws, { header: 1 });
+
+          const headers = rows[0] as string[];
+          setTableColumns(headers.map((h) => ({ accessorKey: h, header: h })));
+
+          const records = rows.slice(1).map((row) => {
+            const obj: Record<string, unknown> = {};
+            headers.forEach((h, i) => {
+              obj[h] = row[i as number];
+            });
+            return obj;
+          });
+          setData(records);
+        }
+      };
+      reader.readAsArrayBuffer(file);
     }
   };
 
@@ -25,18 +84,29 @@ export default function BulkAdd() {
       <AppSidebar />
       <input
         type="file"
-        accept=".csv, .xlsx, .xls"
+        accept=".xlsx, .xls, .csv"
         ref={inputRef}
         style={{ display: "none" }}
         onChange={handleFileChange}
       />
-      <main>
+      <main className="w-full">
         <SidebarTrigger />
-
-        <Button variant="outline" onClick={handleImportClick}>
-          <FileSpreadsheet />
-          Import
-        </Button>
+        <div className="flex flex-col items-center justify-center h-screen">
+          <Button variant="outline" onClick={handleImportClick}>
+            <FileSpreadsheet />
+            Import
+          </Button>
+          {importedFileName && (
+            <div className="mt-2 text-sm text-gray-600">
+              Imported {importedFileName}
+            </div>
+          )}
+          {tableColumns.length > 0 && (
+            <div className="mt-4">
+              <DataTable columns={tableColumns} data={data} />
+            </div>
+          )}
+        </div>
       </main>
     </>
   );
