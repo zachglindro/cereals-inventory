@@ -21,29 +21,17 @@ import {
 } from "@/components/ui/select";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
-
-const typeOptions = ["white", "yellow", "sorghum", "special maize"] as const;
-const locationPlantedOptions = ["LBTR", "LBPD", "CMU"] as const;
-const seasonOptions = ["wet", "dry"] as const;
-
-const formSchema = z.object({
-  type: z.enum(typeOptions),
-  location_planted: z.enum(locationPlantedOptions),
-  year: z.number().int(),
-  season: z.enum(seasonOptions),
-  box_number: z.number().int().gte(0, { message: "Required" }),
-  location: z.string().min(1, "Required"),
-  description: z.string().min(1, "Required"),
-  pedigree: z.string().min(1, "Required"),
-  weight: z.number().gte(0, { message: "Required" }),
-  year_harvested: z.number().int(),
-  comment: z.string(),
-});
+import {
+  inventoryFormSchema,
+  typeOptions,
+  locationPlantedOptions,
+  seasonOptions,
+  InventoryFormValues,
+} from "@/lib/schemas/inventory";
 
 export function InventoryForm() {
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<InventoryFormValues>({
+    resolver: zodResolver(inventoryFormSchema),
     defaultValues: {
       type: "white",
       location_planted: "LBTR",
@@ -57,8 +45,9 @@ export function InventoryForm() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  function onSubmit(values: InventoryFormValues) {
     console.log(values);
+    // Do work here
   }
 
   return (
