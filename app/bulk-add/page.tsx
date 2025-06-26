@@ -25,7 +25,7 @@ export default function BulkAdd() {
       <AppSidebar />
       <input
         type="file"
-        accept=".csv, .tsv, .xlsx, .xls, .json, .ods"
+        accept=".csv, .xlsx, .xls"
         ref={inputRef}
         style={{ display: "none" }}
         onChange={handleFileChange}
