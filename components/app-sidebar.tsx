@@ -13,12 +13,17 @@ import { Plus, Sheet } from "lucide-react";
 const items = [
   {
     title: "Data",
-    url: "",
+    url: "/",
     icon: Sheet,
   },
   {
-    title: "Input",
-    url: "",
+    title: "Add",
+    url: "/add",
+    icon: Plus,
+  },
+  {
+    title: "Bulk-Add",
+    url: "bulk-add",
     icon: Plus,
   },
 ];
