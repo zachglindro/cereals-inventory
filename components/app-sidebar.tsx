@@ -8,13 +8,13 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { Plus, Sheet } from "lucide-react";
+import { House, Plus } from "lucide-react";
 
 const items = [
   {
-    title: "Data",
+    title: "Home",
     url: "/",
-    icon: Sheet,
+    icon: House,
   },
   {
     title: "Add",
