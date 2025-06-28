@@ -1,11 +1,11 @@
 "use client";
 
-import { DataTable } from "@/app/bulk-add/data-table";
+import { DataTable } from "@/app/bulk-add/data-table"; // now points to specialized table
 import { Button } from "@/components/ui/button";
 import { ColumnDef } from "@tanstack/react-table";
 import { FileSpreadsheet } from "lucide-react";
 import Papa from "papaparse";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import * as XLSX from "xlsx";
 
 export default function BulkAdd() {
@@ -16,18 +16,6 @@ export default function BulkAdd() {
   >([]);
   const [importedFileName, setImportedFileName] = useState<string>("");
 
-  const [displayCount, setDisplayCount] = useState(10);
-  useEffect(() => {
-    setDisplayCount(10);
-  }, [data]);
-  const displayedData = data.slice(0, displayCount);
-
-  const handleLoadMore = () => {
-    setDisplayCount((prev) => Math.min(prev + 10, data.length));
-  };
-  const handleLoadAll = () => {
-    setDisplayCount(data.length);
-  };
 
   const handleImportClick = () => {
     inputRef.current?.click();
@@ -88,6 +76,7 @@ export default function BulkAdd() {
     }
   };
 
+
   return (
     <>
       <input
@@ -109,25 +98,7 @@ export default function BulkAdd() {
         )}
         {tableColumns.length > 0 && (
           <div className="mt-4">
-            <DataTable columns={tableColumns} data={displayedData} />
-          </div>
-        )}
-        {data.length > 10 && (
-          <div className="flex gap-2 mt-4">
-            <Button
-              variant="default"
-              onClick={handleLoadMore}
-              disabled={displayCount >= data.length}
-            >
-              Load More
-            </Button>
-            <Button
-              variant="outline"
-              onClick={handleLoadAll}
-              disabled={displayCount === data.length}
-            >
-              Load All
-            </Button>
+            <DataTable data={data} />
           </div>
         )}
         <Button variant="default" className="mt-6">
