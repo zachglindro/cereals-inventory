@@ -106,6 +106,9 @@ export default function BulkAdd() {
               <DataTable columns={tableColumns} data={data} />
             </div>
           )}
+          <Button variant='default' className="mt-6">
+            Submit
+          </Button>
         </div>
       </main>
     </>
