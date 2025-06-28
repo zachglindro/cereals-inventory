@@ -3,7 +3,6 @@ import {
   SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -30,10 +29,9 @@ const items = [
 
 export function AppSidebar() {
   return (
-    <Sidebar>
+    <Sidebar className="top-(--header-height) h-[calc(100svh-var(--header-height))]!">
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Inventory</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (
