@@ -1,9 +1,7 @@
 "use client";
 
 import { DataTable } from "@/app/bulk-add/data-table";
-import { AppSidebar } from "@/components/app-sidebar";
 import { Button } from "@/components/ui/button";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 import { ColumnDef } from "@tanstack/react-table";
 import { FileSpreadsheet } from "lucide-react";
 import Papa from "papaparse";
@@ -81,7 +79,6 @@ export default function BulkAdd() {
 
   return (
     <>
-      <AppSidebar />
       <input
         type="file"
         accept=".xlsx, .xls, .csv"
@@ -89,9 +86,8 @@ export default function BulkAdd() {
         style={{ display: "none" }}
         onChange={handleFileChange}
       />
-      <main className="w-full">
-        <SidebarTrigger />
-        <div className="flex flex-col items-center justify-center h-screen">
+      <main className="w-full flex-1 flex">
+        <div className="flex-1 flex flex-col items-center justify-center w-full">
           <Button variant="outline" onClick={handleImportClick}>
             <FileSpreadsheet />
             Import
