@@ -29,7 +29,7 @@ const items = [
 
 export function AppSidebar() {
   return (
-    <Sidebar className="top-(--header-height) h-[calc(100svh-var(--header-height))]!">
+    <Sidebar collapsible="icon" className="top-(--header-height) h-[calc(100svh-var(--header-height))]!">
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupContent>
