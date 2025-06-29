@@ -2,7 +2,9 @@
 
 import { DataTable } from "@/app/import/data-table"; // now points to specialized table
 import { Button } from "@/components/ui/button";
+import { db } from "@/lib/firebase";
 import { ColumnDef } from "@tanstack/react-table";
+import { addDoc, collection } from "firebase/firestore";
 import { FileSpreadsheet } from "lucide-react";
 import Papa from "papaparse";
 import React, { useRef, useState } from "react";
@@ -15,7 +17,6 @@ export default function BulkAdd() {
     ColumnDef<Record<string, unknown>, unknown>[]
   >([]);
   const [importedFileName, setImportedFileName] = useState<string>("");
-
 
   const handleImportClick = () => {
     inputRef.current?.click();
@@ -76,6 +77,19 @@ export default function BulkAdd() {
     }
   };
 
+  const handleSubmit = async () => {
+    try {
+      await Promise.all(
+        data.map((row) => addDoc(collection(db, "inventory"), row))
+      );
+
+      setData([]);
+      setTableColumns([]);
+      setImportedFileName("");
+    } catch (error) {
+      console.error("Error adding documents: ", error);
+    }
+  };
 
   return (
     <>
@@ -101,7 +115,7 @@ export default function BulkAdd() {
             <DataTable data={data} />
           </div>
         )}
-        <Button variant="default" className="mt-6">
+        <Button variant="default" className="mt-6" onClick={handleSubmit}>
           Submit
         </Button>
       </main>
