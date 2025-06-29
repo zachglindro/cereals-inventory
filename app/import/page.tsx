@@ -1,6 +1,6 @@
 "use client";
 
-import { DataTable } from "@/app/bulk-add/data-table"; // now points to specialized table
+import { DataTable } from "@/app/import/data-table"; // now points to specialized table
 import { Button } from "@/components/ui/button";
 import { ColumnDef } from "@tanstack/react-table";
 import { FileSpreadsheet } from "lucide-react";

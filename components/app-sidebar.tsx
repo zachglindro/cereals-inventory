@@ -21,8 +21,8 @@ const items = [
     icon: Plus,
   },
   {
-    title: "Bulk-Add",
-    url: "bulk-add",
+    title: "Import",
+    url: "import",
     icon: Plus,
   },
 ];
