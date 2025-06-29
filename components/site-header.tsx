@@ -5,7 +5,6 @@ import { Menu } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
 import Image from "next/image";
-import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage } from "@/components/ui/breadcrumb";
 
 export function SiteHeader() {
   const { toggleSidebar } = useSidebar();
@@ -23,11 +22,7 @@ export function SiteHeader() {
         </Button>
         <Separator orientation="vertical" className="mr-2 h-4" />
         <Image src="/up-banner.png" alt="UP Banner" width={120} height={32} />
-        <Breadcrumb className="hidden sm:block">
-        <BreadcrumbList>
-          <BreadcrumbItem><BreadcrumbPage>Bulk-Add</BreadcrumbPage></BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
+        Cereals Inventory
       </div>
     </header>
   );
