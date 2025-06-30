@@ -50,8 +50,8 @@ interface TableContentProps<TData> {
 
 function TableContent<TData>({ table, columnsToUse }: TableContentProps<TData>) {
   return (
-    <div className="overflow-hidden rounded-lg border">
-      <Table>
+    <div className="rounded-lg border">
+      <Table className="table-auto overflow-scroll">
         <TableHeader className="bg-muted sticky top-0 z-10">
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
@@ -73,7 +73,6 @@ function TableContent<TData>({ table, columnsToUse }: TableContentProps<TData>) 
         <TableBody className="**:data-[slot=table-cell]:first:w-8">
           {table.getRowModel().rows?.length ? (
             table.getRowModel().rows.map((row) => (
-              // Inlined TableDataRow logic
               <TableRow
                 key={row.id}
                 data-state={row.getIsSelected() && "selected"}
@@ -111,10 +110,6 @@ interface TablePaginationProps<TData> {
 function TablePagination<TData>({ table }: TablePaginationProps<TData>) {
   return (
     <div className="flex items-center justify-between px-4">
-      <div className="text-muted-foreground hidden flex-1 text-sm lg:flex">
-        {table.getFilteredSelectedRowModel().rows.length} of{" "}
-        {table.getFilteredRowModel().rows.length} row(s) selected.
-      </div>
       <div className="flex w-full items-center gap-8 lg:w-fit">
         <div className="hidden items-center gap-2 lg:flex">
           <Label htmlFor="rows-per-page" className="text-sm font-medium">
@@ -193,7 +188,7 @@ function TablePagination<TData>({ table }: TablePaginationProps<TData>) {
 // --- Main DataTable Component ---
 // Manages table state and orchestrates sub-components.
 export function DataTable({
-  data, // Renamed from initialData for direct use
+  data,
   columns: propColumns,
 }: {
   data: Record<string, unknown>[];

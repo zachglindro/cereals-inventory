@@ -113,7 +113,7 @@ export default function BulkAdd() {
           </div>
         )}
         {tableColumns.length > 0 && (
-          <div className="mt-4">
+          <div className="mt-4 w-full">
             <DataTable data={data} />
           </div>
         )}
