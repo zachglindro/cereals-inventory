@@ -8,6 +8,7 @@ import { addDoc, collection } from "firebase/firestore";
 import { FileSpreadsheet } from "lucide-react";
 import Papa from "papaparse";
 import React, { useRef, useState } from "react";
+import { toast } from "sonner";
 import * as XLSX from "xlsx";
 
 export default function BulkAdd() {
@@ -86,6 +87,7 @@ export default function BulkAdd() {
       setData([]);
       setTableColumns([]);
       setImportedFileName("");
+      toast("Data successfully imported!")
     } catch (error) {
       console.error("Error adding documents: ", error);
     }
