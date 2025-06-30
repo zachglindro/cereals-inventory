@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { db } from "@/lib/firebase";
 import { ColumnDef } from "@tanstack/react-table";
 import { addDoc, collection } from "firebase/firestore";
-import { FileSpreadsheet } from "lucide-react";
+import { FileSpreadsheet, Loader2 } from "lucide-react";
 import Papa from "papaparse";
 import React, { useRef, useState } from "react";
 import { toast } from "sonner";
@@ -18,6 +18,7 @@ export default function BulkAdd() {
     ColumnDef<Record<string, unknown>, unknown>[]
   >([]);
   const [importedFileName, setImportedFileName] = useState<string>("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleImportClick = () => {
     inputRef.current?.click();
@@ -79,6 +80,8 @@ export default function BulkAdd() {
   };
 
   const handleSubmit = async () => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
     try {
       await Promise.all(
         data.map((row) => addDoc(collection(db, "inventory"), row))
@@ -87,9 +90,11 @@ export default function BulkAdd() {
       setData([]);
       setTableColumns([]);
       setImportedFileName("");
-      toast("Data successfully imported!")
+      toast("Data successfully imported!");
     } catch (error) {
       console.error("Error adding documents: ", error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -117,8 +122,20 @@ export default function BulkAdd() {
             <DataTable data={data} />
           </div>
         )}
-        <Button variant="default" className="mt-6" onClick={handleSubmit}>
-          Submit
+        <Button
+          variant="default"
+          className="mt-6"
+          onClick={handleSubmit}
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? (
+            <>
+              <Loader2 className="animate-spin h-4 w-4 mr-2" />
+              Submitting...
+            </>
+          ) : (
+            "Submit"
+          )}
         </Button>
       </main>
     </>
