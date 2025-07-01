@@ -28,6 +28,11 @@ import {
   seasonOptions,
   InventoryFormValues,
 } from "@/lib/schemas/inventory";
+import { useState } from "react";
+import { db } from "@/lib/firebase";
+import { addDoc, collection } from "firebase/firestore";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
 export function InventoryForm() {
   const form = useForm<InventoryFormValues>({
@@ -45,15 +50,29 @@ export function InventoryForm() {
     },
   });
 
-  function onSubmit(values: InventoryFormValues) {
-    console.log(values);
-    // Do work here
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  async function onSubmit(values: InventoryFormValues) {
+    setIsSubmitting(true);
+    try {
+      await addDoc(collection(db, "inventory"), values);
+      toast("Inventory added successfully!");
+      form.reset();
+    } catch (error) {
+      console.error("Error adding document: ", error);
+      toast("Error adding inventory");
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
-    <div className="border p-8 bg-white">
+    <div className="p-8 bg-white">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
+        >
           <FormField
             control={form.control}
             name="box_number"
@@ -273,7 +292,18 @@ export function InventoryForm() {
               </FormItem>
             )}
           />
-          <Button type="submit">Submit</Button>
+          <div className="col-span-full flex justify-end">
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="animate-spin h-4 w-4 mr-2" />
+                  Submitting...
+                </>
+              ) : (
+                "Submit"
+              )}
+            </Button>
+          </div>
         </form>
       </Form>
     </div>
