@@ -8,6 +8,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { House, Plus } from "lucide-react";
+import Link from "next/link";
 
 const items = [
   {
@@ -22,14 +23,17 @@ const items = [
   },
   {
     title: "Import",
-    url: "import",
+    url: "/import",
     icon: Plus,
   },
 ];
 
 export function AppSidebar() {
   return (
-    <Sidebar collapsible="icon" className="top-(--header-height) h-[calc(100svh-var(--header-height))]!">
+    <Sidebar
+      collapsible="icon"
+      className="top-(--header-height) h-[calc(100svh-var(--header-height))]!"
+    >
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupContent>
@@ -37,10 +41,10 @@ export function AppSidebar() {
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <a href={item.url}>
+                    <Link href={item.url}>
                       <item.icon />
                       <span>{item.title}</span>
-                    </a>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
