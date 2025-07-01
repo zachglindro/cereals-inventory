@@ -7,13 +7,13 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { House, Plus } from "lucide-react";
+import { House, Plus, RefreshCw, Sheet } from "lucide-react";
 import Link from "next/link";
 
 const items = [
   {
     title: "Home",
-    url: "/",
+    url: "/dashboard",
     icon: House,
   },
   {
@@ -24,8 +24,13 @@ const items = [
   {
     title: "Import",
     url: "/import",
-    icon: Plus,
+    icon: Sheet,
   },
+  {
+    title: "Update",
+    url: "/update",
+    icon: RefreshCw,
+  }
 ];
 
 export function AppSidebar() {
