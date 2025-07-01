@@ -3,6 +3,7 @@
 import { DataTable } from "@/components/data-table";
 import { Button } from "@/components/ui/button";
 import { db } from "@/lib/firebase";
+import { inventoryFormSchema } from "@/lib/schemas/inventory";
 import { ColumnDef } from "@tanstack/react-table";
 import { addDoc, collection } from "firebase/firestore";
 import { FileSpreadsheet, Loader2 } from "lucide-react";
@@ -19,6 +20,19 @@ export default function BulkAdd() {
   >([]);
   const [importedFileName, setImportedFileName] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [missingColumns, setMissingColumns] = useState<string[]>([]);
+  const [unrecognizedColumns, setUnrecognizedColumns] = useState<string[]>([]);
+
+  const expectedColumns = Object.keys(inventoryFormSchema.shape).filter(
+    (key) => !["created_at", "created_by", "modified_at", "modified_by"].includes(key)
+  );
+
+  const validateColumns = (headers: string[]) => {
+    const missing = expectedColumns.filter((h) => !headers.includes(h));
+    const unrecognized = headers.filter((h) => !expectedColumns.includes(h));
+    setMissingColumns(missing);
+    setUnrecognizedColumns(unrecognized);
+  };
 
   const handleImportClick = () => {
     inputRef.current?.click();
@@ -49,6 +63,7 @@ export default function BulkAdd() {
               return obj;
             });
             setData(records);
+            validateColumns(headers);
           },
         });
         return;
@@ -73,6 +88,7 @@ export default function BulkAdd() {
             return obj;
           });
           setData(records);
+          validateColumns(headers);
         }
       };
       reader.readAsArrayBuffer(file);
@@ -122,11 +138,21 @@ export default function BulkAdd() {
             <DataTable data={data} columns={tableColumns} />
           </div>
         )}
+        {missingColumns.length > 0 && (
+          <div className="mt-2 text-sm text-red-600">
+            Missing columns: {missingColumns.join(", ")}
+          </div>
+        )}
+        {unrecognizedColumns.length > 0 && (
+          <div className="mt-1 text-sm text-red-600">
+            Unrecognized columns: {unrecognizedColumns.join(", ")}
+          </div>
+        )}
         <Button
           variant="default"
           className="mt-6"
           onClick={handleSubmit}
-          disabled={isSubmitting}
+          disabled={isSubmitting || missingColumns.length > 0}
         >
           {isSubmitting ? (
             <>
