@@ -1,6 +1,6 @@
 "use client";
 
-import { DataTable } from "@/app/import/data-table"; // now points to specialized table
+import { DataTable } from "@/app/(user)/import/data-table";
 import { Button } from "@/components/ui/button";
 import { db } from "@/lib/firebase";
 import { ColumnDef } from "@tanstack/react-table";

@@ -51,7 +51,7 @@ export function InventoryForm() {
   }
 
   return (
-    <div className="border rounded-lg p-8 bg-white">
+    <div className="border p-8 bg-white">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           <FormField
