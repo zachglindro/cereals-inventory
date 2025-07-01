@@ -5,12 +5,16 @@ import {
   IconChevronRight,
   IconChevronsLeft,
   IconChevronsRight,
+  IconChevronUp,
+  IconChevronDown,
 } from "@tabler/icons-react";
 import {
   ColumnDef,
   flexRender,
   getCoreRowModel,
   getPaginationRowModel,
+  getSortedRowModel,
+  SortingState,
   useReactTable,
   Table as RTTable,
 } from "@tanstack/react-table";
@@ -53,12 +57,36 @@ function TableContent<TData>({ table, columns, loading }: TableContentProps<TDat
               {headerGroup.headers.map((header) => {
                 return (
                   <TableHead key={header.id} colSpan={header.colSpan}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
+                    {header.isPlaceholder ? null : (
+                      <div
+                        className={`flex items-center gap-2 ${
+                          header.column.getCanSort()
+                            ? 'cursor-pointer select-none hover:bg-muted-foreground/10 rounded p-1 -m-1'
+                            : ''
+                        }`}
+                        onClick={header.column.getToggleSortingHandler()}
+                      >
+                        <span>
+                          {flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                        </span>
+                        {header.column.getCanSort() && (
+                          <span className="ml-1">
+                            {{
+                              asc: <IconChevronUp className="h-4 w-4" />,
+                              desc: <IconChevronDown className="h-4 w-4" />,
+                            }[header.column.getIsSorted() as string] ?? (
+                              <div className="flex flex-col">
+                                <IconChevronUp className="h-3 w-3 opacity-40" />
+                                <IconChevronDown className="h-3 w-3 opacity-40 -mt-1" />
+                              </div>
+                            )}
+                          </span>
                         )}
+                      </div>
+                    )}
                   </TableHead>
                 );
               })}
@@ -200,15 +228,21 @@ export function DataTable<TData>({ data, columns, loading = false }: DataTablePr
     pageIndex: 0,
     pageSize: 10,
   });
+  const [sorting, setSorting] = useState<SortingState>([]);
 
   const table = useReactTable({
     data,
     columns: columns,
-    state: { pagination },
+    state: { 
+      pagination,
+      sorting,
+    },
     onPaginationChange: setPagination,
+    onSortingChange: setSorting,
     getRowId: (_row, index) => index.toString(),
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
   });
 
   return (

@@ -52,13 +52,19 @@ export default function BulkAdd() {
             const rows = results.data as unknown[][];
             const headers = rows[0] as string[];
             setTableColumns(
-              headers.map((h) => ({ accessorKey: h, header: h }))
+              headers.map((h, index) => ({ 
+                id: h || `Column ${index + 1}`,
+                accessorKey: h || `Column ${index + 1}`, 
+                header: h || `Column ${index + 1}`,
+                enableSorting: true,
+              }))
             );
 
             const records = rows.slice(1).map((row) => {
               const obj: Record<string, unknown> = {};
               headers.forEach((h, i) => {
-                obj[h] = row[i];
+                const key = h || `Column ${i + 1}`;
+                obj[key] = row[i];
               });
               return obj;
             });
@@ -78,14 +84,20 @@ export default function BulkAdd() {
           const rows = XLSX.utils.sheet_to_json<unknown[]>(ws, { header: 1 });
 
           const headers = rows[0] as string[];
-          setTableColumns(headers.map((h) => ({ accessorKey: h, header: h })));
+          setTableColumns(headers.map((h, index) => ({ 
+            id: h || `Column ${index + 1}`,
+            accessorKey: h || `Column ${index + 1}`, 
+            header: h || `Column ${index + 1}`,
+            enableSorting: true,
+          })));
 
           const records = rows.slice(1).map((row) => {
             const obj: Record<string, unknown> = {};
             headers.forEach((h, i) => {
+              const key = h || `Column ${i + 1}`;
               const value = row[i as number];
               if (value !== undefined) {
-                obj[h] = value;
+                obj[key] = value;
               }
             });
             return obj;
