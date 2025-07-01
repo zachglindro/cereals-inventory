@@ -23,9 +23,7 @@ export default function BulkAdd() {
   const [missingColumns, setMissingColumns] = useState<string[]>([]);
   const [unrecognizedColumns, setUnrecognizedColumns] = useState<string[]>([]);
 
-  const expectedColumns = Object.keys(inventoryFormSchema.shape).filter(
-    (key) => !["created_at", "created_by", "modified_at", "modified_by"].includes(key)
-  );
+  const expectedColumns = Object.keys(inventoryFormSchema.shape);
 
   const validateColumns = (headers: string[]) => {
     const missing = expectedColumns.filter((h) => !headers.includes(h));

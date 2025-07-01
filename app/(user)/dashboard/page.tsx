@@ -8,23 +8,17 @@ import { columns } from "../import/columns";
 import type { InventoryFormValues } from "@/lib/schemas/inventory";
 import type { ColumnDef } from "@tanstack/react-table";
 
-// Type for rows excluding audit fields
-type InventoryRow = Omit<
-  InventoryFormValues,
-  "created_at" | "created_by" | "modified_at" | "modified_by"
->;
-
 export default function Home() {
-  const [data, setData] = useState<InventoryRow[]>([]);
+  const [data, setData] = useState<InventoryFormValues[]>([]);
   const [loading, setLoading] = useState(true);
-  const tableColumns = columns as ColumnDef<InventoryRow, unknown>[];
+  const tableColumns = columns as ColumnDef<InventoryFormValues, unknown>[];
 
   useEffect(() => {
     async function fetchData() {
       setLoading(true);
       const snapshot = await getDocs(collection(db, "inventory"));
       const rows = snapshot.docs.map((doc) => {
-        return doc.data() as InventoryRow;
+        return doc.data() as InventoryFormValues;
       });
       setData(rows);
       setLoading(false);
@@ -33,5 +27,5 @@ export default function Home() {
     fetchData();
   }, []);
 
-  return <DataTable<InventoryRow> data={data} columns={tableColumns} loading={loading} />;
+  return <DataTable<InventoryFormValues> data={data} columns={tableColumns} loading={loading} />;
 }

@@ -23,10 +23,6 @@ export const inventoryFormSchema = z.object({
   weight: z.number().gte(0, { message: "Required" }),
   year_harvested: z.number().int(),
   comment: z.string(),
-  created_at: z.date(),
-  created_by: z.string(),
-  modified_at: z.date(),
-  modified_by: z.string(),
 });
 
 // Type alias for form values
