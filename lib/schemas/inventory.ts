@@ -1,7 +1,12 @@
 import { z } from "zod";
 
 // Shared options for inventory form
-export const typeOptions = ["white", "yellow", "sorghum", "special maize"] as const;
+export const typeOptions = [
+  "white",
+  "yellow",
+  "sorghum",
+  "special maize",
+] as const;
 export const locationPlantedOptions = ["LBTR", "LBPD", "CMU"] as const;
 export const seasonOptions = ["wet", "dry"] as const;
 
@@ -18,6 +23,10 @@ export const inventoryFormSchema = z.object({
   weight: z.number().gte(0, { message: "Required" }),
   year_harvested: z.number().int(),
   comment: z.string(),
+  created_at: z.date(),
+  created_by: z.string(),
+  modified_at: z.date(),
+  modified_by: z.string(),
 });
 
 // Type alias for form values

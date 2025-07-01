@@ -14,7 +14,7 @@ import {
   useReactTable,
   Table as RTTable,
 } from "@tanstack/react-table";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -38,10 +38,10 @@ import {
 // Handles rendering the table header and body.
 interface TableContentProps<TData> {
   table: RTTable<TData>;
-  columnsToUse: ColumnDef<TData, unknown>[];
+  columns: ColumnDef<TData, unknown>[];
 }
 
-function TableContent<TData>({ table, columnsToUse }: TableContentProps<TData>) {
+function TableContent<TData>({ table, columns }: TableContentProps<TData>) {
   return (
     <div className="rounded-lg border">
       <Table className="table-auto overflow-scroll">
@@ -77,7 +77,7 @@ function TableContent<TData>({ table, columnsToUse }: TableContentProps<TData>) 
           ) : (
             <TableRow>
               <TableCell
-                colSpan={columnsToUse.length}
+                colSpan={columns.length}
                 className="h-24 text-center"
               >
                 No results.
@@ -175,29 +175,12 @@ function TablePagination<TData>({ table }: TablePaginationProps<TData>) {
 }
 
 // --- Main DataTable Component ---
-// Manages table state and orchestrates sub-components.
-export function DataTable({
-  data,
-  columns: propColumns,
-}: {
-  data: Record<string, unknown>[];
-  columns?: ColumnDef<Record<string, unknown>, unknown>[];
-}) {
-  // Dynamically generate columns from keys of the first row if no columns are provided
-  const dynamicColumns =
-    useMemo<ColumnDef<Record<string, unknown>, unknown>[]>(() => {
-      if (!data || data.length === 0) return [];
-      return Object.keys(data[0]).map((key) => ({
-        accessorKey: key,
-        header: () =>
-          key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
-        cell: (info) => info.getValue()?.toString() ?? "",
-      }));
-    }, [data]);
+interface DataTableProps<TData> {
+  data: TData[];
+  columns: ColumnDef<TData, unknown>[];
+}
 
-  // Use provided columns if present, else fallback to dynamicColumns
-  const columnsToUse = propColumns ?? dynamicColumns;
-
+export function DataTable<TData>({ data, columns }: DataTableProps<TData>) {
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 10,
@@ -205,7 +188,7 @@ export function DataTable({
 
   const table = useReactTable({
     data,
-    columns: columnsToUse,
+    columns: columns,
     state: { pagination },
     onPaginationChange: setPagination,
     getRowId: (_row, index) => index.toString(),
@@ -216,7 +199,7 @@ export function DataTable({
   return (
     <div className="w-full flex-col justify-start gap-6">
       <div className="relative flex flex-col gap-4 overflow-auto px-4 lg:px-6">
-        <TableContent table={table} columnsToUse={columnsToUse} />
+        <TableContent table={table} columns={columns} />
         <TablePagination table={table} />
       </div>
     </div>

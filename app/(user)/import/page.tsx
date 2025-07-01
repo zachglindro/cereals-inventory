@@ -119,7 +119,7 @@ export default function BulkAdd() {
         )}
         {tableColumns.length > 0 && (
           <div className="mt-4 w-full">
-            <DataTable data={data} />
+            <DataTable data={data} columns={tableColumns} />
           </div>
         )}
         <Button
