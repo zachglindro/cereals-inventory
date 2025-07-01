@@ -231,7 +231,7 @@ export function InventoryForm() {
               <FormItem>
                 <FormLabel>Pedigree</FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <Input {...field} placeholder="PG 8 10-12"/>
                 </FormControl>
                 <FormMessage />
               </FormItem>
