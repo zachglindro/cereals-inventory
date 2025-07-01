@@ -38,6 +38,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Spinner } from "@/components/ui/spinner";
+import { Funnel } from "lucide-react";
 
 // --- Sub-component: TableContent ---
 // Handles rendering the table header and body.
@@ -47,7 +48,11 @@ interface TableContentProps<TData> {
   loading?: boolean;
 }
 
-function TableContent<TData>({ table, columns, loading }: TableContentProps<TData>) {
+function TableContent<TData>({
+  table,
+  columns,
+  loading,
+}: TableContentProps<TData>) {
   return (
     <div className="rounded-lg border">
       <Table className="table-auto overflow-scroll">
@@ -61,8 +66,8 @@ function TableContent<TData>({ table, columns, loading }: TableContentProps<TDat
                       <div
                         className={`flex items-center gap-2 ${
                           header.column.getCanSort()
-                            ? 'cursor-pointer select-none hover:bg-muted-foreground/10 rounded p-1 -m-1'
-                            : ''
+                            ? "cursor-pointer select-none hover:bg-muted-foreground/10 rounded p-1 -m-1"
+                            : ""
                         }`}
                         onClick={header.column.getToggleSortingHandler()}
                       >
@@ -96,10 +101,7 @@ function TableContent<TData>({ table, columns, loading }: TableContentProps<TDat
         <TableBody className="**:data-[slot=table-cell]:first:w-8">
           {loading ? (
             <TableRow>
-              <TableCell
-                colSpan={columns.length}
-                className="h-24 text-center"
-              >
+              <TableCell colSpan={columns.length} className="h-24 text-center">
                 <div className="flex items-center justify-center gap-2">
                   <Spinner size="sm" />
                   <span className="text-muted-foreground">Loading...</span>
@@ -118,10 +120,7 @@ function TableContent<TData>({ table, columns, loading }: TableContentProps<TDat
             ))
           ) : (
             <TableRow>
-              <TableCell
-                colSpan={columns.length}
-                className="h-24 text-center"
-              >
+              <TableCell colSpan={columns.length} className="h-24 text-center">
                 No results.
               </TableCell>
             </TableRow>
@@ -140,8 +139,8 @@ interface TablePaginationProps<TData> {
 
 function TablePagination<TData>({ table }: TablePaginationProps<TData>) {
   return (
-    <div className="flex items-center justify-between px-4">
-      <div className="flex w-full items-center gap-8 lg:w-fit">
+    <div className="flex items-center justify-between">
+      <div className="flex items-center gap-8">
         <div className="hidden items-center gap-2 lg:flex">
           <Label htmlFor="rows-per-page" className="text-sm font-medium">
             Rows per page
@@ -153,9 +152,7 @@ function TablePagination<TData>({ table }: TablePaginationProps<TData>) {
             }}
           >
             <SelectTrigger size="sm" className="w-20" id="rows-per-page">
-              <SelectValue
-                placeholder={table.getState().pagination.pageSize}
-              />
+              <SelectValue placeholder={table.getState().pagination.pageSize} />
             </SelectTrigger>
             <SelectContent side="top">
               {[10, 20, 30, 40, 50].map((pageSize) => (
@@ -170,7 +167,7 @@ function TablePagination<TData>({ table }: TablePaginationProps<TData>) {
           Page {table.getState().pagination.pageIndex + 1} of{" "}
           {table.getPageCount()}
         </div>
-        <div className="ml-auto flex items-center gap-2 lg:ml-0">
+        <div className="flex items-center gap-2">
           <Button
             variant="outline"
             className="hidden h-8 w-8 p-0 lg:flex"
@@ -212,6 +209,12 @@ function TablePagination<TData>({ table }: TablePaginationProps<TData>) {
           </Button>
         </div>
       </div>
+      <div>
+        <Button variant="outline">
+          <Funnel />
+          Filter
+        </Button>
+      </div>
     </div>
   );
 }
@@ -223,7 +226,11 @@ interface DataTableProps<TData> {
   loading?: boolean;
 }
 
-export function DataTable<TData>({ data, columns, loading = false }: DataTableProps<TData>) {
+export function DataTable<TData>({
+  data,
+  columns,
+  loading = false,
+}: DataTableProps<TData>) {
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 10,
@@ -233,7 +240,7 @@ export function DataTable<TData>({ data, columns, loading = false }: DataTablePr
   const table = useReactTable({
     data,
     columns: columns,
-    state: { 
+    state: {
       pagination,
       sorting,
     },
@@ -247,7 +254,7 @@ export function DataTable<TData>({ data, columns, loading = false }: DataTablePr
 
   return (
     <div className="w-full flex-col justify-start gap-6">
-      <div className="relative flex flex-col gap-4 overflow-auto px-4 lg:px-6">
+      <div className="relative flex flex-col gap-4 overflow-auto">
         <TableContent table={table} columns={columns} loading={loading} />
         <TablePagination table={table} />
       </div>

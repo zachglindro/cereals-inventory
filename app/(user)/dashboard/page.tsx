@@ -27,5 +27,13 @@ export default function Home() {
     fetchData();
   }, []);
 
-  return <DataTable<InventoryFormValues> data={data} columns={tableColumns} loading={loading} />;
+  return (
+    <div className="p-6">
+      <DataTable<InventoryFormValues>
+        data={data}
+        columns={tableColumns}
+        loading={loading}
+      />
+    </div>
+  );
 }
