@@ -8,20 +8,13 @@ import {
 } from "@tabler/icons-react";
 import {
   ColumnDef,
-  CellContext,
-  ColumnFiltersState,
   flexRender,
   getCoreRowModel,
-  getFacetedRowModel,
-  getFacetedUniqueValues,
-  getFilteredRowModel,
   getPaginationRowModel,
-  getSortedRowModel,
-  SortingState,
   useReactTable,
   Table as RTTable,
 } from "@tanstack/react-table";
-import * as React from "react";
+import { useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -73,11 +66,7 @@ function TableContent<TData>({ table, columnsToUse }: TableContentProps<TData>) 
         <TableBody className="**:data-[slot=table-cell]:first:w-8">
           {table.getRowModel().rows?.length ? (
             table.getRowModel().rows.map((row) => (
-              <TableRow
-                key={row.id}
-                data-state={row.getIsSelected() && "selected"}
-                className="relative z-0"
-              >
+              <TableRow key={row.id} className="relative z-0">
                 {row.getVisibleCells().map((cell) => (
                   <TableCell key={cell.id}>
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -195,59 +184,40 @@ export function DataTable({
   columns?: ColumnDef<Record<string, unknown>, unknown>[];
 }) {
   // Dynamically generate columns from keys of the first row if no columns are provided
-  const dynamicColumns: ColumnDef<Record<string, unknown>, unknown>[] =
-    React.useMemo(() => {
+  const dynamicColumns =
+    useMemo<ColumnDef<Record<string, unknown>, unknown>[]>(() => {
       if (!data || data.length === 0) return [];
       return Object.keys(data[0]).map((key) => ({
         accessorKey: key,
         header: () =>
           key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
-        cell: (info: CellContext<Record<string, unknown>, unknown>) =>
-          info.getValue()?.toString() ?? "",
+        cell: (info) => info.getValue()?.toString() ?? "",
       }));
     }, [data]);
 
   // Use provided columns if present, else fallback to dynamicColumns
   const columnsToUse = propColumns ?? dynamicColumns;
 
-  const [rowSelection, setRowSelection] = React.useState({});
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
-  );
-  const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [pagination, setPagination] = React.useState({
+  const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 10,
   });
 
-  const table = useReactTable<Record<string, unknown>>({
+  const table = useReactTable({
     data,
     columns: columnsToUse,
-    state: {
-      sorting,
-      rowSelection,
-      columnFilters,
-      pagination,
-    },
-    getRowId: (_row, index) => index.toString(),
-    enableRowSelection: true,
-    onRowSelectionChange: setRowSelection,
-    onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
+    state: { pagination },
     onPaginationChange: setPagination,
+    getRowId: (_row, index) => index.toString(),
     getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFacetedRowModel: getFacetedRowModel(),
-    getFacetedUniqueValues: getFacetedUniqueValues(),
   });
 
   return (
     <div className="w-full flex-col justify-start gap-6">
       <div className="relative flex flex-col gap-4 overflow-auto px-4 lg:px-6">
-        <TableContent<Record<string, unknown>> table={table} columnsToUse={columnsToUse} />
-        <TablePagination<Record<string, unknown>> table={table} />
+        <TableContent table={table} columnsToUse={columnsToUse} />
+        <TablePagination table={table} />
       </div>
     </div>
   );
