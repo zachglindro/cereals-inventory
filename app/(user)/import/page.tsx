@@ -83,7 +83,10 @@ export default function BulkAdd() {
           const records = rows.slice(1).map((row) => {
             const obj: Record<string, unknown> = {};
             headers.forEach((h, i) => {
-              obj[h] = row[i as number];
+              const value = row[i as number];
+              if (value !== undefined) {
+                obj[h] = value;
+              }
             });
             return obj;
           });
