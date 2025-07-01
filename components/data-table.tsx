@@ -33,15 +33,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Spinner } from "@/components/ui/spinner";
 
 // --- Sub-component: TableContent ---
 // Handles rendering the table header and body.
 interface TableContentProps<TData> {
   table: RTTable<TData>;
   columns: ColumnDef<TData, unknown>[];
+  loading?: boolean;
 }
 
-function TableContent<TData>({ table, columns }: TableContentProps<TData>) {
+function TableContent<TData>({ table, columns, loading }: TableContentProps<TData>) {
   return (
     <div className="rounded-lg border">
       <Table className="table-auto overflow-scroll">
@@ -64,7 +66,19 @@ function TableContent<TData>({ table, columns }: TableContentProps<TData>) {
           ))}
         </TableHeader>
         <TableBody className="**:data-[slot=table-cell]:first:w-8">
-          {table.getRowModel().rows?.length ? (
+          {loading ? (
+            <TableRow>
+              <TableCell
+                colSpan={columns.length}
+                className="h-24 text-center"
+              >
+                <div className="flex items-center justify-center gap-2">
+                  <Spinner size="sm" />
+                  <span className="text-muted-foreground">Loading...</span>
+                </div>
+              </TableCell>
+            </TableRow>
+          ) : table.getRowModel().rows?.length ? (
             table.getRowModel().rows.map((row) => (
               <TableRow key={row.id} className="relative z-0">
                 {row.getVisibleCells().map((cell) => (
@@ -178,9 +192,10 @@ function TablePagination<TData>({ table }: TablePaginationProps<TData>) {
 interface DataTableProps<TData> {
   data: TData[];
   columns: ColumnDef<TData, unknown>[];
+  loading?: boolean;
 }
 
-export function DataTable<TData>({ data, columns }: DataTableProps<TData>) {
+export function DataTable<TData>({ data, columns, loading = false }: DataTableProps<TData>) {
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 10,
@@ -199,7 +214,7 @@ export function DataTable<TData>({ data, columns }: DataTableProps<TData>) {
   return (
     <div className="w-full flex-col justify-start gap-6">
       <div className="relative flex flex-col gap-4 overflow-auto px-4 lg:px-6">
-        <TableContent table={table} columns={columns} />
+        <TableContent table={table} columns={columns} loading={loading} />
         <TablePagination table={table} />
       </div>
     </div>

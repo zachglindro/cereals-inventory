@@ -16,19 +16,22 @@ type InventoryRow = Omit<
 
 export default function Home() {
   const [data, setData] = useState<InventoryRow[]>([]);
+  const [loading, setLoading] = useState(true);
   const tableColumns = columns as ColumnDef<InventoryRow, unknown>[];
 
   useEffect(() => {
     async function fetchData() {
+      setLoading(true);
       const snapshot = await getDocs(collection(db, "inventory"));
       const rows = snapshot.docs.map((doc) => {
         return doc.data() as InventoryRow;
       });
       setData(rows);
+      setLoading(false);
     }
 
     fetchData();
   }, []);
 
-  return <DataTable<InventoryRow> data={data} columns={tableColumns} />;
+  return <DataTable<InventoryRow> data={data} columns={tableColumns} loading={loading} />;
 }
