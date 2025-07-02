@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { DataTable } from "@/components/data-table";
-import { columns } from "../import/columns";
+import { columns } from "@/lib/schemas/columns";
 import type { InventoryFormValues } from "@/lib/schemas/inventory";
 import type { ColumnDef } from "@tanstack/react-table";
 

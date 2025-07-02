@@ -42,7 +42,13 @@ export default function BulkAdd() {
       const fileName = file.name.toLowerCase();
       const allowedExtensions = [".csv", ".xls", ".xlsx"];
       if (!allowedExtensions.some((ext) => fileName.endsWith(ext))) {
-        toast.error(`${file.name} is not a recognized file type. Only ${allowedExtensions.join(", ")} are allowed.`);
+        toast.error(
+          `${
+            file.name
+          } is not a recognized file type. Only ${allowedExtensions.join(
+            ", "
+          )} are allowed.`
+        );
         setData([]);
         setTableColumns([]);
         setMissingColumns([]);
@@ -60,9 +66,9 @@ export default function BulkAdd() {
             const rows = results.data as unknown[][];
             const headers = rows[0] as string[];
             setTableColumns(
-              headers.map((h, index) => ({ 
+              headers.map((h, index) => ({
                 id: h || `Column ${index + 1}`,
-                accessorKey: h || `Column ${index + 1}`, 
+                accessorKey: h || `Column ${index + 1}`,
                 header: h || `Column ${index + 1}`,
                 enableSorting: true,
               }))
@@ -92,12 +98,14 @@ export default function BulkAdd() {
           const rows = XLSX.utils.sheet_to_json<unknown[]>(ws, { header: 1 });
 
           const headers = rows[0] as string[];
-          setTableColumns(headers.map((h, index) => ({ 
-            id: h || `Column ${index + 1}`,
-            accessorKey: h || `Column ${index + 1}`, 
-            header: h || `Column ${index + 1}`,
-            enableSorting: true,
-          })));
+          setTableColumns(
+            headers.map((h, index) => ({
+              id: h || `Column ${index + 1}`,
+              accessorKey: h || `Column ${index + 1}`,
+              header: h || `Column ${index + 1}`,
+              enableSorting: true,
+            }))
+          );
 
           const records = rows.slice(1).map((row) => {
             const obj: Record<string, unknown> = {};
