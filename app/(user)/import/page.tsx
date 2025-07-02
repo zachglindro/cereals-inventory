@@ -81,9 +81,17 @@ export default function BulkAdd() {
 
             const records = rows.slice(1).map((row) => {
               const obj: Record<string, unknown> = {};
-              headers.forEach((h, i) => {
-                const key = h || `Column ${i + 1}`;
-                obj[key] = row[i];
+              headers.forEach((h, index) => {
+                const key = h || `Column ${index + 1}`;
+                let value = row[index];
+                if (key === "box_number") {
+                  const parsed = parseInt(String(value), 10);
+                  value = isNaN(parsed) ? value : parsed;
+                } else if (key === "weight") {
+                  const parsed = parseFloat(String(value));
+                  value = isNaN(parsed) ? value : parsed;
+                }
+                obj[key] = value;
               });
               return obj;
             });
