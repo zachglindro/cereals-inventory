@@ -45,7 +45,7 @@ export function InventoryForm() {
       location: "",
       description: "",
       pedigree: "",
-      comment: "",
+      remarks: "",
     },
   });
 
@@ -262,10 +262,10 @@ export function InventoryForm() {
           />
           <FormField
             control={form.control}
-            name="comment"
+            name="remarks"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Comment</FormLabel>
+                <FormLabel>Remarks</FormLabel>
                 <FormControl>
                   <Input {...field} />
                 </FormControl>
