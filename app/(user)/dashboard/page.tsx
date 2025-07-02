@@ -33,6 +33,7 @@ export default function Home() {
         data={data}
         columns={tableColumns}
         loading={loading}
+        enableFilters
       />
     </div>
   );

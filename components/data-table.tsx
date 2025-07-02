@@ -144,9 +144,13 @@ function TableContent<TData>({
 // Handles rendering the pagination controls.
 interface TablePaginationProps<TData> {
   table: RTTable<TData>;
+  enableFilters?: boolean;
 }
 
-function TablePagination<TData>({ table }: TablePaginationProps<TData>) {
+function TablePagination<TData>({
+  table,
+  enableFilters = false,
+}: TablePaginationProps<TData>) {
   return (
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-8">
@@ -218,27 +222,29 @@ function TablePagination<TData>({ table }: TablePaginationProps<TData>) {
           </Button>
         </div>
       </div>
-      <div>
-        <Sheet>
-          <SheetTrigger asChild>
-            <Button variant="outline">
-              <Funnel />
-              Filter
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="right">
-            <SheetHeader>
-              <SheetTitle>Filters</SheetTitle>
-              <SheetDescription>Apply filters to the table.</SheetDescription>
-            </SheetHeader>
-            {/* TODO: add filter form fields here */}
-            <SheetFooter>
-              <Button variant="outline">Clear</Button>
-              <Button>Apply</Button>
-            </SheetFooter>
-          </SheetContent>
-        </Sheet>
-      </div>
+      {enableFilters && (
+        <div>
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="outline">
+                <Funnel />
+                Filter
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right">
+              <SheetHeader>
+                <SheetTitle>Filters</SheetTitle>
+                <SheetDescription>Apply filters to the table.</SheetDescription>
+              </SheetHeader>
+              {/* TODO: add filter form fields here */}
+              <SheetFooter>
+                <Button variant="outline">Clear</Button>
+                <Button>Apply</Button>
+              </SheetFooter>
+            </SheetContent>
+          </Sheet>
+        </div>
+      )}
     </div>
   );
 }
@@ -248,17 +254,20 @@ interface DataTableProps<TData> {
   data: TData[];
   columns: ColumnDef<TData, unknown>[];
   loading?: boolean;
+  enableFilters?: boolean;
 }
 
 export function DataTable<TData>({
   data,
   columns,
   loading = false,
+  enableFilters = false,
 }: DataTableProps<TData>) {
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 10,
   });
+
   const [sorting, setSorting] = useState<SortingState>([]);
 
   const table = useReactTable({
@@ -280,7 +289,7 @@ export function DataTable<TData>({
     <div className="w-full flex-col justify-start gap-6">
       <div className="relative flex flex-col gap-4 overflow-auto">
         <TableContent table={table} columns={columns} loading={loading} />
-        <TablePagination table={table} />
+        <TablePagination table={table} enableFilters={enableFilters} />
       </div>
     </div>
   );
