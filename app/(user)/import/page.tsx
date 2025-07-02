@@ -22,6 +22,7 @@ export default function BulkAdd() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [missingColumns, setMissingColumns] = useState<string[]>([]);
   const [unrecognizedColumns, setUnrecognizedColumns] = useState<string[]>([]);
+  const [rowErrors, setRowErrors] = useState<{ rowIndex: number; errors: string[] }[]>([]);
 
   const expectedColumns = Object.keys(inventoryFormSchema.shape);
 
@@ -30,6 +31,22 @@ export default function BulkAdd() {
     const unrecognized = headers.filter((h) => !expectedColumns.includes(h));
     setMissingColumns(missing);
     setUnrecognizedColumns(unrecognized);
+  };
+
+  const validateSchema = (records: Record<string, unknown>[]) => {
+    const errors = records
+      .map((row, idx) => {
+        const parsed = inventoryFormSchema.safeParse(row);
+        if (!parsed.success) {
+          return {
+            rowIndex: idx,
+            errors: parsed.error.errors.map((e) => `${e.path.join('.')}: ${e.message}`),
+          };
+        }
+        return null;
+      })
+      .filter((e) => e) as { rowIndex: number; errors: string[] }[];
+    setRowErrors(errors);
   };
 
   const handleImportClick = () => {
@@ -84,11 +101,13 @@ export default function BulkAdd() {
             });
             setData(records);
             validateColumns(headers);
+            validateSchema(records);
           },
         });
         return;
       }
 
+      // Handles xls/x files
       const reader = new FileReader();
       reader.onload = (evt) => {
         const bytes = evt.target?.result;
@@ -120,6 +139,7 @@ export default function BulkAdd() {
           });
           setData(records);
           validateColumns(headers);
+          validateSchema(records);
         }
       };
       reader.readAsArrayBuffer(file);
@@ -184,12 +204,21 @@ export default function BulkAdd() {
             Unrecognized columns: {unrecognizedColumns.join(", ")}
           </div>
         )}
+      {missingColumns.length === 0 && unrecognizedColumns.length === 0 && rowErrors.length > 0 && (
+        <div className="mt-2 text-sm text-red-600">
+          {rowErrors.map((err) => (
+            <div key={err.rowIndex}>
+              Row {err.rowIndex + 2} errors: {err.errors.join(", ")}
+            </div>
+          ))}
+        </div>
+      )}
         {tableColumns.length > 0 && (
           <Button
             variant="default"
             className="mt-6"
             onClick={handleSubmit}
-            disabled={isSubmitting || missingColumns.length > 0}
+            disabled={isSubmitting || missingColumns.length > 0 || rowErrors.length > 0}
           >
             {isSubmitting ? (
               <>
