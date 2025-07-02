@@ -21,7 +21,7 @@ export default async function UserLayout({
           <SidebarInset>{children}</SidebarInset>
         </div>
       </SidebarProvider>
-      <Toaster />
+      <Toaster closeButton />
     </div>
   );
 }

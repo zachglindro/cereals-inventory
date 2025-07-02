@@ -56,11 +56,11 @@ export function InventoryForm() {
     setIsSubmitting(true);
     try {
       await addDoc(collection(db, "inventory"), values);
-      toast("Inventory added successfully!");
+      toast.success("Inventory added successfully!");
       form.reset();
     } catch (error) {
       console.error("Error adding document: ", error);
-      toast("Error adding inventory");
+      toast.error("Error adding inventory");
     } finally {
       setIsSubmitting(false);
     }

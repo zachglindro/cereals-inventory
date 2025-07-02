@@ -42,7 +42,7 @@ export default function BulkAdd() {
       const fileName = file.name.toLowerCase();
       const allowedExtensions = [".csv", ".xls", ".xlsx"];
       if (!allowedExtensions.some((ext) => fileName.endsWith(ext))) {
-        toast(`${file.name} is not a recognized file type. Only ${allowedExtensions.join(", ")} are allowed.`);
+        toast.error(`${file.name} is not a recognized file type. Only ${allowedExtensions.join(", ")} are allowed.`);
         setData([]);
         setTableColumns([]);
         setMissingColumns([]);
@@ -129,7 +129,7 @@ export default function BulkAdd() {
       setData([]);
       setTableColumns([]);
       setImportedFileName("");
-      toast("Data successfully imported!");
+      toast.success("Data successfully imported!");
     } catch (error) {
       console.error("Error adding documents: ", error);
     } finally {
