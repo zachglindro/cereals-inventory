@@ -83,7 +83,7 @@ function TableContent<TData>({
                         <span>
                           {flexRender(
                             header.column.columnDef.header,
-                            header.getContext()
+                            header.getContext(),
                           )}
                         </span>
                         {header.column.getCanSort() && (

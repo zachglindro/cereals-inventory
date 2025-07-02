@@ -30,7 +30,7 @@ const items = [
     title: "Update",
     url: "/update",
     icon: RefreshCw,
-  }
+  },
 ];
 
 export function AppSidebar() {

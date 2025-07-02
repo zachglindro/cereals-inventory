@@ -86,7 +86,7 @@ export function InventoryForm() {
                     onChange={(e) => {
                       const val = e.target.value;
                       field.onChange(
-                        val === "" ? undefined : Math.max(0, Number(val))
+                        val === "" ? undefined : Math.max(0, Number(val)),
                       );
                     }}
                   />
@@ -250,7 +250,7 @@ export function InventoryForm() {
                     onChange={(e) => {
                       const val = e.target.value;
                       field.onChange(
-                        val === "" ? undefined : Math.max(0, Number(val))
+                        val === "" ? undefined : Math.max(0, Number(val)),
                       );
                     }}
                   />

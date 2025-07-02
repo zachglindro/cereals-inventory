@@ -43,7 +43,7 @@ export default function BulkAdd() {
           return {
             rowIndex: idx,
             errors: parsed.error.errors.map(
-              (e) => `${e.path.join(".")}: ${e.message}`
+              (e) => `${e.path.join(".")}: ${e.message}`,
             ),
           };
         }
@@ -67,8 +67,8 @@ export default function BulkAdd() {
           `${
             file.name
           } is not a recognized file type. Only ${allowedExtensions.join(
-            ", "
-          )} are allowed.`
+            ", ",
+          )} are allowed.`,
         );
         setData([]);
         setTableColumns([]);
@@ -92,7 +92,7 @@ export default function BulkAdd() {
                 accessorKey: h || `Column ${index + 1}`,
                 header: h || `Column ${index + 1}`,
                 enableSorting: true,
-              }))
+              })),
             );
 
             const records = rows.slice(1).map((row) => {
@@ -127,7 +127,7 @@ export default function BulkAdd() {
               accessorKey: h || `Column ${index + 1}`,
               header: h || `Column ${index + 1}`,
               enableSorting: true,
-            }))
+            })),
           );
 
           const records = rows.slice(1).map((row) => {
@@ -155,7 +155,7 @@ export default function BulkAdd() {
     setIsSubmitting(true);
     try {
       await Promise.all(
-        data.map((row) => addDoc(collection(db, "inventory"), row))
+        data.map((row) => addDoc(collection(db, "inventory"), row)),
       );
 
       setData([]);
