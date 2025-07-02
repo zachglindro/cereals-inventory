@@ -124,7 +124,9 @@ export default function BulkAdd() {
               headers.forEach((h, i) => {
                 const key = h || `Column ${i + 1}`;
                 const value = row[i as number];
-                if (value !== undefined) {
+                if (key === "year") {
+                  obj[key] = String(value);
+                } else if (value !== undefined) {
                   obj[key] = value;
                 }
               });
