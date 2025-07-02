@@ -199,19 +199,23 @@ export default function BulkAdd() {
           </div>
         )}
         {missingColumns.length > 0 && (
-          <div className="mt-2 text-sm text-red-600">
-            Missing columns: {missingColumns.join(", ")}
+          <div className="mt-2 text-sm text-red-600 text-center">
+            Missing columns: {missingColumns.join(", ")}.
+            <br />
+            Please add these columns to your spreadsheet.
           </div>
         )}
         {unrecognizedColumns.length > 0 && (
-          <div className="mt-1 text-sm text-red-600">
-            Unrecognized columns: {unrecognizedColumns.join(", ")}
+          <div className="mt-1 text-sm text-red-600 text-center">
+            Unrecognized columns: {unrecognizedColumns.join(", ")}.
+            <br />
+            These columns will not be imported into the database.
           </div>
         )}
         {missingColumns.length === 0 &&
           unrecognizedColumns.length === 0 &&
           rowErrors.length > 0 && (
-            <div className="mt-2 text-sm text-red-600">
+            <div className="mt-2 text-sm text-red-600 text-center">
               {rowErrors.map((err) => (
                 <div key={err.rowIndex}>
                   Row {err.rowIndex + 2} errors: {err.errors.join(", ")}
