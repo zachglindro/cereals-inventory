@@ -39,8 +39,18 @@ export default function BulkAdd() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setImportedFileName(file.name);
       const fileName = file.name.toLowerCase();
+      const allowedExtensions = [".csv", ".xls", ".xlsx"];
+      if (!allowedExtensions.some((ext) => fileName.endsWith(ext))) {
+        toast(`${file.name} is not a recognized file type. Only ${allowedExtensions.join(", ")} are allowed.`);
+        setData([]);
+        setTableColumns([]);
+        setMissingColumns([]);
+        setUnrecognizedColumns([]);
+        setImportedFileName("");
+        return;
+      }
+      setImportedFileName(file.name);
 
       if (fileName.endsWith(".csv")) {
         Papa.parse(file, {
@@ -141,6 +151,11 @@ export default function BulkAdd() {
           <FileSpreadsheet />
           Import
         </Button>
+        {!importedFileName && (
+          <div className="mt-2 text-sm text-gray-600">
+            Import data from a spreadsheet file
+          </div>
+        )}
         {importedFileName && (
           <div className="mt-2 text-sm text-gray-600">
             Imported {importedFileName}
@@ -161,21 +176,23 @@ export default function BulkAdd() {
             Unrecognized columns: {unrecognizedColumns.join(", ")}
           </div>
         )}
-        <Button
-          variant="default"
-          className="mt-6"
-          onClick={handleSubmit}
-          disabled={isSubmitting || missingColumns.length > 0}
-        >
-          {isSubmitting ? (
-            <>
-              <Loader2 className="animate-spin h-4 w-4 mr-2" />
-              Submitting...
-            </>
-          ) : (
-            "Submit"
-          )}
-        </Button>
+        {tableColumns.length > 0 && (
+          <Button
+            variant="default"
+            className="mt-6"
+            onClick={handleSubmit}
+            disabled={isSubmitting || missingColumns.length > 0}
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="animate-spin h-4 w-4 mr-2" />
+                Submitting...
+              </>
+            ) : (
+              "Submit"
+            )}
+          </Button>
+        )}
       </main>
     </>
   );
