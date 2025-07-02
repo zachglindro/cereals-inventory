@@ -19,7 +19,7 @@ export const columns: ColumnDef<InventoryFormValues>[] = [
   {
     id: "year",
     accessorKey: "year",
-    header: "Year",
+    header: "Year(s)",
     enableSorting: true,
   },
   {
@@ -56,12 +56,6 @@ export const columns: ColumnDef<InventoryFormValues>[] = [
     id: "weight",
     accessorKey: "weight",
     header: "Weight (g)",
-    enableSorting: true,
-  },
-  {
-    id: "year_harvested",
-    accessorKey: "year_harvested",
-    header: "Year Harvested",
     enableSorting: true,
   },
   {

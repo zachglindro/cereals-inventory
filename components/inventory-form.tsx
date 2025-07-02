@@ -40,12 +40,11 @@ export function InventoryForm() {
     defaultValues: {
       type: "white",
       location_planted: "LBTR",
-      year: new Date().getFullYear(),
+      year: "",
       season: "wet",
       location: "",
       description: "",
       pedigree: "",
-      year_harvested: new Date().getFullYear(),
       comment: "",
     },
   });
@@ -160,8 +159,8 @@ export function InventoryForm() {
                 <FormLabel>Year</FormLabel>
                 <FormControl>
                   <Input
-                    type="number"
                     {...field}
+                    placeholder={new Date().getFullYear().toString()}
                     onChange={(e) => field.onChange(Number(e.target.value))}
                   />
                 </FormControl>
@@ -231,7 +230,7 @@ export function InventoryForm() {
               <FormItem>
                 <FormLabel>Pedigree</FormLabel>
                 <FormControl>
-                  <Input {...field} placeholder="PG 8 10-12"/>
+                  <Input {...field} placeholder="PG 8 10-12" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -257,23 +256,6 @@ export function InventoryForm() {
                   />
                 </FormControl>
                 <FormDescription>in g</FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="year_harvested"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Year Harvested</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    {...field}
-                    onChange={(e) => field.onChange(Number(e.target.value))}
-                  />
-                </FormControl>
                 <FormMessage />
               </FormItem>
             )}

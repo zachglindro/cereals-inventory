@@ -14,14 +14,13 @@ export const seasonOptions = ["wet", "dry"] as const;
 export const inventoryFormSchema = z.object({
   type: z.enum(typeOptions),
   location_planted: z.enum(locationPlantedOptions),
-  year: z.number().int(),
+  year: z.string(),
   season: z.enum(seasonOptions),
   box_number: z.number().int().gte(0, { message: "Required" }),
   location: z.string().min(1, "Required"),
   description: z.string().min(1, "Required"),
   pedigree: z.string().min(1, "Required"),
   weight: z.number().gte(0, { message: "Required" }),
-  year_harvested: z.number().int(),
   comment: z.string().optional(),
 });
 
