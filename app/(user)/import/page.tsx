@@ -135,6 +135,7 @@ export default function BulkAdd() {
         setMissingColumns([]);
         setUnrecognizedColumns([]);
         setImportedFileName("");
+        setRowErrors([]);
       }
     }
   };
