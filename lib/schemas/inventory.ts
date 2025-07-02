@@ -22,7 +22,7 @@ export const inventoryFormSchema = z.object({
   pedigree: z.string().min(1, "Required"),
   weight: z.number().gte(0, { message: "Required" }),
   year_harvested: z.number().int(),
-  comment: z.string(),
+  comment: z.string().optional(),
 });
 
 // Type alias for form values
