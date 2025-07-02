@@ -61,22 +61,6 @@ export default function BulkAdd() {
     const file = e.target.files?.[0];
     if (file) {
       const fileName = file.name.toLowerCase();
-      const allowedExtensions = [".csv", ".xls", ".xlsx"];
-      if (!allowedExtensions.some((ext) => fileName.endsWith(ext))) {
-        toast.error(
-          `${
-            file.name
-          } is not a recognized file type. Only ${allowedExtensions.join(
-            ", ",
-          )} are allowed.`,
-        );
-        setData([]);
-        setTableColumns([]);
-        setMissingColumns([]);
-        setUnrecognizedColumns([]);
-        setImportedFileName("");
-        return;
-      }
       setImportedFileName(file.name);
 
       if (fileName.endsWith(".csv")) {
@@ -108,45 +92,50 @@ export default function BulkAdd() {
             validateSchema(records);
           },
         });
-        return;
-      }
+      } else if (fileName.endsWith(".xls") || fileName.endsWith(".xlsx")) {
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+          const bytes = evt.target?.result;
+          if (bytes) {
+            const wb = XLSX.read(bytes, { type: "array" });
+            const ws = wb.Sheets[wb.SheetNames[0]];
+            const rows = XLSX.utils.sheet_to_json<unknown[]>(ws, { header: 1 });
 
-      // Handles xls/x files
-      const reader = new FileReader();
-      reader.onload = (evt) => {
-        const bytes = evt.target?.result;
-        if (bytes) {
-          const wb = XLSX.read(bytes, { type: "array" });
-          const ws = wb.Sheets[wb.SheetNames[0]];
-          const rows = XLSX.utils.sheet_to_json<unknown[]>(ws, { header: 1 });
+            const headers = rows[0] as string[];
+            setTableColumns(
+              headers.map((h, index) => ({
+                id: h || `Column ${index + 1}`,
+                accessorKey: h || `Column ${index + 1}`,
+                header: h || `Column ${index + 1}`,
+                enableSorting: true,
+              })),
+            );
 
-          const headers = rows[0] as string[];
-          setTableColumns(
-            headers.map((h, index) => ({
-              id: h || `Column ${index + 1}`,
-              accessorKey: h || `Column ${index + 1}`,
-              header: h || `Column ${index + 1}`,
-              enableSorting: true,
-            })),
-          );
-
-          const records = rows.slice(1).map((row) => {
-            const obj: Record<string, unknown> = {};
-            headers.forEach((h, i) => {
-              const key = h || `Column ${i + 1}`;
-              const value = row[i as number];
-              if (value !== undefined) {
-                obj[key] = value;
-              }
+            const records = rows.slice(1).map((row) => {
+              const obj: Record<string, unknown> = {};
+              headers.forEach((h, i) => {
+                const key = h || `Column ${i + 1}`;
+                const value = row[i as number];
+                if (value !== undefined) {
+                  obj[key] = value;
+                }
+              });
+              return obj;
             });
-            return obj;
-          });
-          setData(records);
-          validateColumns(headers);
-          validateSchema(records);
-        }
-      };
-      reader.readAsArrayBuffer(file);
+            setData(records);
+            validateColumns(headers);
+            validateSchema(records);
+          }
+        };
+        reader.readAsArrayBuffer(file);
+      } else {
+        toast.error(`${file.name} is not a recognized file type.`);
+        setData([]);
+        setTableColumns([]);
+        setMissingColumns([]);
+        setUnrecognizedColumns([]);
+        setImportedFileName("");
+      }
     }
   };
 
