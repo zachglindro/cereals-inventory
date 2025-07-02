@@ -39,6 +39,15 @@ import {
 } from "@/components/ui/table";
 import { Spinner } from "@/components/ui/spinner";
 import { Funnel } from "lucide-react";
+import {
+  Sheet,
+  SheetTrigger,
+  SheetContent,
+  SheetHeader,
+  SheetFooter,
+  SheetTitle,
+  SheetDescription,
+} from "@/components/ui/sheet";
 
 // --- Sub-component: TableContent ---
 // Handles rendering the table header and body.
@@ -210,10 +219,25 @@ function TablePagination<TData>({ table }: TablePaginationProps<TData>) {
         </div>
       </div>
       <div>
-        <Button variant="outline">
-          <Funnel />
-          Filter
-        </Button>
+        <Sheet>
+          <SheetTrigger asChild>
+            <Button variant="outline">
+              <Funnel />
+              Filter
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="right">
+            <SheetHeader>
+              <SheetTitle>Filters</SheetTitle>
+              <SheetDescription>Apply filters to the table.</SheetDescription>
+            </SheetHeader>
+            {/* TODO: add filter form fields here */}
+            <SheetFooter>
+              <Button variant="outline">Clear</Button>
+              <Button>Apply</Button>
+            </SheetFooter>
+          </SheetContent>
+        </Sheet>
       </div>
     </div>
   );
