@@ -168,34 +168,38 @@ export function FilterControl({
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h4 className="font-medium">Filter {label}</h4>
-              {hasActiveFilter && (
-                <Button variant="ghost" size="sm" onClick={clearFilter}>
-                  <X className="h-4 w-4" />
-                </Button>
-              )}
             </div>
 
             {/* Multi-select for enum and text fields */}
             {(isEnumField || isTextField) && (
-              <div className="space-y-2 max-h-60 overflow-y-auto">
-                {uniqueValues.map((value) => (
-                  <div key={value} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`${fieldName}-${value}`}
-                      checked={currentFilter?.values?.includes(value) || false}
-                      onCheckedChange={(checked) =>
-                        handleMultiSelect(value, checked as boolean)
-                      }
-                    />
-                    <Label
-                      htmlFor={`${fieldName}-${value}`}
-                      className="text-sm cursor-pointer flex-1"
-                    >
-                      {value}
-                    </Label>
+              <>
+                <div className="space-y-2 max-h-60 overflow-y-auto">
+                  {uniqueValues.map((value) => (
+                    <div key={value} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`${fieldName}-${value}`}
+                        checked={currentFilter?.values?.includes(value) || false}
+                        onCheckedChange={(checked) =>
+                          handleMultiSelect(value, checked as boolean)
+                        }
+                      />
+                      <Label
+                        htmlFor={`${fieldName}-${value}`}
+                        className="text-sm cursor-pointer flex-1"
+                      >
+                        {value}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+                {hasActiveFilter && (
+                  <div className="pt-2">
+                    <Button variant="ghost" size="sm" onClick={clearFilter}>
+                      Clear all
+                    </Button>
                   </div>
-                ))}
-              </div>
+                )}
+              </>
             )}
 
             {/* Single-number input for box number */}
