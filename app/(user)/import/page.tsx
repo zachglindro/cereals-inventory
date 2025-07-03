@@ -1,9 +1,9 @@
 "use client";
 
-import { DataTable } from "@/components/data-table";
+import { DataTable } from "@/components/data-table/index";
 import { Button } from "@/components/ui/button";
 import { db } from "@/lib/firebase";
-import { inventoryFormSchema } from "@/lib/schemas/inventory";
+import { inventoryFormSchema, type InventoryFormValues } from "@/lib/schemas/inventory";
 import { ColumnDef } from "@tanstack/react-table";
 import { addDoc, collection } from "firebase/firestore";
 import { FileSpreadsheet, Loader2 } from "lucide-react";
@@ -14,9 +14,9 @@ import * as XLSX from "xlsx";
 
 export default function BulkAdd() {
   const inputRef = useRef<HTMLInputElement>(null);
-  const [data, setData] = useState<Record<string, unknown>[]>([]);
+  const [data, setData] = useState<InventoryFormValues[]>([]);
   const [tableColumns, setTableColumns] = useState<
-    ColumnDef<Record<string, unknown>, unknown>[]
+    ColumnDef<InventoryFormValues, unknown>[]
   >([]);
   const [importedFileName, setImportedFileName] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -95,7 +95,7 @@ export default function BulkAdd() {
               });
               return obj;
             });
-            setData(records);
+            setData(records as InventoryFormValues[]);
             validateColumns(headers);
             validateSchema(records);
           },
@@ -132,7 +132,7 @@ export default function BulkAdd() {
               });
               return obj;
             });
-            setData(records);
+            setData(records as InventoryFormValues[]);
             validateColumns(headers);
             validateSchema(records);
           }

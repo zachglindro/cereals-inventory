@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { DataTable } from "@/components/data-table";
+import { DataTable } from "@/components/data-table/index";
 import { columns } from "@/lib/schemas/columns";
 import type { InventoryFormValues } from "@/lib/schemas/inventory";
 import type { ColumnDef } from "@tanstack/react-table";
@@ -33,7 +33,16 @@ export default function Home() {
         data={data}
         columns={tableColumns}
         loading={loading}
-        enableFilters
+        filterableFields={[
+          { label: "Type", fieldName: "type" },
+          { label: "Location Planted", fieldName: "location_planted" },
+          { label: "Year", fieldName: "year" },
+          { label: "Season", fieldName: "season" },
+          { label: "Location", fieldName: "location" },
+          { label: "Description", fieldName: "description" },
+          { label: "Pedigree", fieldName: "pedigree" },
+          { label: "Weight", fieldName: "weight"}
+        ]}
       />
     </div>
   );
