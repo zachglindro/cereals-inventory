@@ -14,9 +14,11 @@ import {
   getCoreRowModel,
   getPaginationRowModel,
   getSortedRowModel,
+  getFilteredRowModel,
   SortingState,
   useReactTable,
   Table as RTTable,
+  Row,
 } from "@tanstack/react-table";
 import { useState } from "react";
 
@@ -29,6 +31,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";  // for inline box number filter
 import {
   Table,
   TableBody,
@@ -48,6 +51,12 @@ import {
   SheetTitle,
   SheetDescription,
 } from "@/components/ui/sheet";
+import {
+  FilterControl,
+  type FilterState,
+  type FilterValue,
+} from "@/components/filter";
+import { type InventoryFormValues } from "@/lib/schemas/inventory";
 
 // --- Sub-component: TableContent ---
 // Handles rendering the table header and body.
@@ -141,16 +150,26 @@ function TableContent<TData>({
 }
 
 // --- Sub-component: TablePagination ---
-// Handles rendering the pagination controls.
+// Handles pagination controls and filter trigger
 interface TablePaginationProps<TData> {
   table: RTTable<TData>;
   enableFilters?: boolean;
+  data?: TData[];
+  filterState?: FilterState;
+  onFilterChange?: (fieldName: string, value: FilterValue | null) => void;
+  onClearAllFilters?: () => void;
 }
 
 function TablePagination<TData>({
   table,
   enableFilters = false,
+  data = [],
+  filterState = {},
+  onFilterChange,
+  onClearAllFilters,
 }: TablePaginationProps<TData>) {
+  const activeFiltersCount = Object.keys(filterState).length;
+
   return (
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-8">
@@ -222,24 +241,108 @@ function TablePagination<TData>({
           </Button>
         </div>
       </div>
-      {enableFilters && (
-        <div>
+      {enableFilters && onFilterChange && (
+        <div className="flex items-center space-x-2">
+          {/* Inline box number input filter */}
+          <Input
+            type="number"
+            placeholder="Box #"
+            value={filterState["box_number"]?.numericValue ?? ""}
+            onChange={(e) => {
+              const val = e.target.value;
+              const num = parseFloat(val);
+              if (val === "" || isNaN(num)) {
+                onFilterChange!("box_number", null);
+              } else {
+                onFilterChange!("box_number", {
+                  type: "numeric",
+                  numericOperator: "=",
+                  numericValue: num,
+                });
+              }
+            }}
+          />
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="outline">
-                <Funnel />
-                Filter
+              <Button variant="outline" className="gap-2">
+                <Funnel className="h-4 w-4" />
+                Filters
+                {activeFiltersCount > 0 && (
+                  <span className="ml-1 bg-primary text-primary-foreground text-xs rounded-full px-2 py-0.5">
+                    {activeFiltersCount}
+                  </span>
+                )}
               </Button>
             </SheetTrigger>
-            <SheetContent side="right">
+            <SheetContent>
               <SheetHeader>
-                <SheetTitle>Filters</SheetTitle>
-                <SheetDescription>Apply filters to the table.</SheetDescription>
+                <SheetTitle>Filter Data</SheetTitle>
+                <SheetDescription>
+                  Set filters to narrow down the data shown in the table.
+                </SheetDescription>
               </SheetHeader>
-              {/* TODO: add filter form fields here */}
+              <div className="overflow-y-auto">
+                <FilterControl
+                  label="Type"
+                  fieldName="type"
+                  filterState={filterState}
+                  onFilterChange={onFilterChange}
+                  data={data as InventoryFormValues[]}
+                />
+                <FilterControl
+                  label="Location Planted"
+                  fieldName="location_planted"
+                  filterState={filterState}
+                  onFilterChange={onFilterChange}
+                  data={data as InventoryFormValues[]}
+                />
+                <FilterControl
+                  label="Year"
+                  fieldName="year"
+                  filterState={filterState}
+                  onFilterChange={onFilterChange}
+                  data={data as InventoryFormValues[]}
+                />
+                <FilterControl
+                  label="Season"
+                  fieldName="season"
+                  filterState={filterState}
+                  onFilterChange={onFilterChange}
+                  data={data as InventoryFormValues[]}
+                />
+                <FilterControl
+                  label="Location"
+                  fieldName="location"
+                  filterState={filterState}
+                  onFilterChange={onFilterChange}
+                  data={data as InventoryFormValues[]}
+                />
+                <FilterControl
+                  label="Description"
+                  fieldName="description"
+                  filterState={filterState}
+                  onFilterChange={onFilterChange}
+                  data={data as InventoryFormValues[]}
+                />
+                <FilterControl
+                  label="Pedigree"
+                  fieldName="pedigree"
+                  filterState={filterState}
+                  onFilterChange={onFilterChange}
+                  data={data as InventoryFormValues[]}
+                />
+                <FilterControl
+                  label="Weight (g)"
+                  fieldName="weight"
+                  filterState={filterState}
+                  onFilterChange={onFilterChange}
+                  data={data as InventoryFormValues[]}
+                />
+              </div>
               <SheetFooter>
-                <Button variant="outline">Clear</Button>
-                <Button>Apply</Button>
+                <Button variant="outline" onClick={onClearAllFilters}>
+                  Clear All
+                </Button>
               </SheetFooter>
             </SheetContent>
           </Sheet>
@@ -269,6 +372,74 @@ export function DataTable<TData>({
   });
 
   const [sorting, setSorting] = useState<SortingState>([]);
+  const [filterState, setFilterState] = useState<FilterState>({});
+
+  const globalFilterFn = (row: Row<TData>) => {
+    for (const [fieldName, filter] of Object.entries(filterState)) {
+      const cellValue = row.getValue(fieldName);
+
+      if (filter.type === "multi" && filter.values) {
+        if (!filter.values.includes(String(cellValue))) {
+          return false;
+        }
+      } else if (
+        filter.type === "numeric" &&
+        filter.numericOperator &&
+        filter.numericValue !== undefined
+      ) {
+        const numValue = Number(cellValue);
+        const filterValue = filter.numericValue;
+
+        switch (filter.numericOperator) {
+          case ">":
+            if (!(numValue > filterValue)) return false;
+            break;
+          case ">=":
+            if (!(numValue >= filterValue)) return false;
+            break;
+          case "<=":
+            if (!(numValue <= filterValue)) return false;
+            break;
+          case "=":
+            if (numValue !== filterValue) return false;
+            break;
+          case "range":
+            if (filter.numericValue2 !== undefined) {
+              if (
+                !(numValue >= filterValue && numValue <= filter.numericValue2)
+              )
+                return false;
+            }
+            break;
+        }
+      } else if (filter.type === "text" && filter.textValue) {
+        if (
+          !String(cellValue)
+            .toLowerCase()
+            .includes(filter.textValue.toLowerCase())
+        ) {
+          return false;
+        }
+      }
+    }
+    return true;
+  };
+
+  const handleFilterChange = (fieldName: string, value: FilterValue | null) => {
+    setFilterState((prev) => {
+      const newState = { ...prev };
+      if (value === null) {
+        delete newState[fieldName];
+      } else {
+        newState[fieldName] = value;
+      }
+      return newState;
+    });
+  };
+
+  const handleClearAllFilters = () => {
+    setFilterState({});
+  };
 
   const table = useReactTable({
     data,
@@ -276,6 +447,7 @@ export function DataTable<TData>({
     state: {
       pagination,
       sorting,
+      globalFilter: filterState,
     },
     onPaginationChange: setPagination,
     onSortingChange: setSorting,
@@ -283,13 +455,22 @@ export function DataTable<TData>({
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    globalFilterFn: globalFilterFn,
   });
 
   return (
     <div className="w-full flex-col justify-start gap-6">
       <div className="relative flex flex-col gap-4 overflow-auto">
         <TableContent table={table} columns={columns} loading={loading} />
-        <TablePagination table={table} enableFilters={enableFilters} />
+        <TablePagination
+          table={table}
+          enableFilters={enableFilters}
+          data={data}
+          filterState={filterState}
+          onFilterChange={handleFilterChange}
+          onClearAllFilters={handleClearAllFilters}
+        />
       </div>
     </div>
   );
