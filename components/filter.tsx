@@ -71,7 +71,10 @@ export function FilterControl({
   const isNumericField = fieldName === "weight";
   const isBoxNumberField = fieldName === "box_number";
   const isTextField =
-    !isEnumField && !isNumericField && !isBoxNumberField && fieldName !== "remarks";
+    !isEnumField &&
+    !isNumericField &&
+    !isBoxNumberField &&
+    fieldName !== "remarks";
 
   if (fieldName === "remarks") return null; // Remarks should not be filterable
 
@@ -178,7 +181,9 @@ export function FilterControl({
                     <div key={value} className="flex items-center space-x-2">
                       <Checkbox
                         id={`${fieldName}-${value}`}
-                        checked={currentFilter?.values?.includes(value) || false}
+                        checked={
+                          currentFilter?.values?.includes(value) || false
+                        }
                         onCheckedChange={(checked) =>
                           handleMultiSelect(value, checked as boolean)
                         }

@@ -31,7 +31,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";  // for inline box number filter
+import { Input } from "@/components/ui/input"; // for inline box number filter
 import {
   Table,
   TableBody,
