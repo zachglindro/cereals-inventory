@@ -275,7 +275,7 @@ function TablePagination<TData>({
               </Button>
             </SheetTrigger>
             <SheetContent>
-              <SheetHeader>
+              <SheetHeader className="border-b">
                 <SheetTitle>Filter Data</SheetTitle>
                 <SheetDescription>
                   Set filters to narrow down the data shown in the table.
@@ -339,7 +339,7 @@ function TablePagination<TData>({
                   data={data as InventoryFormValues[]}
                 />
               </div>
-              <SheetFooter>
+              <SheetFooter className="border-t">
                 <Button variant="outline" onClick={onClearAllFilters}>
                   Clear All
                 </Button>
