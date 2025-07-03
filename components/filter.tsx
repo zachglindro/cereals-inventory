@@ -135,7 +135,7 @@ export function FilterControl({
     });
   };
 
-  const hasActiveFilter = currentFilter !== undefined;
+  const hasActiveFilter = currentFilter != null;
   const selectedCount = currentFilter?.values?.length || 0;
 
   return (
@@ -315,12 +315,16 @@ export function FilterControl({
       {hasActiveFilter && (
         <div className="flex flex-wrap gap-1">
           {currentFilter.values?.map((value) => (
-            <Badge key={value} variant="secondary" className="text-xs">
-              {value}
-              <X
-                className="h-3 w-3 ml-1 cursor-pointer"
+            <Badge key={value} variant="secondary" className="text-xs flex items-center">
+              <span>{value}</span>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="ml-1"
                 onClick={() => handleMultiSelect(value, false)}
-              />
+              >
+                <X className="h-3 w-3" />
+              </Button>
             </Badge>
           ))}
         </div>
