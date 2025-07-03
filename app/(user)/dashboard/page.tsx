@@ -18,7 +18,10 @@ export default function Home() {
       setLoading(true);
       const snapshot = await getDocs(collection(db, "inventory"));
       const rows = snapshot.docs.map((doc) => {
-        return doc.data() as InventoryFormValues;
+        return {
+          ...(doc.data() as InventoryFormValues),
+          id: doc.id,
+        };
       });
       setData(rows);
       setLoading(false);
@@ -41,7 +44,7 @@ export default function Home() {
           { label: "Location", fieldName: "location" },
           { label: "Description", fieldName: "description" },
           { label: "Pedigree", fieldName: "pedigree" },
-          { label: "Weight", fieldName: "weight"}
+          { label: "Weight", fieldName: "weight" },
         ]}
       />
     </div>
