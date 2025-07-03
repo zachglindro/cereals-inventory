@@ -31,7 +31,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Input } from "@/components/ui/input"; // for inline box number filter
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -43,20 +43,21 @@ import {
 import { Spinner } from "@/components/ui/spinner";
 import { Funnel } from "lucide-react";
 import {
-  Sheet,
-  SheetTrigger,
-  SheetContent,
-  SheetHeader,
-  SheetFooter,
-  SheetTitle,
-  SheetDescription,
-} from "@/components/ui/sheet";
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogFooter,
+  DialogTitle,
+  DialogClose,
+} from "@/components/ui/dialog";
 import {
   FilterControl,
   type FilterState,
   type FilterValue,
 } from "@/components/filter";
 import { type InventoryFormValues } from "@/lib/schemas/inventory";
+import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
 // --- Sub-component: TableContent ---
 // Handles rendering the table header and body.
@@ -128,13 +129,31 @@ function TableContent<TData>({
             </TableRow>
           ) : table.getRowModel().rows?.length ? (
             table.getRowModel().rows.map((row) => (
-              <TableRow key={row.id} className="relative z-0">
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
-              </TableRow>
+              <Dialog key={row.id}>
+                <DialogTrigger asChild>
+                  <TableRow className="cursor-pointer relative z-0">
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle className="text-lg font-medium">Row Details</DialogTitle>
+                  </DialogHeader>
+                  {/* Drawer body content */}
+                  <div className="p-4 text-sm whitespace-pre-wrap">
+                    <pre>{JSON.stringify(row.original, null, 2)}</pre>
+                  </div>
+                  <DialogFooter className="sm:justify-start">
+                    <DialogClose asChild>
+                      <Button variant="outline">Close</Button>
+                    </DialogClose>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
             ))
           ) : (
             <TableRow>
