@@ -32,6 +32,10 @@ export default function Home() {
 
   return (
     <div className="p-6">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold">Inventory Table</h1>
+        <p className="text-gray-600">Showing all inventory items</p>
+      </div>
       <DataTable<InventoryFormValues>
         data={data}
         columns={tableColumns}
