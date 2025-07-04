@@ -200,7 +200,7 @@ export default function BulkAdd() {
         )}
         {tableColumns.length > 0 && (
           <div className="mt-4 w-full">
-            <DataTable data={data} columns={tableColumns} />
+            <DataTable data={data} columns={tableColumns} showExport={false} />
           </div>
         )}
         {missingColumns.length > 0 && (

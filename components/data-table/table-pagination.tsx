@@ -20,11 +20,13 @@ import React from "react"; // Import React for React.ReactNode
 interface TablePaginationProps<TData> {
   table: RTTable<TData>;
   children?: React.ReactNode; // Slot for filter component
+  actions?: React.ReactNode; // Slot for action buttons like export
 }
 
 export function TablePagination<TData>({
   table,
   children,
+  actions,
 }: TablePaginationProps<TData>) {
   return (
     <div className="flex items-center justify-between">
@@ -97,7 +99,10 @@ export function TablePagination<TData>({
           </Button>
         </div>
       </div>
-      {children} {/* Render filters here if provided */}
+      <div className="flex items-center gap-2">
+        {actions} {/* Render action buttons here if provided */}
+        {children} {/* Render filters here if provided */}
+      </div>
     </div>
   );
 }

@@ -14,6 +14,14 @@ import { useState } from "react";
 
 import { FilterState, FilterValue } from "@/components/filter";
 import { InventoryFormValues } from "@/lib/schemas/inventory"; // Assuming this type is needed for filter fields
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { IconDownload, IconChevronDown } from "@tabler/icons-react";
 
 import { TableContent } from "./table-content";
 import { TablePagination } from "./table-pagination";
@@ -27,6 +35,8 @@ interface DataTableProps<TData extends InventoryFormValues> {
   filterableFields?: FilterField[];
   /** Callback invoked after a row is updated */
   onRowUpdate?: (updated: TData) => void;
+  /** Whether to show export functionality */
+  showExport?: boolean;
 }
 
 export function DataTable<TData extends InventoryFormValues>({
@@ -35,6 +45,7 @@ export function DataTable<TData extends InventoryFormValues>({
   loading = false,
   filterableFields,
   onRowUpdate,
+  showExport = true,
 }: DataTableProps<TData>) {
   const [pagination, setPagination] = useState({
     pageIndex: 0,
@@ -49,6 +60,12 @@ export function DataTable<TData extends InventoryFormValues>({
 
   const handleClearAllFilters = () => {
     setFilterState({});
+  };
+
+  const handleExport = (format: 'csv' | 'xlsx' | 'txt') => {
+    // TODO: Implement actual export functionality
+    console.log(`Exporting as ${format}...`);
+    // You can access the filtered data with: table.getFilteredRowModel().rows.map(row => row.original)
   };
 
   const table = useReactTable({
@@ -71,11 +88,34 @@ export function DataTable<TData extends InventoryFormValues>({
 
   const showFilters = filterableFields && filterableFields.length > 0;
 
+  const exportActions = showExport ? (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline" size="sm">
+          <IconDownload className="mr-2 h-4 w-4" />
+          Export
+          <IconChevronDown className="ml-2 h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem onClick={() => handleExport('csv')}>
+          Export as CSV
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => handleExport('xlsx')}>
+          Export as Excel
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => handleExport('txt')}>
+          Export as Text
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  ) : null;
+
   return (
     <div className="w-full flex-col justify-start gap-6">
       <div className="relative flex flex-col gap-4 overflow-auto">
         <TableContent table={table} columns={columns} loading={loading} onRowUpdate={onRowUpdate} />
-        <TablePagination table={table}>
+        <TablePagination table={table} actions={exportActions}>
           {showFilters && (
             <TableFilters
               filterState={filterState}
