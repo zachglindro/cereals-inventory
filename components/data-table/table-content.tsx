@@ -25,8 +25,22 @@ import { useState } from "react";
 import { db } from "@/lib/firebase";
 import { updateDoc, deleteDoc, doc } from "firebase/firestore";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "sonner";
 import type { Row } from "@tanstack/react-table";
+import {
+  typeOptions,
+  locationPlantedOptions,
+  seasonOptions,
+} from "@/lib/schemas/inventory";
 
 interface TableContentProps<TData extends Record<string, unknown>> {
   table: RTTable<TData>;
@@ -211,50 +225,138 @@ function RowDialog<TData extends Record<string, any>>({
         <DialogHeader>
           <DialogTitle className="text-lg font-medium">Edit Row</DialogTitle>
         </DialogHeader>
-        <div className="text-sm space-y-2">
-          {Object.entries(editValues).map(([key, value]) =>
-            key === "id" ? null : (
-              <div key={key} className="flex flex-col">
-                <span className="font-medium">{key}</span>
+        <div className="text-sm space-y-4">
+          {Object.entries(editValues).map(([key, value]) => {
+            if (key === "id") return null;
+            
+            // Render appropriate input based on field type
+            if (key === "type") {
+              return (
+                <div key={key} className="flex flex-col space-y-2">
+                  <Label className="font-medium">Type</Label>
+                  <Select
+                    value={String(value)}
+                    onValueChange={(newValue) => handleChange(key, newValue)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {typeOptions.map((option) => (
+                        <SelectItem key={option} value={option}>
+                          {option}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              );
+            }
+            
+            if (key === "location_planted") {
+              return (
+                <div key={key} className="flex flex-col space-y-2">
+                  <Label className="font-medium">Location Planted</Label>
+                  <Select
+                    value={String(value)}
+                    onValueChange={(newValue) => handleChange(key, newValue)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select location" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {locationPlantedOptions.map((option) => (
+                        <SelectItem key={option} value={option}>
+                          {option}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              );
+            }
+            
+            if (key === "season") {
+              return (
+                <div key={key} className="flex flex-col space-y-2">
+                  <Label className="font-medium">Season</Label>
+                  <RadioGroup
+                    value={String(value)}
+                    onValueChange={(newValue) => handleChange(key, newValue)}
+                    className="flex flex-row space-x-4"
+                  >
+                    {seasonOptions.map((option) => (
+                      <div key={option} className="flex items-center space-x-2">
+                        <RadioGroupItem value={option} id={`${key}-${option}`} />
+                        <Label htmlFor={`${key}-${option}`} className="capitalize">
+                          {option}
+                        </Label>
+                      </div>
+                    ))}
+                  </RadioGroup>
+                </div>
+              );
+            }
+            
+            // For numeric fields, use number input
+            if (key === "box_number" || key === "weight") {
+              return (
+                <div key={key} className="flex flex-col space-y-2">
+                  <Label className="font-medium capitalize">{key.replace('_', ' ')}</Label>
+                  <Input
+                    type="number"
+                    value={String(value)}
+                    onChange={(e) => handleChange(key, parseFloat(e.target.value) || 0)}
+                  />
+                </div>
+              );
+            }
+            
+            // Default to text input for other fields
+            return (
+              <div key={key} className="flex flex-col space-y-2">
+                <Label className="font-medium capitalize">{key.replace('_', ' ')}</Label>
                 <Input
                   value={String(value)}
                   onChange={(e) => handleChange(key, e.target.value)}
                 />
               </div>
-            ),
-          )}
+            );
+          })}
         </div>
         <DialogFooter className="flex justify-between items-center">
-          {/* Left-side delete button with destructive styling */}
-          <Button
-            variant="destructive"
-            onClick={handleDelete}
-            disabled={isSubmitting || isDeleting}
-          >
-            {isDeleting ? (
-              <>
-                <Spinner size="sm" /> Deleting
-              </>
-            ) : (
-              "Delete"
-            )}
-          </Button>
-          <div className="flex space-x-2">
+          <div className="flex w-full items-center">
             <Button
-              onClick={handleSubmit}
+              variant="destructive"
+              onClick={handleDelete}
               disabled={isSubmitting || isDeleting}
+              className="mr-auto"
             >
-              {isSubmitting ? (
+              {isDeleting ? (
                 <>
-                  <Spinner size="sm" /> Saving
+                  <Spinner size="sm" /> Deleting
                 </>
               ) : (
-                "Save"
+                "Delete"
               )}
             </Button>
-            <DialogClose asChild>
-              <Button variant="outline">Close</Button>
-            </DialogClose>
+            <div className="flex space-x-2 ml-auto">
+              <DialogClose asChild>
+                <Button variant="outline">Close</Button>
+              </DialogClose>
+              <Button
+                onClick={handleSubmit}
+                disabled={isSubmitting || isDeleting}
+              >
+                {isSubmitting ? (
+                  <>
+                    <Spinner size="sm" /> Saving
+                  </>
+                ) : (
+                  "Save"
+                )}
+              </Button>
+            </div>
           </div>
         </DialogFooter>
       </DialogContent>
