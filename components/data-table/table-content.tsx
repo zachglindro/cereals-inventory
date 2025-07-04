@@ -136,6 +136,7 @@ function RowDialog<TData extends Record<string, any>>({
   const [open, setOpen] = useState(false);
   const [editValues, setEditValues] = useState({ ...row.original });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [justEdited, setJustEdited] = useState(false);
   const handleChange = (key: string, value: any) => {
     setEditValues((prev) => ({ ...prev, [key]: value }));
   };
@@ -146,6 +147,8 @@ function RowDialog<TData extends Record<string, any>>({
       await updateDoc(docRef, editValues);
       toast.success("Inventory updated successfully!");
       setOpen(false);
+      setJustEdited(true);
+      setTimeout(() => setJustEdited(false), 1200);
       onRowUpdate?.(editValues as TData);
     } catch (error) {
       console.error("Error updating document: ", error);
@@ -156,7 +159,7 @@ function RowDialog<TData extends Record<string, any>>({
   };
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <TableRow className="relative z-0">
+      <TableRow className={`relative z-0 transition-all ${justEdited ? 'animate-pulse bg-green-100' : ''}`}>
         {row.getVisibleCells().map((cell) => (
           <TableCell key={cell.id}>
             {flexRender(cell.column.columnDef.cell, cell.getContext())}
