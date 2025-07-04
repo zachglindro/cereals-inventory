@@ -22,6 +22,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { IconDownload, IconChevronDown } from "@tabler/icons-react";
+import * as XLSX from "xlsx";
 
 import { TableContent } from "./table-content";
 import { TablePagination } from "./table-pagination";
@@ -62,10 +63,103 @@ export function DataTable<TData extends InventoryFormValues>({
     setFilterState({});
   };
 
-  const handleExport = (format: 'csv' | 'xlsx' | 'txt') => {
-    // TODO: Implement actual export functionality
-    console.log(`Exporting as ${format}...`);
-    // You can access the filtered data with: table.getFilteredRowModel().rows.map(row => row.original)
+  const handleExport = (format: 'csv' | 'xlsx') => {
+    if (format === 'csv') {
+      const filteredData = table.getFilteredRowModel().rows.map(row => row.original);
+      
+      if (filteredData.length === 0) {
+        console.warn('No data to export');
+        return;
+      }
+
+      // Build column info with both header and accessor key
+      const columnInfo = columns.map(col => ({
+        header: (typeof col.header === 'string' ? col.header : 
+                'accessorKey' in col && col.accessorKey ? col.accessorKey as string :
+                col.id || 'Unknown') as string,
+        accessorKey: ('accessorKey' in col && col.accessorKey ? col.accessorKey as string :
+                     col.id || 'unknown') as string
+      }));
+
+      const csvHeaders = columnInfo.map(info => info.header);
+      const accessorKeys = columnInfo.map(info => info.accessorKey);
+      
+      // Convert data to CSV format
+      const csvContent = [
+        csvHeaders.join(','), // Header row
+        ...filteredData.map(row => 
+          accessorKeys.map(key => {
+            const value = (row as any)[key] ?? '';
+            // Escape quotes and wrap in quotes if contains comma, quote, or newline
+            const stringValue = String(value);
+            if (stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n')) {
+              return `"${stringValue.replace(/"/g, '""')}"`;
+            }
+            return stringValue;
+          }).join(',')
+        )
+      ].join('\n');
+
+      // Create and download the file
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `inventory-export-${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } else if (format === 'xlsx') {
+      const filteredData = table.getFilteredRowModel().rows.map(row => row.original);
+      
+      if (filteredData.length === 0) {
+        console.warn('No data to export');
+        return;
+      }
+
+      // Build column info with both header and accessor key
+      const columnInfo = columns.map(col => ({
+        header: (typeof col.header === 'string' ? col.header : 
+                'accessorKey' in col && col.accessorKey ? col.accessorKey as string :
+                col.id || 'Unknown') as string,
+        accessorKey: ('accessorKey' in col && col.accessorKey ? col.accessorKey as string :
+                     col.id || 'unknown') as string
+      }));
+
+      const accessorKeys = columnInfo.map(info => info.accessorKey);
+      
+      // Convert data to format suitable for xlsx
+      const worksheetData = [
+        columnInfo.map(info => info.header), // Header row
+        ...filteredData.map(row => 
+          accessorKeys.map(key => (row as any)[key] ?? '')
+        )
+      ];
+
+      // Create workbook and worksheet
+      const workbook = XLSX.utils.book_new();
+      const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+      
+      // Auto-size columns
+      const columnWidths = columnInfo.map((_, colIndex) => {
+        const maxLength = Math.max(
+          columnInfo[colIndex].header.length,
+          ...filteredData.map(row => 
+            String((row as any)[accessorKeys[colIndex]] ?? '').length
+          )
+        );
+        return { width: Math.min(Math.max(maxLength + 2, 10), 50) };
+      });
+      worksheet['!cols'] = columnWidths;
+
+      // Add worksheet to workbook
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Inventory');
+
+      // Generate and download the file
+      const fileName = `inventory-export-${new Date().toISOString().split('T')[0]}.xlsx`;
+      XLSX.writeFile(workbook, fileName);
+    }
   };
 
   const table = useReactTable({
@@ -103,9 +197,6 @@ export function DataTable<TData extends InventoryFormValues>({
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => handleExport('xlsx')}>
           Export as Excel
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => handleExport('txt')}>
-          Export as Text
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
