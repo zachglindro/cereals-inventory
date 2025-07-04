@@ -2,8 +2,15 @@
 import { useSidebar } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Menu, MoreVertical } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 import Image from "next/image";
+import Link from "next/link";
 
 export function SiteHeader() {
   const { toggleSidebar } = useSidebar();
@@ -18,9 +25,18 @@ export function SiteHeader() {
           <Image src="/up-banner.png" alt="UP Banner" width={120} height={32} />
           Cereals Inventory
         </div>
-        <Button variant="ghost">
-          <MoreVertical />
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost">
+              <MoreVertical />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem>
+              <Link href="/">Logout</Link>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </header>
   );
