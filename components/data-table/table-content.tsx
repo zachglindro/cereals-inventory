@@ -23,7 +23,7 @@ import { Button } from "@/components/ui/button";
 import { ColumnDef } from "@tanstack/react-table"; // Import ColumnDef here
 import { useState } from "react";
 import { db } from "@/lib/firebase";
-import { updateDoc, doc } from "firebase/firestore";
+import { updateDoc, deleteDoc, doc } from "firebase/firestore";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import type { Row } from "@tanstack/react-table";
@@ -136,6 +136,7 @@ function RowDialog<TData extends Record<string, any>>({
   const [open, setOpen] = useState(false);
   const [editValues, setEditValues] = useState({ ...row.original });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [justEdited, setJustEdited] = useState(false);
   const handleChange = (key: string, value: any) => {
     setEditValues((prev) => ({ ...prev, [key]: value }));
@@ -157,6 +158,24 @@ function RowDialog<TData extends Record<string, any>>({
       setIsSubmitting(false);
     }
   };
+
+  // Handler to delete the entry with confirmation
+  const handleDelete = async () => {
+    if (!window.confirm("Are you sure you want to delete this entry?")) return;
+    setIsDeleting(true);
+    try {
+      const docRef = doc(db, "inventory", String(editValues.id));
+      await deleteDoc(docRef);
+      toast.success("Inventory entry deleted!");
+      setOpen(false);
+    } catch (error) {
+      console.error("Error deleting document: ", error);
+      toast.error("Error deleting inventory");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   if (!onRowUpdate) {
     return (
       <TableRow>
@@ -165,7 +184,6 @@ function RowDialog<TData extends Record<string, any>>({
             {flexRender(cell.column.columnDef.cell, cell.getContext())}
           </TableCell>
         ))}
-        <TableCell />
       </TableRow>
     );
   }
@@ -204,17 +222,34 @@ function RowDialog<TData extends Record<string, any>>({
             ),
           )}
         </div>
-        <DialogFooter>
-          <Button onClick={handleSubmit} disabled={isSubmitting}>
-            {isSubmitting ? (
+        <DialogFooter className="flex justify-between items-center">
+          {/* Left-side delete button with destructive styling */}
+          <Button
+            variant="destructive"
+            onClick={handleDelete}
+            disabled={isSubmitting || isDeleting}
+          >
+            {isDeleting ? (
               <>
-                <Spinner size="sm" /> Saving
+                <Spinner size="sm" /> Deleting
               </>
             ) : (
-              "Save"
+              "Delete"
             )}
           </Button>
-          <div className="justify-start">
+          <div className="flex space-x-2">
+            <Button
+              onClick={handleSubmit}
+              disabled={isSubmitting || isDeleting}
+            >
+              {isSubmitting ? (
+                <>
+                  <Spinner size="sm" /> Saving
+                </>
+              ) : (
+                "Save"
+              )}
+            </Button>
             <DialogClose asChild>
               <Button variant="outline">Close</Button>
             </DialogClose>
