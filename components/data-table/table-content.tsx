@@ -102,7 +102,7 @@ export function TableContent<TData extends Record<string, unknown>>({
                   </TableHead>
                 );
               })}
-              <TableHead key="actions">Actions</TableHead>
+              {onRowUpdate && <TableHead key="actions">Actions</TableHead>}
             </TableRow>
           ))}
         </TableHeader>
@@ -157,9 +157,23 @@ function RowDialog<TData extends Record<string, any>>({
       setIsSubmitting(false);
     }
   };
+  if (!onRowUpdate) {
+    return (
+      <TableRow>
+        {row.getVisibleCells().map((cell) => (
+          <TableCell key={cell.id}>
+            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+          </TableCell>
+        ))}
+        <TableCell />
+      </TableRow>
+    );
+  }
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <TableRow className={`relative z-0 transition-all ${justEdited ? 'animate-pulse bg-green-100' : ''}`}>
+      <TableRow
+        className={`relative z-0 transition-all ${justEdited ? "animate-pulse bg-green-100" : ""}`}
+      >
         {row.getVisibleCells().map((cell) => (
           <TableCell key={cell.id}>
             {flexRender(cell.column.columnDef.cell, cell.getContext())}

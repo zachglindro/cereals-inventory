@@ -3,7 +3,10 @@
 import { DataTable } from "@/components/data-table/index";
 import { Button } from "@/components/ui/button";
 import { db } from "@/lib/firebase";
-import { inventoryFormSchema, type InventoryFormValues } from "@/lib/schemas/inventory";
+import {
+  inventoryFormSchema,
+  type InventoryFormValues,
+} from "@/lib/schemas/inventory";
 import { ColumnDef } from "@tanstack/react-table";
 import { addDoc, collection } from "firebase/firestore";
 import { FileSpreadsheet, Loader2 } from "lucide-react";
@@ -26,7 +29,9 @@ export default function BulkAdd() {
     { rowIndex: number; errors: string[] }[]
   >([]);
 
-  const expectedColumns = Object.keys(inventoryFormSchema.shape);
+  // Use a schema without the auto-generated id for import validation
+  const importSchema = inventoryFormSchema.omit({ id: true });
+  const expectedColumns = Object.keys(importSchema.shape);
 
   const validateColumns = (headers: string[]) => {
     const missing = expectedColumns.filter((h) => !headers.includes(h));
@@ -38,7 +43,7 @@ export default function BulkAdd() {
   const validateSchema = (records: Record<string, unknown>[]) => {
     const errors = records
       .map((row, idx) => {
-        const parsed = inventoryFormSchema.safeParse(row);
+        const parsed = importSchema.safeParse(row);
         if (!parsed.success) {
           return {
             rowIndex: idx,
