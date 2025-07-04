@@ -5,6 +5,12 @@ import { ColumnDef } from "@tanstack/react-table";
 
 export const columns: ColumnDef<InventoryFormValues>[] = [
   {
+    id: "box_number",
+    accessorKey: "box_number",
+    header: "Box Number",
+    enableSorting: true,
+  },
+  {
     id: "type",
     accessorKey: "type",
     header: "Type",
@@ -26,12 +32,6 @@ export const columns: ColumnDef<InventoryFormValues>[] = [
     id: "season",
     accessorKey: "season",
     header: "Season",
-    enableSorting: true,
-  },
-  {
-    id: "box_number",
-    accessorKey: "box_number",
-    header: "Box Number",
     enableSorting: true,
   },
   {
