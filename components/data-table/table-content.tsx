@@ -168,6 +168,8 @@ function RowDialog<TData extends Record<string, any>>({
       await deleteDoc(docRef);
       toast.success("Inventory entry deleted!");
       setOpen(false);
+      // Notify parent to refresh data after delete, pass deleted row info
+      onRowUpdate?.({ ...editValues, deleted: true } as TData);
     } catch (error) {
       console.error("Error deleting document: ", error);
       toast.error("Error deleting inventory");
