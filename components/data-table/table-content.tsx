@@ -65,7 +65,10 @@ export function TableContent<TData extends Record<string, unknown>>({
         ))
     ) : (
       <TableRow>
-        <TableCell colSpan={columns.length} className="h-24 text-center">
+        <TableCell
+          colSpan={onRowUpdate ? columns.length + 1 : columns.length}
+          className="h-24 text-center"
+        >
           No results.
         </TableCell>
       </TableRow>
