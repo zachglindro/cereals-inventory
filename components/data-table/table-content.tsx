@@ -21,18 +21,42 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ColumnDef } from "@tanstack/react-table"; // Import ColumnDef here
+import { useState } from "react";
+import { db } from "@/lib/firebase";
+import { updateDoc, doc } from "firebase/firestore";
+import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
+import type { Row } from "@tanstack/react-table";
 
-interface TableContentProps<TData> {
+interface TableContentProps<TData extends Record<string, unknown>> {
   table: RTTable<TData>;
   columns: ColumnDef<TData, unknown>[]; // Use ColumnDef from tanstack
   loading?: boolean;
+  /** Callback invoked after a row is updated */
+  onRowUpdate?: (updated: TData) => void;
 }
 
-export function TableContent<TData>({
+export function TableContent<TData extends Record<string, unknown>>({
   table,
   columns,
   loading,
+  onRowUpdate,
 }: TableContentProps<TData>) {
+  const renderRows =
+    table.getRowModel().rows?.length > 0 ? (
+      table
+        .getRowModel()
+        .rows.map((row) => (
+          <RowDialog key={row.id} row={row} onRowUpdate={onRowUpdate} />
+        ))
+    ) : (
+      <TableRow>
+        <TableCell colSpan={columns.length} className="h-24 text-center">
+          No results.
+        </TableCell>
+      </TableRow>
+    );
+
   return (
     <div className="rounded-lg border">
       <Table className="table-auto overflow-scroll">
@@ -78,6 +102,7 @@ export function TableContent<TData>({
                   </TableHead>
                 );
               })}
+              <TableHead key="actions">Actions</TableHead>
             </TableRow>
           ))}
         </TableHeader>
@@ -91,48 +116,94 @@ export function TableContent<TData>({
                 </div>
               </TableCell>
             </TableRow>
-          ) : table.getRowModel().rows?.length ? (
-            table.getRowModel().rows.map((row) => (
-              <Dialog key={row.id}>
-                <DialogTrigger asChild>
-                  <TableRow className="cursor-pointer relative z-0">
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext(),
-                        )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle className="text-lg font-medium">
-                      Row Details
-                    </DialogTitle>
-                  </DialogHeader>
-                  {/* Drawer body content */}
-                  <div className="p-4 text-sm whitespace-pre-wrap">
-                    <pre>{JSON.stringify(row.original, null, 2)}</pre>
-                  </div>
-                  <DialogFooter className="sm:justify-start">
-                    <DialogClose asChild>
-                      <Button variant="outline">Close</Button>
-                    </DialogClose>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
-            ))
           ) : (
-            <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center">
-                No results.
-              </TableCell>
-            </TableRow>
+            renderRows
           )}
         </TableBody>
       </Table>
     </div>
+  );
+}
+
+// Component to handle row editing
+function RowDialog<TData extends Record<string, any>>({
+  row,
+  onRowUpdate,
+}: {
+  row: Row<TData>;
+  onRowUpdate?: (updated: TData) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [editValues, setEditValues] = useState({ ...row.original });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const handleChange = (key: string, value: any) => {
+    setEditValues((prev) => ({ ...prev, [key]: value }));
+  };
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+    try {
+      const docRef = doc(db, "inventory", String(editValues.id));
+      await updateDoc(docRef, editValues);
+      toast.success("Inventory updated successfully!");
+      setOpen(false);
+      onRowUpdate?.(editValues as TData);
+    } catch (error) {
+      console.error("Error updating document: ", error);
+      toast.error("Error updating inventory");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <TableRow className="relative z-0">
+        {row.getVisibleCells().map((cell) => (
+          <TableCell key={cell.id}>
+            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+          </TableCell>
+        ))}
+        <TableCell>
+          <DialogTrigger asChild>
+            <Button variant="outline" size="sm">
+              Edit
+            </Button>
+          </DialogTrigger>
+        </TableCell>
+      </TableRow>
+      <DialogContent className="m-4 max-h-[70vh] overflow-auto">
+        <DialogHeader>
+          <DialogTitle className="text-lg font-medium">Edit Row</DialogTitle>
+        </DialogHeader>
+        <div className="text-sm space-y-2">
+          {Object.entries(editValues).map(([key, value]) =>
+            key === "id" ? null : (
+              <div key={key} className="flex flex-col">
+                <span className="font-medium">{key}</span>
+                <Input
+                  value={String(value)}
+                  onChange={(e) => handleChange(key, e.target.value)}
+                />
+              </div>
+            ),
+          )}
+        </div>
+        <DialogFooter>
+          <Button onClick={handleSubmit} disabled={isSubmitting}>
+            {isSubmitting ? (
+              <>
+                <Spinner size="sm" /> Saving
+              </>
+            ) : (
+              "Save"
+            )}
+          </Button>
+          <div className="justify-start">
+            <DialogClose asChild>
+              <Button variant="outline">Close</Button>
+            </DialogClose>
+          </div>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

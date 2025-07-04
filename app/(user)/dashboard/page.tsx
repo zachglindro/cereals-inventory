@@ -46,6 +46,13 @@ export default function Home() {
           { label: "Pedigree", fieldName: "pedigree" },
           { label: "Weight", fieldName: "weight" },
         ]}
+        onRowUpdate={(updated: InventoryFormValues) =>
+          setData(prev =>
+            prev.map(item =>
+              item.id === updated.id ? updated : item
+            )
+          )
+        }
       />
     </div>
   );

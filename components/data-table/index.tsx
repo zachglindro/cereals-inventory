@@ -25,6 +25,8 @@ interface DataTableProps<TData extends InventoryFormValues> {
   columns: ColumnDef<TData, unknown>[];
   loading?: boolean;
   filterableFields?: FilterField[];
+  /** Callback invoked after a row is updated */
+  onRowUpdate?: (updated: TData) => void;
 }
 
 export function DataTable<TData extends InventoryFormValues>({
@@ -32,6 +34,7 @@ export function DataTable<TData extends InventoryFormValues>({
   columns,
   loading = false,
   filterableFields,
+  onRowUpdate,
 }: DataTableProps<TData>) {
   const [pagination, setPagination] = useState({
     pageIndex: 0,
@@ -71,7 +74,7 @@ export function DataTable<TData extends InventoryFormValues>({
   return (
     <div className="w-full flex-col justify-start gap-6">
       <div className="relative flex flex-col gap-4 overflow-auto">
-        <TableContent table={table} columns={columns} loading={loading} />
+        <TableContent table={table} columns={columns} loading={loading} onRowUpdate={onRowUpdate} />
         <TablePagination table={table}>
           {showFilters && (
             <TableFilters
