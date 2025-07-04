@@ -7,7 +7,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { House, Plus, RefreshCw, Sheet } from "lucide-react";
+import { Camera, House, Plus, RefreshCw, Sheet } from "lucide-react";
 import Link from "next/link";
 
 const items = [
@@ -27,9 +27,9 @@ const items = [
     icon: Sheet,
   },
   {
-    title: "Update",
-    url: "/update",
-    icon: RefreshCw,
+    title: "Scan",
+    url: "/scan",
+    icon: Camera,
   },
 ];
 
