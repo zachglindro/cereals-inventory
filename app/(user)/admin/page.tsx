@@ -12,7 +12,6 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import { IconChevronDown } from "@tabler/icons-react";
 import {
   Dialog,
   DialogContent,
@@ -22,6 +21,7 @@ import {
   DialogDescription,
   DialogClose,
 } from "@/components/ui/dialog";
+import { EllipsisVertical } from "lucide-react";
 
 // Define User schema
 type User = {
@@ -184,7 +184,7 @@ export default function Admin() {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="sm">
-              <IconChevronDown />
+              <EllipsisVertical />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
