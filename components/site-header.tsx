@@ -10,10 +10,25 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import Image from "next/image";
-import Link from "next/link";
+import { app } from "@/lib/firebase";
+import { getAuth, signOut } from "firebase/auth";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export function SiteHeader() {
   const { toggleSidebar } = useSidebar();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    const auth = getAuth(app);
+    try {
+      await signOut(auth);
+      toast("Signed out successfully.");
+      router.push("/");
+    } catch (error) {
+      toast("Failed to sign out.");
+    }
+  };
 
   return (
     <header className="bg-background sticky top-0 z-50 flex w-full items-center border-b">
@@ -32,9 +47,7 @@ export function SiteHeader() {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem>
-              <Link href="/">Logout</Link>
-            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
