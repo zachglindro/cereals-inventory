@@ -13,7 +13,6 @@ import {
 import { useState } from "react";
 
 import { FilterState, FilterValue } from "@/components/filter";
-import { InventoryFormValues } from "@/lib/schemas/inventory"; // Assuming this type is needed for filter fields
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -27,9 +26,10 @@ import * as XLSX from "xlsx";
 import { TableContent } from "./table-content";
 import { TablePagination } from "./table-pagination";
 import { FilterField, TableFilters } from "./table-filters";
+import { InventoryFormValues } from "@/lib/schemas/inventory";
 import { globalFilterFn, updateFilterState } from "./utils"; // Import from utils
 
-interface DataTableProps<TData extends InventoryFormValues> {
+interface DataTableProps<TData extends Record<string, unknown>> {
   data: TData[];
   columns: ColumnDef<TData, unknown>[];
   loading?: boolean;
@@ -40,7 +40,7 @@ interface DataTableProps<TData extends InventoryFormValues> {
   showExport?: boolean;
 }
 
-export function DataTable<TData extends InventoryFormValues>({
+export function DataTable<TData extends Record<string, unknown>>({
   data,
   columns,
   loading = false,
@@ -417,7 +417,7 @@ export function DataTable<TData extends InventoryFormValues>({
               filterState={filterState}
               onFilterChange={handleFilterChange}
               onClearAllFilters={handleClearAllFilters}
-              data={data}
+              data={(data as unknown) as InventoryFormValues[]}
               filterFields={filterableFields!}
             />
           )}
