@@ -21,7 +21,7 @@ import {
   DialogDescription,
   DialogClose,
 } from "@/components/ui/dialog";
-import { EllipsisVertical } from "lucide-react";
+import { EllipsisVertical, User as UserIcon } from "lucide-react";
 
 // Define User schema
 type User = {
@@ -83,6 +83,111 @@ function ConfirmDialog({
   );
 }
 
+// User details dialog component
+function UserDetailsDialog({
+  user,
+  children,
+}: {
+  user: User;
+  children: React.ReactNode;
+}) {
+  const [open, setOpen] = useState(false);
+  
+  const trigger = React.cloneElement(
+    children as React.ReactElement<any>,
+    {
+      onSelect: (e: any) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setOpen(true);
+      },
+    }
+  );
+
+  return (
+    <>
+      {trigger}
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>User Details</DialogTitle>
+            <DialogDescription>
+              Detailed information for {user.displayName}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            {/* User Avatar */}
+            <div className="flex justify-center">
+              {user.photoUrl ? (
+                <img
+                  src={user.photoUrl}
+                  alt={user.displayName}
+                  className="w-20 h-20 rounded-full object-cover border-2 border-gray-200"
+                />
+              ) : (
+                <div className="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center">
+                  <UserIcon className="w-8 h-8 text-gray-500" />
+                </div>
+              )}
+            </div>
+            
+            {/* User Information */}
+            <div className="grid grid-cols-1 gap-3">
+              <div>
+                <label className="text-sm font-medium text-gray-500">Name</label>
+                <p className="text-sm text-gray-900">{user.displayName}</p>
+              </div>
+              
+              <div>
+                <label className="text-sm font-medium text-gray-500">Email</label>
+                <p className="text-sm text-gray-900">{user.email}</p>
+              </div>
+              
+              <div>
+                <label className="text-sm font-medium text-gray-500">Role</label>
+                <span
+                  className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ${
+                    user.role === 'admin' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
+                  }`}
+                >
+                  {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                </span>
+              </div>
+              
+              <div>
+                <label className="text-sm font-medium text-gray-500">Status</label>
+                <div>
+                  {user.approved ? (
+                    <span className="inline-flex items-center rounded-full bg-green-100 text-green-800 px-2 py-0.5 text-xs font-semibold">
+                      Approved
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center rounded-full bg-yellow-100 text-yellow-800 px-2 py-0.5 text-xs font-semibold">
+                      Pending Approval
+                    </span>
+                  )}
+                </div>
+              </div>
+              
+              <div>
+                <label className="text-sm font-medium text-gray-500">Member Since</label>
+                <p className="text-sm text-gray-900">
+                  {user.createdAt?.toDate().toLocaleDateString() || 'N/A'}
+                </p>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline">Close</Button>
+            </DialogClose>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
+
 export default function Admin() {
   const [data, setData] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -101,7 +206,7 @@ export default function Admin() {
           createdAt: u.createdAt,
           displayName: u.displayName,
           email: u.email,
-          photoUrl: u.photoUrl,
+          photoUrl: u.photoURL,
           role: u.role,
         } as User;
       });
@@ -188,6 +293,9 @@ export default function Admin() {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
+            <UserDetailsDialog user={row.original}>
+              <DropdownMenuItem>View</DropdownMenuItem>
+            </UserDetailsDialog>
             {row.original.approved ? (
               <ConfirmDialog
                 actionName="Disapprove User"
