@@ -166,7 +166,7 @@ export function InventoryForm() {
                   <Input
                     {...field}
                     placeholder={new Date().getFullYear().toString()}
-                    onChange={(e) => field.onChange(Number(e.target.value))}
+                    onChange={(e) => field.onChange(e.target.value)}
                   />
                 </FormControl>
                 <FormMessage />

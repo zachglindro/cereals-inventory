@@ -14,7 +14,7 @@ export const seasonOptions = ["wet", "dry"] as const;
 export const inventoryFormSchema = z.object({
   type: z.enum(typeOptions),
   location_planted: z.enum(locationPlantedOptions),
-  year: z.string(),
+  year: z.string().min(1, "Required"),
   season: z.enum(seasonOptions),
   box_number: z.number().int().gte(0, { message: "Required" }),
   location: z.string().min(1, "Required"),
@@ -22,7 +22,7 @@ export const inventoryFormSchema = z.object({
   pedigree: z.string().min(1, "Required"),
   weight: z.number().gte(0, { message: "Required" }),
   remarks: z.string().optional(),
-  id: z.string(),
+  id: z.string().optional(),
 });
 
 // Type alias for form values
