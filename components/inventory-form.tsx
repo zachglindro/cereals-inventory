@@ -30,7 +30,7 @@ import {
 } from "@/lib/schemas/inventory";
 import { useState } from "react";
 import { db } from "@/lib/firebase";
-import { addDoc, collection } from "firebase/firestore";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
@@ -55,6 +55,11 @@ export function InventoryForm() {
     setIsSubmitting(true);
     try {
       await addDoc(collection(db, "inventory"), values);
+      // Add activity log entry
+      await addDoc(collection(db, "activity"), {
+        message: `Added inventory: Box ${values.box_number} (${values.type}, ${values.pedigree})`,
+        loggedAt: serverTimestamp(),
+      });
       toast.success("Inventory added successfully!");
       form.reset();
     } catch (error) {
