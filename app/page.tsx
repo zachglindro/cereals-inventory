@@ -33,11 +33,13 @@ export default function Login() {
         toast("Your account is pending approval by the admin.");
         return;
       }
+
       const userData = userDocSnap.data();
       if (!userData.approved) {
         toast.error("Your account is pending admin approval.");
         return;
       }
+
       toast.success("Signed in successfully");
       router.push('/dashboard');
     } catch (error: any) {
