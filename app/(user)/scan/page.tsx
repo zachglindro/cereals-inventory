@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { QRScanner } from "@/components/scanner";
 import { Button } from "@/components/ui/button";
-import { Camera } from "lucide-react";
+import { Camera, Printer } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -59,6 +59,60 @@ export default function Update() {
     }
   };
 
+  const handlePrint = () => {
+    // Add print styles to hide everything except QR code
+    const printStyles = `
+      <style id="print-styles">
+        @media print {
+          body * {
+            visibility: hidden;
+          }
+          .print-area, .print-area * {
+            visibility: visible;
+          }
+          .print-area {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+          }
+          .print-box-number {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+          }
+        }
+      </style>
+    `;
+    
+    // Add styles to head
+    document.head.insertAdjacentHTML('beforeend', printStyles);
+    
+    // Add print-area class to the QR code container
+    const qrContainer = document.querySelector('.qr-code-container');
+    if (qrContainer) {
+      qrContainer.classList.add('print-area');
+    }
+    
+    // Print
+    window.print();
+    
+    // Clean up
+    const printStylesElement = document.getElementById('print-styles');
+    if (printStylesElement) {
+      printStylesElement.remove();
+    }
+    if (qrContainer) {
+      qrContainer.classList.remove('print-area');
+    }
+  };
+
   return (
     <div className="flex items-center justify-center h-full">
       {!showScanner ? (
@@ -92,21 +146,28 @@ export default function Update() {
                 type="number"
                 value={boxNumberInput}
                 onChange={(e) => setBoxNumberInput(e.target.value)}
-                className="col-span-3"
+                className="col-span-2"
               />
+              <Button onClick={handleGenerateQr} disabled={isLoadingQr} className="col-span-1">
+                {isLoadingQr ? <Spinner size="sm" /> : null}
+                Generate
+              </Button>
             </div>
             {error && <p className="text-red-500 text-sm">{error}</p>}
             {generatedUuid && (
-              <div className="flex justify-center">
+              <div className="qr-code-container flex flex-col items-center justify-center">
                 <QRCode value={generatedUuid} size={256} level="H" />
+                <div className="mt-2 text-sm text-gray-600">Box #{boxNumberInput}</div>
               </div>
             )}
           </div>
           <DialogFooter>
-            <Button onClick={handleGenerateQr} disabled={isLoadingQr}>
-              {isLoadingQr ? <Spinner className="mr-2" /> : null}
-              Generate
-            </Button>
+            {generatedUuid && (
+              <Button onClick={handlePrint} variant="outline">
+                <Printer className="mr-2 h-4 w-4" />
+                Print
+              </Button>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>
