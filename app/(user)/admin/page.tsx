@@ -140,11 +140,34 @@ export default function Admin() {
   const columns: ColumnDef<User, unknown>[] = [
     { accessorKey: 'displayName', header: 'Name' },
     { accessorKey: 'email', header: 'Email' },
-    { accessorKey: 'role', header: 'Role' },
+    {
+      accessorKey: 'role',
+      header: 'Role',
+      cell: (info) => {
+        const role = info.getValue() as string;
+        let color = '';
+        if (role === 'admin') color = 'bg-blue-100 text-blue-800';
+        else color = 'bg-gray-100 text-gray-800';
+        return (
+          <span
+            className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ${color}`}
+          >
+            {role.charAt(0).toUpperCase() + role.slice(1)}
+          </span>
+        );
+      },
+    },
     {
       accessorKey: 'approved',
       header: 'Approved',
-      cell: (info) => (info.getValue() ? 'Yes' : 'No'),
+      cell: (info) => {
+        const approved = info.getValue() as boolean;
+        return approved ? (
+          <span className="inline-flex items-center rounded-full bg-green-100 text-green-800 px-2 py-0.5 text-xs font-semibold">Yes</span>
+        ) : (
+          <span className="inline-flex items-center rounded-full bg-yellow-100 text-yellow-800 px-2 py-0.5 text-xs font-semibold">No</span>
+        );
+      },
     },
     {
       accessorKey: 'createdAt',
