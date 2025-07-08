@@ -34,9 +34,7 @@ interface DataTableProps<TData extends Record<string, unknown>> {
   columns: ColumnDef<TData, unknown>[];
   loading?: boolean;
   filterableFields?: FilterField[];
-  /** Callback invoked after a row is updated */
   onRowUpdate?: (updated: TData) => void;
-  /** Whether to show export functionality */
   showExport?: boolean;
 }
 
