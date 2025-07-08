@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner"; // Assuming a Spinner component exists
 import QRCode from "react-qr-code";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL;
 import { v4 as uuidv4 } from 'uuid';
 import { db } from "@/lib/firebase"; // Assuming firebase config is exported as db
 import { collection, query, where, getDocs, addDoc, deleteDoc, doc } from "firebase/firestore";
@@ -247,8 +248,8 @@ export default function Update() {
             {error && <p className="text-red-500 text-sm">{error}</p>}
             {generatedUuid && (
               <div className="qr-code-container flex flex-col items-center justify-center">
-                <QRCode value={generatedUuid} size={256} level="H" />
-                <div className="mt-2 text-sm text-gray-600">Box #{boxNumberInput}</div>
+                <QRCode value={`${SITE_URL}/box/${generatedUuid}`} size={256} level="H" />
+                <div className="mt-1 text-sm text-gray-600">Box #{boxNumberInput}</div>
               </div>
             )}
           </div>

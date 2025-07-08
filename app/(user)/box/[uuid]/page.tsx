@@ -10,18 +10,18 @@ import type { ColumnDef } from "@tanstack/react-table";
 
 export default function Entry() {
   const params = useParams();
-  const number = params.number;
+  const uuid = params.uuid;
   const [data, setData] = useState<InventoryFormValues[]>([]);
   const [loading, setLoading] = useState(true);
   const tableColumns = columns as ColumnDef<InventoryFormValues, unknown>[];
 
   useEffect(() => {
     async function fetchData() {
-      if (!number) return;
+      if (!uuid) return;
       
       setLoading(true);
       try {
-        const boxNumber = parseInt(number as string, 10);
+        const boxNumber = parseInt(uuid as string, 10);
         
         const q = query(
           collection(db, "inventory"),
@@ -32,7 +32,7 @@ export default function Entry() {
         const rows = snapshot.docs.map((doc) => {
           return {
             ...(doc.data() as InventoryFormValues),
-            id: doc.id, // Include the document ID
+            id: doc.id,
           };
         });
         setData(rows);
@@ -44,13 +44,13 @@ export default function Entry() {
     }
 
     fetchData();
-  }, [number]);
+  }, [uuid]);
 
   return (
     <div className="p-6">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold">Box {number} Inventory</h1>
-        <p className="text-gray-600">Showing all inventory items in box {number}</p>
+        <h1 className="text-2xl font-bold">Box {uuid} Inventory</h1>
+        <p className="text-gray-600">Showing all inventory items in box {uuid}</p>
       </div>
       
       <DataTable<InventoryFormValues>
