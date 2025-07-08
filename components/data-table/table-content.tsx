@@ -229,7 +229,19 @@ function RowDialog<TData extends Record<string, any>>({
           <DialogTitle className="text-lg font-medium">Edit Row</DialogTitle>
         </DialogHeader>
         <div className="text-sm space-y-4">
-          {Object.entries(editValues).map(([key, value]) => {
+          {[
+            "box_number",
+            "type", 
+            "location_planted",
+            "year",
+            "season",
+            "location",
+            "description", 
+            "pedigree",
+            "weight",
+            "remarks"
+          ].map((key) => {
+            const value = editValues[key];
             if (key === "id") return null;
             
             // Render appropriate input based on field type
@@ -325,7 +337,7 @@ function RowDialog<TData extends Record<string, any>>({
                 />
               </div>
             );
-          })}
+          }).filter(Boolean)}
         </div>
         <DialogFooter className="flex justify-between items-center">
           <div className="flex w-full items-center">
