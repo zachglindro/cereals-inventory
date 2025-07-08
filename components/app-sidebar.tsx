@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Sidebar,
   SidebarContent,
@@ -7,8 +9,9 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { Camera, House, Plus, RefreshCw, Sheet } from "lucide-react";
+import { Camera, House, Plus, RefreshCw, Sheet, Shield } from "lucide-react";
 import Link from "next/link";
+import { useUser } from "@/context/UserContext";
 
 const items = [
   {
@@ -34,6 +37,7 @@ const items = [
 ];
 
 export function AppSidebar() {
+  const { profile } = useUser();
   return (
     <Sidebar
       collapsible="icon"
@@ -53,6 +57,16 @@ export function AppSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
+              {profile?.role === "admin" && (
+                <SidebarMenuItem key="Admin">
+                  <SidebarMenuButton asChild>
+                    <Link href="/admin">
+                      <Shield />
+                      <span>Admin</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
