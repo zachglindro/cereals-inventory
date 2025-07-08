@@ -10,7 +10,7 @@ import { Spinner } from "@/components/ui/spinner"; // Assuming a Spinner compone
 import QRCode from "react-qr-code";
 import { v4 as uuidv4 } from 'uuid';
 import { db } from "@/lib/firebase"; // Assuming firebase config is exported as db
-import { collection, query, where, getDocs, addDoc } from "firebase/firestore";
+import { collection, query, where, getDocs, addDoc, deleteDoc, doc } from "firebase/firestore";
 
 export default function Update() {
   const [showScanner, setShowScanner] = useState(false);
@@ -18,6 +18,7 @@ export default function Update() {
   const [boxNumberInput, setBoxNumberInput] = useState("");
   const [generatedUuid, setGeneratedUuid] = useState("");
   const [isLoadingQr, setIsLoadingQr] = useState(false);
+  const [isLoadingPrintAll, setIsLoadingPrintAll] = useState(false);
   const [error, setError] = useState("");
 
   const handleGenerateQr = async () => {
@@ -113,6 +114,96 @@ export default function Update() {
     }
   };
 
+  // Add handler for printing all QR codes
+  const handlePrintAll = async () => {
+    setError("");
+    setIsLoadingPrintAll(true);
+    try {
+      // 1. fetch all unique box numbers from inventory
+      const invSnap = await getDocs(collection(db, "inventory"));
+      const boxNumbers = Array.from(
+        new Set(invSnap.docs.map(d => d.data().box_number))
+      );
+
+      // 2. fetch all existing QR code entries
+      const qrCodesRef = collection(db, "qrcodes");
+      const qrSnap = await getDocs(qrCodesRef);
+      const existingMap = new Map(); // box_number -> uuid
+      const toDeleteIds: string[] = [];
+      qrSnap.docs.forEach(docSnap => {
+        const data = docSnap.data();
+        const bn = data.box_number;
+        if (boxNumbers.includes(bn)) {
+          existingMap.set(bn, data.uuid);
+        } else {
+          toDeleteIds.push(docSnap.id);
+        }
+      });
+
+      // 3. add missing QR codes
+      for (const bn of boxNumbers) {
+        if (!existingMap.has(bn)) {
+          const newUuid = uuidv4();
+          await addDoc(qrCodesRef, { box_number: bn, uuid: newUuid });
+          existingMap.set(bn, newUuid);
+        }
+      }
+
+      // 4. remove orphaned QR codes
+      for (const id of toDeleteIds) {
+        await deleteDoc(doc(db, "qrcodes", id));
+      }
+
+      // prepare print window
+      const entries = Array.from(existingMap.entries())
+        .sort((a, b) => a[0] - b[0]); // sort by box number numerically
+      const html = `
+        <html><head><title>Print All QR Codes</title>
+        <style>
+          body { margin: 20px; }
+          .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 16px; }
+          .item { 
+            text-align: center; 
+            padding: 8px; 
+            margin: 4px; 
+            border: 1px solid #ddd; 
+            border-radius: 6px; 
+          }
+          .item img { width: 80px; height: 80px; }
+          .caption { margin-top: 4px; font-size: 12px; font-weight: bold; }
+        </style>
+        </head><body>
+        <div class="grid">
+          ${entries
+            .map(
+              ([bn, uuid]) => `
+            <div class="item">
+              <img src="https://api.qrserver.com/v1/create-qr-code/?data=${uuid}&size=80x80" />
+              <div class="caption">Box #${bn}</div>
+            </div>
+          `
+            )
+            .join("")}
+        </div>
+        <script>
+          window.onload = () => { window.print(); };
+          window.onafterprint = () => { window.close(); };
+        </script>
+        </body></html>
+      `;
+      const printWindow = window.open("", "_blank");
+      if (printWindow) {
+        printWindow.document.write(html);
+        printWindow.document.close();
+      }
+    } catch (e) {
+      console.error("Error printing all QR codes:", e);
+      setError("An error occurred while printing all QR codes.");
+    } finally {
+      setIsLoadingPrintAll(false);
+    }
+  };
+
   return (
     <div className="flex items-center justify-center h-full">
       {!showScanner ? (
@@ -162,6 +253,11 @@ export default function Update() {
             )}
           </div>
           <DialogFooter>
+            {/* Button to print all QR codes */}
+            <Button onClick={handlePrintAll} variant="outline" className="mr-2" disabled={isLoadingPrintAll}>
+              {isLoadingPrintAll ? <Spinner size="sm" /> : null}
+              Print All QR
+            </Button>
             {generatedUuid && (
               <Button onClick={handlePrint} variant="outline">
                 <Printer className="mr-2 h-4 w-4" />
