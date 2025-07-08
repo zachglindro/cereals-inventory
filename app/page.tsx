@@ -9,9 +9,61 @@ import { toast } from "sonner";
 import { FirebaseError } from "firebase/app";
 import { db } from "@/lib/firebase";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
+import { useUser } from "@/context/UserContext";
+import { useAuth } from "@/hooks/use-auth";
+import { useEffect } from "react";
+import { Spinner } from "@/components/ui/spinner";
 
 export default function Login() {
   const router = useRouter();
+  const { user, profile, loading } = useUser();
+  const { handleSignOut } = useAuth();
+
+  // Redirect authenticated users to dashboard
+  useEffect(() => {
+    if (!loading && user && profile?.approved) {
+      router.push('/dashboard');
+    }
+  }, [user, profile, loading, router]);
+
+  // Show loading spinner while checking authentication
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <Spinner className="h-8 w-8" />
+      </div>
+    );
+  }
+
+  // If user is authenticated and approved, don't show login page
+  if (user && profile?.approved) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <Spinner className="h-8 w-8" />
+      </div>
+    );
+  }
+
+  // If user is authenticated but not approved, show pending approval message
+  if (user && profile && !profile.approved) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="w-full max-w-md p-6 text-center">
+          <h2 className="text-2xl font-bold mb-4">Account Pending Approval</h2>
+          <p className="text-gray-600 mb-6">
+            Your account is awaiting admin approval. Please contact an administrator.
+          </p>
+          <p className="text-sm text-gray-500 mb-4">
+            Signed in as: {user.email}
+          </p>
+          <Button onClick={handleSignOut} variant="outline">
+            Sign Out
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   const handleGoogleSignIn = async () => {
     const auth = getAuth(app);
     const provider = new GoogleAuthProvider();
