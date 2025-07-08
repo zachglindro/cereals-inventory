@@ -7,6 +7,8 @@ import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { useRouter } from 'next/navigation';
 import { toast } from "sonner";
 import { FirebaseError } from "firebase/app";
+import { db } from "@/lib/firebase";
+import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 
 export default function Login() {
   const router = useRouter();
@@ -16,7 +18,27 @@ export default function Login() {
     try {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
-      toast.success("Signed in successfully")
+
+      const userDocRef = doc(db, "users", user.uid);
+      const userDocSnap = await getDoc(userDocRef);
+      if (!userDocSnap.exists()) {
+        await setDoc(userDocRef, {
+          email: user.email,
+          displayName: user.displayName,
+          photoURL: user.photoURL,
+          role: "user",
+          approved: false,
+          createdAt: serverTimestamp(),
+        });
+        toast("Your account is pending approval by the admin.");
+        return;
+      }
+      const userData = userDocSnap.data();
+      if (!userData.approved) {
+        toast.error("Your account is pending admin approval.");
+        return;
+      }
+      toast.success("Signed in successfully");
       router.push('/dashboard');
     } catch (error: any) {
       let errorMessage = "An unexpected error occurred.";
