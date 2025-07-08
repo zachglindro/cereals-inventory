@@ -23,7 +23,11 @@ export default function Home() {
           id: doc.id,
         };
       });
-      setData(rows);
+      // Sort by box_number field
+      const sortedRows = rows.sort((a, b) => {
+        return Number(a.box_number ?? 0) - Number(b.box_number ?? 0);
+      });
+      setData(sortedRows);
       setLoading(false);
     }
 
