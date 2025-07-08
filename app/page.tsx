@@ -1,11 +1,31 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { ScanQrCode } from "lucide-react";
+import { app } from "@/lib/firebase";
+import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { useRouter } from 'next/navigation';
+import { toast } from "sonner";
 
 export default function Login() {
+  const router = useRouter();
+  const handleGoogleSignIn = async () => {
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      console.log("Signed in user:", user);
+      router.push('/dashboard');
+    } catch (error) {
+      toast("error.");
+    }
+  };
+
   return (
     <main className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
       <div className="w-full max-w-sm grid gap-4 justify-items-center">
-        <Button variant="outline" type="button">
+        <Button variant="outline" type="button" onClick={handleGoogleSignIn}>
           <svg
             version="1.1"
             xmlns="http://www.w3.org/2000/svg"
