@@ -6,6 +6,7 @@ import { app } from "@/lib/firebase";
 import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { useRouter } from 'next/navigation';
 import { toast } from "sonner";
+import { FirebaseError } from "firebase/app";
 
 export default function Login() {
   const router = useRouter();
@@ -15,10 +16,38 @@ export default function Login() {
     try {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
-      console.log("Signed in user:", user);
+      toast.success("Signed in successfully")
       router.push('/dashboard');
-    } catch (error) {
-      toast("error.");
+    } catch (error: any) {
+      let errorMessage = "An unexpected error occurred.";
+      if (error instanceof FirebaseError) {
+        switch (error.code) {
+          case "auth/popup-closed-by-user":
+            errorMessage = "Sign-in popup closed before completing sign in.";
+            break;
+          case "auth/cancelled-popup-request":
+            errorMessage = "Sign-in request was cancelled.";
+            break;
+          case "auth/popup-blocked":
+            errorMessage = "Sign-in popup was blocked by the browser.";
+            break;
+          case "auth/network-request-failed":
+            errorMessage = "Network error, please check your connection and try again.";
+            break;
+          case "auth/account-exists-with-different-credential":
+            errorMessage = "An account already exists with the same email but different sign-in credentials.";
+            break;
+          case "auth/unauthorized-domain":
+            errorMessage = "The application is not authorized to run on this domain.";
+            break;
+          case "auth/operation-not-allowed":
+            errorMessage = "Google sign-in is not enabled for this project.";
+            break;
+          default:
+            errorMessage = error.message;
+        }
+      }
+      toast.error(errorMessage);
     }
   };
 
