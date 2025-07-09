@@ -3,14 +3,19 @@ import { Scanner } from "@yudiel/react-qr-scanner";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
+// Add: fetch allowed hosts from environment variable
+const ALLOWED_HOSTS = process.env.NEXT_PUBLIC_ALLOWED_HOSTS
+  ? process.env.NEXT_PUBLIC_ALLOWED_HOSTS.split(",")
+  : [];
+
 const isLocalLink = (url: string): boolean => {
   try {
     const urlObj = new URL(url);
-    return urlObj.hostname === 'localhost' || 
-           urlObj.hostname === '127.0.0.1' || 
-           urlObj.hostname.endsWith('.local') ||
-           urlObj.protocol === 'file:' ||
-           (urlObj.hostname === window.location.hostname);
+    return (
+      ALLOWED_HOSTS.includes(urlObj.hostname) ||
+      urlObj.protocol === 'file:' ||
+      urlObj.hostname === window.location.hostname
+    );
   } catch {
     // If it's not a valid URL, check if it's a relative path
     return url.startsWith('/') || !url.includes('://');
