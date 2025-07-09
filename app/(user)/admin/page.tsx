@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { collection, getDocs, updateDoc, deleteDoc, doc } from "firebase/firestore";
+import { collection, getDocs, updateDoc, deleteDoc, doc, orderBy, query, limit, addDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { DataTable } from "@/components/data-table";
 import type { ColumnDef } from "@tanstack/react-table";
@@ -21,7 +21,8 @@ import {
   DialogDescription,
   DialogClose,
 } from "@/components/ui/dialog";
-import { EllipsisVertical, User as UserIcon } from "lucide-react";
+import { EllipsisVertical, User as UserIcon, Activity, ChevronRight } from "lucide-react";
+import { useUser } from "@/context/UserContext";
 
 // Define User schema
 type User = {
@@ -33,6 +34,59 @@ type User = {
   photoUrl?: string;
   role: string;
 };
+
+// Define Activity schema
+type Activity = {
+  id: string;
+  message: string;
+  loggedAt: any; // Firestore Timestamp
+  loggedBy: string; // email
+};
+
+// Expandable text component for activity messages
+function ExpandableText({ text, maxLength = 80 }: { text: string; maxLength?: number }) {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  
+  if (text.length <= maxLength) {
+    return <span className="text-sm">{text}</span>;
+  }
+  
+  return (
+    <>
+      <div className="text-sm">
+        <span>{text.substring(0, maxLength)}...</span>
+        <button
+          onClick={() => setIsDialogOpen(true)}
+          className="ml-2 text-blue-600 hover:text-blue-800 font-medium inline-flex items-center"
+        >
+          <ChevronRight className="w-3 h-3 mr-1" />
+          Show more
+        </button>
+      </div>
+      
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Activity Details</DialogTitle>
+            <DialogDescription>
+              Full activity message
+            </DialogDescription>
+          </DialogHeader>
+          <div className="max-h-96 overflow-y-auto">
+            <p className="text-sm text-gray-900 whitespace-pre-wrap break-words">
+              {text}
+            </p>
+          </div>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline">Close</Button>
+            </DialogClose>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
 
 // Reusable confirmation dialog for actions
 function ConfirmDialog({
@@ -189,9 +243,13 @@ function UserDetailsDialog({
 }
 
 export default function Admin() {
+  const { user } = useUser();
   const [data, setData] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterType, setFilterType] = useState<'all' | 'approved' | 'unapproved'>('all');
+  const [activeTab, setActiveTab] = useState<'users' | 'activity'>('users');
+  const [activityData, setActivityData] = useState<Activity[]>([]);
+  const [activityLoading, setActivityLoading] = useState(false);
 
   // Fetch users
   useEffect(() => {
@@ -216,22 +274,116 @@ export default function Admin() {
     fetchUsers();
   }, []);
 
+  // Fetch activity data
+  useEffect(() => {
+    async function fetchActivity() {
+      if (activeTab !== 'activity') return;
+      
+      setActivityLoading(true);
+      try {
+        const activityQuery = query(
+          collection(db, 'activity'),
+          orderBy('loggedAt', 'desc'),
+          limit(100) // Limit to last 100 activities for performance
+        );
+        const snapshot = await getDocs(activityQuery);
+        const activities = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        } as Activity));
+        setActivityData(activities);
+      } catch (error) {
+        console.error('Error fetching activity:', error);
+      } finally {
+        setActivityLoading(false);
+      }
+    }
+    fetchActivity();
+  }, [activeTab]);
+
+  // Refresh activity when actions are performed
+  const refreshActivity = async () => {
+    if (activeTab === 'activity') {
+      setActivityLoading(true);
+      try {
+        const activityQuery = query(
+          collection(db, 'activity'),
+          orderBy('loggedAt', 'desc'),
+          limit(100)
+        );
+        const snapshot = await getDocs(activityQuery);
+        const activities = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        } as Activity));
+        setActivityData(activities);
+      } catch (error) {
+        console.error('Error fetching activity:', error);
+      } finally {
+        setActivityLoading(false);
+      }
+    }
+  };
+
   // Action handlers
   const handleApprove = async (u: User) => {
     await updateDoc(doc(db, 'users', u.id), { approved: true });
     setData((prev) => prev.map((x) => (x.id === u.id ? { ...x, approved: true } : x)));
+    
+    // Log activity
+    await addDoc(collection(db, 'activity'), {
+      message: `Approved user: ${u.displayName} (${u.email})`,
+      loggedAt: serverTimestamp(),
+      loggedBy: user?.email || 'unknown'
+    });
+    
+    // Refresh activity if on activity tab
+    refreshActivity();
   };
+  
   const handleDisapprove = async (u: User) => {
     await updateDoc(doc(db, 'users', u.id), { approved: false });
     setData((prev) => prev.map((x) => (x.id === u.id ? { ...x, approved: false } : x)));
+    
+    // Log activity
+    await addDoc(collection(db, 'activity'), {
+      message: `Disapproved user: ${u.displayName} (${u.email})`,
+      loggedAt: serverTimestamp(),
+      loggedBy: user?.email || 'unknown'
+    });
+    
+    // Refresh activity if on activity tab
+    refreshActivity();
   };
+  
   const handleDelete = async (u: User) => {
     await deleteDoc(doc(db, 'users', u.id));
     setData((prev) => prev.filter((x) => x.id !== u.id));
+    
+    // Log activity
+    await addDoc(collection(db, 'activity'), {
+      message: `Deleted user: ${u.displayName} (${u.email})`,
+      loggedAt: serverTimestamp(),
+      loggedBy: user?.email || 'unknown'
+    });
+    
+    // Refresh activity if on activity tab
+    refreshActivity();
   };
+  
   const handleRoleChange = async (u: User, role: string) => {
     await updateDoc(doc(db, 'users', u.id), { role });
     setData((prev) => prev.map((x) => (x.id === u.id ? { ...x, role } : x)));
+    
+    // Log activity
+    await addDoc(collection(db, 'activity'), {
+      message: `Changed role for ${u.displayName} (${u.email}) to ${role}`,
+      loggedAt: serverTimestamp(),
+      loggedBy: user?.email || 'unknown'
+    });
+    
+    // Refresh activity if on activity tab
+    refreshActivity();
   };
 
   // Filter data
@@ -344,29 +496,110 @@ export default function Admin() {
     },
   ];
 
+  // Define activity columns
+  const activityColumns: ColumnDef<Activity, unknown>[] = [
+    {
+      accessorKey: 'loggedAt',
+      header: 'Time',
+      cell: (info) => {
+        const ts = info.getValue() as any;
+        return ts?.toDate().toLocaleString() || '';
+      },
+    },
+    {
+      accessorKey: 'loggedBy',
+      header: 'User',
+      cell: (info) => {
+        const email = info.getValue() as string;
+        return (
+          <span className="text-sm font-medium">{email}</span>
+        );
+      },
+    },
+    {
+      accessorKey: 'message',
+      header: 'Activity',
+      cell: (info) => {
+        const message = info.getValue() as string;
+        return <ExpandableText text={message} maxLength={80} />;
+      },
+    },
+  ];
+
   return (
     <div className="p-6">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold">User Administration</h1>
-        <p className="text-gray-600">Manage user approvals and roles</p>
+        <h1 className="text-2xl font-bold">Administration</h1>
+        <p className="text-gray-600">Manage users and view system activity</p>
       </div>
-      <div className="mb-4 space-x-2">
-        <Button size="sm" variant={filterType === 'all' ? 'default' : 'outline'} onClick={() => setFilterType('all')}>
-          All
-        </Button>
-        <Button size="sm" variant={filterType === 'approved' ? 'default' : 'outline'} onClick={() => setFilterType('approved')}>
-          Approved
-        </Button>
-        <Button size="sm" variant={filterType === 'unapproved' ? 'default' : 'outline'} onClick={() => setFilterType('unapproved')}>
-          Unapproved
-        </Button>
+
+      {/* Tab Navigation */}
+      <div className="mb-6 border-b border-gray-200">
+        <nav className="-mb-px flex space-x-8">
+          <button
+            onClick={() => setActiveTab('users')}
+            className={`py-2 px-1 border-b-2 font-medium text-sm ${
+              activeTab === 'users'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+          >
+            <UserIcon className="w-4 h-4 inline mr-2" />
+            User Management
+          </button>
+          <button
+            onClick={() => setActiveTab('activity')}
+            className={`py-2 px-1 border-b-2 font-medium text-sm ${
+              activeTab === 'activity'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+          >
+            <Activity className="w-4 h-4 inline mr-2" />
+            System Activity
+          </button>
+        </nav>
       </div>
-      <DataTable<User>
-        data={filtered}
-        columns={columns}
-        loading={loading}
-        showExport={false}
-      />
+
+      {/* Users Tab Content */}
+      {activeTab === 'users' && (
+        <>
+          <div className="mb-4 space-x-2">
+            <Button size="sm" variant={filterType === 'all' ? 'default' : 'outline'} onClick={() => setFilterType('all')}>
+              All
+            </Button>
+            <Button size="sm" variant={filterType === 'approved' ? 'default' : 'outline'} onClick={() => setFilterType('approved')}>
+              Approved
+            </Button>
+            <Button size="sm" variant={filterType === 'unapproved' ? 'default' : 'outline'} onClick={() => setFilterType('unapproved')}>
+              Unapproved
+            </Button>
+          </div>
+          <DataTable<User>
+            data={filtered}
+            columns={columns}
+            loading={loading}
+            showExport={false}
+          />
+        </>
+      )}
+
+      {/* Activity Tab Content */}
+      {activeTab === 'activity' && (
+        <>
+          <div className="mb-4">
+            <p className="text-sm text-gray-600">
+              Showing the last 100 system activities (most recent first)
+            </p>
+          </div>
+          <DataTable<Activity>
+            data={activityData}
+            columns={activityColumns}
+            loading={activityLoading}
+            showExport={false}
+          />
+        </>
+      )}
     </div>
   );
 }

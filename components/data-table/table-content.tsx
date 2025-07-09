@@ -193,7 +193,7 @@ function RowDialog<TData extends Record<string, any>>({
         await addDoc(collection(db, "activity"), {
           message: baseMessage + changesMessage,
           loggedAt: new Date(),
-          loggedBy: profile.displayName || profile.email || profile.uid
+          loggedBy: profile.email
         });
       }
       
