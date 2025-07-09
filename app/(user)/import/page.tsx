@@ -61,6 +61,9 @@ export default function BulkAdd() {
   };
 
   const handleImportClick = () => {
+    if (inputRef.current) {
+      inputRef.current.value = "";
+    }
     inputRef.current?.click();
   };
 
