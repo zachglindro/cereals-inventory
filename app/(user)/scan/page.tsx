@@ -1,17 +1,32 @@
-"use client"
+"use client";
 import { useState } from "react";
 import { QRScanner } from "@/components/scanner";
 import { Button } from "@/components/ui/button";
 import { Camera, Printer } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner"; // Assuming a Spinner component exists
 import QRCode from "react-qr-code";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL;
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from "uuid";
 import { db } from "@/lib/firebase"; // Assuming firebase config is exported as db
-import { collection, query, where, getDocs, addDoc, deleteDoc, doc } from "firebase/firestore";
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  addDoc,
+  deleteDoc,
+  doc,
+} from "firebase/firestore";
 
 export default function Update() {
   const [showScanner, setShowScanner] = useState(false);
@@ -92,26 +107,26 @@ export default function Update() {
         }
       </style>
     `;
-    
+
     // Add styles to head
-    document.head.insertAdjacentHTML('beforeend', printStyles);
-    
+    document.head.insertAdjacentHTML("beforeend", printStyles);
+
     // Add print-area class to the QR code container
-    const qrContainer = document.querySelector('.qr-code-container');
+    const qrContainer = document.querySelector(".qr-code-container");
     if (qrContainer) {
-      qrContainer.classList.add('print-area');
+      qrContainer.classList.add("print-area");
     }
-    
+
     // Print
     window.print();
-    
+
     // Clean up
-    const printStylesElement = document.getElementById('print-styles');
+    const printStylesElement = document.getElementById("print-styles");
     if (printStylesElement) {
       printStylesElement.remove();
     }
     if (qrContainer) {
-      qrContainer.classList.remove('print-area');
+      qrContainer.classList.remove("print-area");
     }
   };
 
@@ -123,7 +138,7 @@ export default function Update() {
       // 1. fetch all unique box numbers from inventory
       const invSnap = await getDocs(collection(db, "inventory"));
       const boxNumbers = Array.from(
-        new Set(invSnap.docs.map(d => d.data().box_number))
+        new Set(invSnap.docs.map((d) => d.data().box_number)),
       );
 
       // 2. fetch all existing QR code entries
@@ -131,7 +146,7 @@ export default function Update() {
       const qrSnap = await getDocs(qrCodesRef);
       const existingMap = new Map(); // box_number -> uuid
       const toDeleteIds: string[] = [];
-      qrSnap.docs.forEach(docSnap => {
+      qrSnap.docs.forEach((docSnap) => {
         const data = docSnap.data();
         const bn = data.box_number;
         if (boxNumbers.includes(bn)) {
@@ -156,8 +171,9 @@ export default function Update() {
       }
 
       // prepare print window
-      const entries = Array.from(existingMap.entries())
-        .sort((a, b) => a[0] - b[0]); // sort by box number numerically
+      const entries = Array.from(existingMap.entries()).sort(
+        (a, b) => a[0] - b[0],
+      ); // sort by box number numerically
       const html = `
         <html><head><title>Print All QR Codes</title>
         <style>
@@ -182,7 +198,7 @@ export default function Update() {
               <img src="https://api.qrserver.com/v1/create-qr-code/?data=${uuid}&size=80x80" />
               <div class="caption">Box #${bn}</div>
             </div>
-          `
+          `,
             )
             .join("")}
         </div>
@@ -209,10 +225,18 @@ export default function Update() {
     <div className="flex items-center justify-center h-full">
       {!showScanner ? (
         <>
-          <Button variant="default" onClick={() => setShowScanner(true)} className="mr-2">
-            <Camera className="mr-2 h-4 w-4" />Scan QR
+          <Button
+            variant="default"
+            onClick={() => setShowScanner(true)}
+            className="mr-2"
+          >
+            <Camera className="mr-2 h-4 w-4" />
+            Scan QR
           </Button>
-          <Button variant="outline" onClick={() => setShowGenerateQrDialog(true)}>
+          <Button
+            variant="outline"
+            onClick={() => setShowGenerateQrDialog(true)}
+          >
             Generate QR
           </Button>
         </>
@@ -220,7 +244,10 @@ export default function Update() {
         <QRScanner />
       )}
 
-      <Dialog open={showGenerateQrDialog} onOpenChange={setShowGenerateQrDialog}>
+      <Dialog
+        open={showGenerateQrDialog}
+        onOpenChange={setShowGenerateQrDialog}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Generate QR Code</DialogTitle>
@@ -240,7 +267,11 @@ export default function Update() {
                 onChange={(e) => setBoxNumberInput(e.target.value)}
                 className="col-span-2"
               />
-              <Button onClick={handleGenerateQr} disabled={isLoadingQr} className="col-span-1">
+              <Button
+                onClick={handleGenerateQr}
+                disabled={isLoadingQr}
+                className="col-span-1"
+              >
                 {isLoadingQr ? <Spinner size="sm" /> : null}
                 Generate
               </Button>
@@ -248,14 +279,25 @@ export default function Update() {
             {error && <p className="text-red-500 text-sm">{error}</p>}
             {generatedUuid && (
               <div className="qr-code-container flex flex-col items-center justify-center">
-                <QRCode value={`${SITE_URL}/box/${generatedUuid}`} size={256} level="H" />
-                <div className="mt-1 text-sm text-gray-600">Box #{boxNumberInput}</div>
+                <QRCode
+                  value={`${SITE_URL}/box/${generatedUuid}`}
+                  size={256}
+                  level="H"
+                />
+                <div className="mt-1 text-sm text-gray-600">
+                  Box #{boxNumberInput}
+                </div>
               </div>
             )}
           </div>
           <DialogFooter>
             {/* Button to print all QR codes */}
-            <Button onClick={handlePrintAll} variant="outline" className="mr-2" disabled={isLoadingPrintAll}>
+            <Button
+              onClick={handlePrintAll}
+              variant="outline"
+              className="mr-2"
+              disabled={isLoadingPrintAll}
+            >
               {isLoadingPrintAll ? <Spinner size="sm" /> : null}
               Print All QR
             </Button>
