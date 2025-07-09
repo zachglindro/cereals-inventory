@@ -20,6 +20,7 @@ import type { InventoryFormValues } from "@/lib/schemas/inventory";
 import type { ColumnDef } from "@tanstack/react-table";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { ArrowLeft } from "lucide-react";
+import Image from "next/image";
 
 export default function Login() {
   const router = useRouter();
@@ -277,9 +278,24 @@ export default function Login() {
           />
         </div>
       ) : (
-        <div className="w-full max-w-sm grid gap-4 justify-items-center">
+        <div className="w-full max-w-sm grid gap-6 justify-items-center">
           {!showScanner ? (
             <>
+              {/* UP Logo and Header */}
+              <div className="flex flex-col items-center gap-4 mb-2">
+                <Image
+                  src="/up-logo.png"
+                  alt="University of the Philippines Logo"
+                  width={120}
+                  height={120}
+                  priority
+                  className="object-contain"
+                />
+                <h1 className="text-3xl font-bold text-gray-800 text-center">
+                  Cereals Inventory
+                </h1>
+              </div>
+              
               <Button variant="outline" type="button" onClick={handleGoogleSignIn}>
                 <svg
                   version="1.1"
