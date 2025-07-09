@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/dialog";
 import { EllipsisVertical, User as UserIcon, Activity, ChevronRight } from "lucide-react";
 import { useUser } from "@/context/UserContext";
+import { Badge } from "@/components/ui/badge";
 
 // Define User schema
 type User = {
@@ -199,26 +200,24 @@ function UserDetailsDialog({
               
               <div>
                 <label className="text-sm font-medium text-gray-500">Role</label>
-                <span
-                  className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ${
-                    user.role === 'admin' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
-                  }`}
-                >
-                  {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
-                </span>
+                <div>
+                  <Badge variant={user.role === 'admin' ? 'default' : 'secondary'}>
+                    {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                  </Badge>
+                </div>
               </div>
               
               <div>
                 <label className="text-sm font-medium text-gray-500">Status</label>
                 <div>
                   {user.approved ? (
-                    <span className="inline-flex items-center rounded-full bg-green-100 text-green-800 px-2 py-0.5 text-xs font-semibold">
+                    <Badge variant="default" className="bg-green-100 text-green-800 border-green-200">
                       Approved
-                    </span>
+                    </Badge>
                   ) : (
-                    <span className="inline-flex items-center rounded-full bg-yellow-100 text-yellow-800 px-2 py-0.5 text-xs font-semibold">
+                    <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-200">
                       Pending Approval
-                    </span>
+                    </Badge>
                   )}
                 </div>
               </div>
@@ -402,15 +401,10 @@ export default function Admin() {
       header: 'Role',
       cell: (info) => {
         const role = info.getValue() as string;
-        let color = '';
-        if (role === 'admin') color = 'bg-blue-100 text-blue-800';
-        else color = 'bg-gray-100 text-gray-800';
         return (
-          <span
-            className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ${color}`}
-          >
+          <Badge variant={role === 'admin' ? 'default' : 'secondary'}>
             {role.charAt(0).toUpperCase() + role.slice(1)}
-          </span>
+          </Badge>
         );
       },
     },
@@ -420,9 +414,13 @@ export default function Admin() {
       cell: (info) => {
         const approved = info.getValue() as boolean;
         return approved ? (
-          <span className="inline-flex items-center rounded-full bg-green-100 text-green-800 px-2 py-0.5 text-xs font-semibold">Yes</span>
+          <Badge variant="default" className="bg-green-100 text-green-800 border-green-200">
+            Yes
+          </Badge>
         ) : (
-          <span className="inline-flex items-center rounded-full bg-yellow-100 text-yellow-800 px-2 py-0.5 text-xs font-semibold">No</span>
+          <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-200">
+            No
+          </Badge>
         );
       },
     },
