@@ -23,7 +23,7 @@ import { Button } from "@/components/ui/button";
 import { ColumnDef } from "@tanstack/react-table"; // Import ColumnDef here
 import { useState } from "react";
 import { db } from "@/lib/firebase";
-import { updateDoc, deleteDoc, doc } from "firebase/firestore";
+import { updateDoc, deleteDoc, doc, addDoc, collection } from "firebase/firestore";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -41,6 +41,7 @@ import {
   locationPlantedOptions,
   seasonOptions,
 } from "@/lib/schemas/inventory";
+import { useUser } from "@/context/UserContext";
 
 interface TableContentProps<TData extends Record<string, unknown>> {
   table: RTTable<TData>;
@@ -155,6 +156,7 @@ function RowDialog<TData extends Record<string, any>>({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [justEdited, setJustEdited] = useState(false);
+  const { profile } = useUser();
   const handleChange = (key: string, value: any) => {
     setEditValues((prev) => ({ ...prev, [key]: value }));
   };
@@ -163,6 +165,38 @@ function RowDialog<TData extends Record<string, any>>({
     try {
       const docRef = doc(db, "inventory", String(editValues.id));
       await updateDoc(docRef, editValues);
+      
+      // Log activity after successful update
+      if (profile) {
+        // Compare original values with edited values to create a detailed message
+        const changes: string[] = [];
+        const originalData = row.original;
+        
+        Object.keys(editValues).forEach((key) => {
+          if (key === "id") return; // Skip ID field
+          
+          const originalValue = originalData[key];
+          const newValue = editValues[key];
+          
+          // Only log if the value actually changed
+          if (originalValue !== newValue) {
+            const fieldName = key.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+            changes.push(`${fieldName}: "${originalValue}" → "${newValue}"`);
+          }
+        });
+        
+        const baseMessage = `Updated inventory item (Box ${editValues.box_number} - ${editValues.type})`;
+        const changesMessage = changes.length > 0 
+          ? `. Changes: ${changes.join(', ')}`
+          : '. No changes detected';
+        
+        await addDoc(collection(db, "activity"), {
+          message: baseMessage + changesMessage,
+          loggedAt: new Date(),
+          loggedBy: profile.displayName || profile.email || profile.uid
+        });
+      }
+      
       toast.success("Inventory updated successfully!");
       setOpen(false);
       setJustEdited(true);
