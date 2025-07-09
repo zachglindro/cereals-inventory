@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner"; // Assuming a Spinner component exists
 import QRCode from "react-qr-code";
+import QRCodeLib from "qrcode";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL;
 import { v4 as uuidv4 } from "uuid";
 import { db } from "@/lib/firebase"; // Assuming firebase config is exported as db
@@ -170,32 +171,31 @@ export default function Update() {
         await deleteDoc(doc(db, "qrcodes", id));
       }
 
-      // prepare print window
-      const entries = Array.from(existingMap.entries()).sort(
-        (a, b) => a[0] - b[0],
-      ); // sort by box number numerically
+      // prepare print window with client-generated QR codes
+      const entries = Array.from(existingMap.entries()).sort((a, b) => a[0] - b[0]);
+      // generate data-URIs for each QR code on the client
+      const entriesData = await Promise.all(
+        entries.map(async ([bn, uuid]) => ({
+          bn,
+          dataUrl: await QRCodeLib.toDataURL(`${SITE_URL}/box/${uuid}`, { width: 80, margin: 0 }),
+        })),
+      );
       const html = `
         <html><head><title>Print All QR Codes</title>
         <style>
           body { margin: 20px; }
           .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 16px; }
-          .item { 
-            text-align: center; 
-            padding: 8px; 
-            margin: 4px; 
-            border: 1px solid #ddd; 
-            border-radius: 6px; 
-          }
+          .item { text-align: center; padding: 8px; margin: 4px; border: 1px solid #ddd; border-radius: 6px; }
           .item img { width: 80px; height: 80px; }
           .caption { margin-top: 4px; font-size: 12px; font-weight: bold; }
         </style>
         </head><body>
         <div class="grid">
-          ${entries
+          ${entriesData
             .map(
-              ([bn, uuid]) => `
+              ({ bn, dataUrl }) => `
             <div class="item">
-              <img src="https://api.qrserver.com/v1/create-qr-code/?data=${uuid}&size=80x80" />
+              <img src="${dataUrl}" alt="QR code for box ${bn}" />
               <div class="caption">Box #${bn}</div>
             </div>
           `,
