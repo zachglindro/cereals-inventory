@@ -14,6 +14,7 @@ export default function Entry() {
   const [data, setData] = useState<InventoryFormValues[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [boxNumber, setBoxNumber] = useState<number | null>(null);
   const tableColumns = columns as ColumnDef<InventoryFormValues, unknown>[];
 
   useEffect(() => {
@@ -38,11 +39,12 @@ export default function Entry() {
           return;
         }
         const qrData = qrSnapshot.docs[0].data() as { box_number: number; uuid: string };
-        const boxNumber = qrData.box_number;
+        const foundBox = qrData.box_number;
+        setBoxNumber(foundBox);
         // now fetch inventory for that box
         const invQuery = query(
           collection(db, "inventory"),
-          where("box_number", "==", boxNumber)
+          where("box_number", "==", foundBox)
         );
         const snapshot = await getDocs(invQuery);
 
@@ -66,8 +68,8 @@ export default function Entry() {
   return (
     <div className="p-6">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold">Box {uuid} Inventory</h1>
-        <p className="text-gray-600">Showing all inventory items in box {uuid}</p>
+        <h1 className="text-2xl font-bold">Box {boxNumber} Inventory</h1>
+        <p className="text-gray-600">Showing all inventory items in box {boxNumber}</p>
       </div>
       {error ? (
         <div className="mb-4 text-red-600">Error: {error}</div>
