@@ -283,14 +283,24 @@ export default function Login() {
             <>
               {/* UP Logo and Header */}
               <div className="flex flex-col items-center gap-4 mb-2">
-                <Image
-                  src="/up-logo.png"
-                  alt="University of the Philippines Logo"
-                  width={120}
-                  height={120}
-                  priority
-                  className="object-contain"
-                />
+                <div className="flex items-center gap-8">
+                  <Image
+                    src="/up-logo.png"
+                    alt="University of the Philippines Logo"
+                    width={130}
+                    height={130}
+                    priority
+                    className="object-contain"
+                  />
+                  <Image
+                    src="/cropped-IPB-logo.png"
+                    alt="IPB Logo"
+                    width={110}
+                    height={110}
+                    priority
+                    className="object-contain"
+                  />
+                </div>
                 <h1 className="text-3xl font-bold text-gray-800 text-center">
                   Cereals Inventory
                 </h1>
