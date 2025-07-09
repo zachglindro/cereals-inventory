@@ -13,14 +13,115 @@ import { useUser } from "@/context/UserContext";
 import { useAuth } from "@/hooks/use-auth";
 import { useEffect, useState } from "react";
 import { Spinner } from "@/components/ui/spinner";
-import { QRScanner } from "@/components/scanner";
+import { Scanner } from "@yudiel/react-qr-scanner";
+import { DataTable } from "@/components/data-table/index";
+import { columns } from "@/lib/schemas/columns";
+import type { InventoryFormValues } from "@/lib/schemas/inventory";
+import type { ColumnDef } from "@tanstack/react-table";
+import { collection, getDocs, query, where } from "firebase/firestore";
+import { ArrowLeft } from "lucide-react";
 
 export default function Login() {
   const router = useRouter();
   const [showScanner, setShowScanner] = useState(false);
+  const [scannedData, setScannedData] = useState<{
+    boxNumber: number;
+    inventory: InventoryFormValues[];
+  } | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { user, profile, loading } = useUser();
   const { handleSignOut } = useAuth();
+  const tableColumns = columns as ColumnDef<InventoryFormValues, unknown>[];
 
+  // Add: fetch allowed hosts from environment variable
+  const ALLOWED_HOSTS = process.env.NEXT_PUBLIC_ALLOWED_HOSTS
+    ? process.env.NEXT_PUBLIC_ALLOWED_HOSTS.split(",")
+    : [];
+
+  const isLocalLink = (url: string): boolean => {
+    try {
+      const urlObj = new URL(url);
+      return (
+        ALLOWED_HOSTS.includes(urlObj.hostname) ||
+        urlObj.protocol === 'file:' ||
+        urlObj.hostname === window.location.hostname
+      );
+    } catch {
+      // If it's not a valid URL, check if it's a relative path
+      return url.startsWith('/') || !url.includes('://');
+    }
+  };
+
+  const handleScan = async (result: any) => {
+    if (result && result[0]?.rawValue) {
+      const scannedValue = result[0].rawValue;
+      setError(null);
+      setIsLoading(true);
+      
+      try {
+        // Extract UUID from the scanned URL
+        let uuid = "";
+        if (scannedValue.includes('/box/')) {
+          const parts = scannedValue.split('/box/');
+          uuid = parts[1].split('?')[0].split('#')[0]; // Remove query params and fragments
+        } else {
+          // If it's just a UUID
+          uuid = scannedValue;
+        }
+
+        if (!uuid) {
+          setError("Invalid QR code format");
+          setIsLoading(false);
+          return;
+        }
+
+        // Lookup box number from qrcodes collection
+        const qrQuery = query(
+          collection(db, "qrcodes"),
+          where("uuid", "==", uuid)
+        );
+        const qrSnapshot = await getDocs(qrQuery);
+        
+        if (qrSnapshot.empty) {
+          setError("Invalid QR code - box not found");
+          setIsLoading(false);
+          return;
+        }
+
+        const qrData = qrSnapshot.docs[0].data() as { box_number: number; uuid: string };
+        const foundBox = qrData.box_number;
+
+        // Fetch inventory for that box
+        const invQuery = query(
+          collection(db, "inventory"),
+          where("box_number", "==", foundBox)
+        );
+        const snapshot = await getDocs(invQuery);
+
+        const inventory = snapshot.docs.map((doc) => ({
+          ...(doc.data() as InventoryFormValues),
+          id: doc.id,
+        }));
+
+        setScannedData({ boxNumber: foundBox, inventory });
+        toast.success(`Found ${inventory.length} items in box ${foundBox}`);
+      } catch (error) {
+        console.error("Error processing QR code:", error);
+        setError("Error loading box data");
+        toast.error("Error loading box data");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  };
+
+  const resetScanner = () => {
+    setShowScanner(false);
+    setScannedData(null);
+    setError(null);
+    setIsLoading(false);
+  };
   // Redirect authenticated users to dashboard
   useEffect(() => {
     if (!loading && user && profile?.approved) {
@@ -131,35 +232,80 @@ export default function Login() {
 
   return (
     <main className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
-      <div className="w-full max-w-sm grid gap-4 justify-items-center">
-        {!showScanner ? (
-          <>
-            <Button variant="outline" type="button" onClick={handleGoogleSignIn}>
-              <svg
-                version="1.1"
-                xmlns="http://www.w3.org/2000/svg"
-                xmlnsXlink="http://www.w3.org/1999/xlink"
-                viewBox="0 0 48 48"
-                style={{ display: "block" }}
-              >
-                <path
-                  fill="#EA4335"
-                  d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"
-                ></path>
-                <path
-                  fill="#4285F4"
-                  d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"
-                ></path>
-                <path
-                  fill="#FBBC05"
-                  d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"
-                ></path>
-                <path
-                  fill="#34A853"
-                  d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"
-                ></path>
-                <path fill="none" d="M0 0h48v48H0z"></path>
-              </svg>
+      {scannedData ? (
+        // Show inventory table for scanned box
+        <div className="w-full max-w-6xl">
+          <div className="mb-6 flex items-center gap-4">
+            <Button variant="outline" onClick={resetScanner}>
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Scanner
+            </Button>
+            <div>
+              <h1 className="text-2xl font-bold">Box {scannedData.boxNumber} Inventory</h1>
+              <p className="text-gray-600">Showing all inventory items in box {scannedData.boxNumber}</p>
+            </div>
+          </div>
+          <DataTable<InventoryFormValues>
+            data={scannedData.inventory}
+            columns={tableColumns}
+            loading={isLoading}
+            filterableFields={[
+              { label: "Type", fieldName: "type" },
+              { label: "Location Planted", fieldName: "location_planted" },
+              { label: "Year", fieldName: "year" },
+              { label: "Season", fieldName: "season" },
+              { label: "Location", fieldName: "location" },
+              { label: "Description", fieldName: "description" },
+              { label: "Pedigree", fieldName: "pedigree" },
+              { label: "Weight", fieldName: "weight" },
+            ]}
+            onRowUpdate={(updated: InventoryFormValues) => {
+              if (updated && (updated as any).deleted) {
+                // Remove the deleted row
+                setScannedData(prev => prev ? {
+                  ...prev,
+                  inventory: prev.inventory.filter(item => item.id !== updated.id)
+                } : null);
+              } else if (updated) {
+                // Update the row
+                setScannedData(prev => prev ? {
+                  ...prev,
+                  inventory: prev.inventory.map(item => item.id === updated.id ? updated : item)
+                } : null);
+              }
+            }}
+          />
+        </div>
+      ) : (
+        <div className="w-full max-w-sm grid gap-4 justify-items-center">
+          {!showScanner ? (
+            <>
+              <Button variant="outline" type="button" onClick={handleGoogleSignIn}>
+                <svg
+                  version="1.1"
+                  xmlns="http://www.w3.org/2000/svg"
+                  xmlnsXlink="http://www.w3.org/1999/xlink"
+                  viewBox="0 0 48 48"
+                  style={{ display: "block" }}
+                >
+                  <path
+                    fill="#EA4335"
+                    d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"
+                  ></path>
+                  <path
+                    fill="#4285F4"
+                    d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"
+                  ></path>
+                  <path
+                    fill="#FBBC05"
+                    d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"
+                  ></path>
+                  <path
+                    fill="#34A853"
+                    d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"
+                  ></path>
+                  <path fill="none" d="M0 0h48v48H0z"></path>
+                </svg>
               Continue with Google
             </Button>
             <Button variant="outline" type="button" onClick={() => setShowScanner(true)}>
@@ -168,9 +314,52 @@ export default function Login() {
             </Button>
           </>
         ) : (
-          <QRScanner />
+          <div className="w-full">
+            <div className="mb-4 flex items-center gap-4">
+              <Button variant="outline" onClick={() => setShowScanner(false)}>
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back
+              </Button>
+              <div>
+                <h2 className="text-lg font-semibold">Scan QR Code</h2>
+                <p className="text-sm text-gray-600">Point your camera at a box QR code</p>
+              </div>
+            </div>
+            {error && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
+                <p className="text-red-600 text-sm">{error}</p>
+              </div>
+            )}
+            {isLoading && (
+              <div className="mb-4 flex items-center justify-center">
+                <Spinner className="h-6 w-6 mr-2" />
+                <span className="text-sm text-gray-600">Loading box data...</span>
+              </div>
+            )}
+            <div className="w-full max-w-sm mx-auto">
+              <Scanner 
+                onScan={handleScan} 
+                constraints={{ 
+                  width: { ideal: 320 }, 
+                  height: { ideal: 240 } 
+                }}
+                styles={{
+                  container: { 
+                    width: '100%', 
+                    maxWidth: '320px',
+                    height: 'auto'
+                  },
+                  video: { 
+                    width: '100%', 
+                    height: 'auto' 
+                  }
+                }}
+              />
+            </div>
+          </div>
         )}
       </div>
+      )}
     </main>
   );
 }
