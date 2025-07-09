@@ -278,7 +278,7 @@ export default function Login() {
           />
         </div>
       ) : (
-        <div className="w-full max-w-sm grid gap-6 justify-items-center">
+        <div className="w-full max-w-sm grid gap-4 justify-items-center">
           {!showScanner ? (
             <>
               {/* UP Logo and Header */}
