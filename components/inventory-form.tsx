@@ -33,8 +33,10 @@ import { db } from "@/lib/firebase";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { useUser } from "@/context/UserContext";
 
 export function InventoryForm() {
+  const { user } = useUser();
   const form = useForm<InventoryFormValues>({
     resolver: zodResolver(inventoryFormSchema),
     defaultValues: {
@@ -59,6 +61,7 @@ export function InventoryForm() {
       await addDoc(collection(db, "activity"), {
         message: `Added inventory: Box ${values.box_number} (${values.type}, ${values.pedigree})`,
         loggedAt: serverTimestamp(),
+        loggedBy: user?.email || "unknown"
       });
       toast.success("Inventory added successfully!");
       form.reset();
@@ -260,7 +263,7 @@ export function InventoryForm() {
                     }}
                   />
                 </FormControl>
-                <FormDescription>in g</FormDescription>
+                <FormDescription>in kg</FormDescription>
                 <FormMessage />
               </FormItem>
             )}

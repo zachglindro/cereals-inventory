@@ -8,7 +8,8 @@ import {
   type InventoryFormValues,
 } from "@/lib/schemas/inventory";
 import { ColumnDef } from "@tanstack/react-table";
-import { addDoc, collection } from "firebase/firestore";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { useUser } from "@/context/UserContext";
 import { FileSpreadsheet, Loader2 } from "lucide-react";
 import Papa from "papaparse";
 import React, { useRef, useState } from "react";
@@ -16,6 +17,7 @@ import { toast } from "sonner";
 import * as XLSX from "xlsx";
 
 export default function BulkAdd() {
+  const { user } = useUser();
   const inputRef = useRef<HTMLInputElement>(null);
   const [data, setData] = useState<InventoryFormValues[]>([]);
   const [tableColumns, setTableColumns] = useState<
@@ -162,6 +164,13 @@ export default function BulkAdd() {
       await Promise.all(
         data.map((row) => addDoc(collection(db, "inventory"), row)),
       );
+
+      // Add activity log entry
+      await addDoc(collection(db, "activity"), {
+        message: `Bulk imported ${data.length} inventory items from ${importedFileName}`,
+        loggedAt: serverTimestamp(),
+        loggedBy: user?.email || "unknown",
+      });
 
       setData([]);
       setTableColumns([]);
