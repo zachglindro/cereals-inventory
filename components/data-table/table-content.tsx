@@ -258,7 +258,7 @@ function RowDialog<TData extends Record<string, any>>({
           </DialogTrigger>
         </TableCell>
       </TableRow>
-      <DialogContent className="m-4 max-h-[70vh] overflow-auto">
+      <DialogContent className="max-h-[70vh] overflow-auto">
         <DialogHeader>
           <DialogTitle className="text-lg font-medium">Edit Row</DialogTitle>
         </DialogHeader>
