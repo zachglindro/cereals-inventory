@@ -258,7 +258,8 @@ export default function Update() {
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="boxNumber" className="text-right">
-                Box Number
+                <span className="sm:hidden">Box #</span>
+                <span className="hidden sm:inline">Box Number</span>
               </Label>
               <Input
                 id="boxNumber"
