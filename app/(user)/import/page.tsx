@@ -186,6 +186,15 @@ export default function BulkAdd() {
     }
   };
 
+  // Add Generate Template handler
+  const handleGenerateTemplate = () => {
+    const headers = expectedColumns;
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet([headers]);
+    XLSX.utils.book_append_sheet(wb, ws, "Template");
+    XLSX.writeFile(wb, "inventory_template.xlsx");
+  };
+
   return (
     <>
       <input
@@ -199,6 +208,13 @@ export default function BulkAdd() {
         <Button variant="outline" onClick={handleImportClick}>
           <FileSpreadsheet />
           Import
+        </Button>
+        <Button
+          variant="outline"
+          className="mt-2"
+          onClick={handleGenerateTemplate}
+        >
+          Generate Template
         </Button>
         {!importedFileName && (
           <div className="mt-2 text-sm text-gray-600">
