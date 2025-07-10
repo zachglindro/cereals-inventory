@@ -42,6 +42,7 @@ export function TableFilters({
       <Input
         type="number"
         placeholder="Box #"
+        className="w-20 sm:w-28 md:w-36 lg:w-48 appearance-none [&::-webkit-inner-spin-button]:hidden [&::-webkit-outer-spin-button]:hidden [&::-moz-appearance-textfield]:appearance-none"
         value={filterState["box_number"]?.numericValue ?? ""}
         onChange={(e) => {
           const val = e.target.value;
@@ -61,9 +62,9 @@ export function TableFilters({
         <SheetTrigger asChild>
           <Button variant="outline" className="gap-2">
             <Funnel className="h-4 w-4" />
-            Filters
+            <span className="hidden sm:inline">Filters</span>
             {activeFiltersCount > 0 && (
-              <span className="ml-1 bg-primary text-primary-foreground text-xs rounded-full px-2 py-0.5">
+              <span className="ml-1 hidden sm:inline bg-primary text-primary-foreground text-xs rounded-full px-2 py-0.5">
                 {activeFiltersCount}
               </span>
             )}

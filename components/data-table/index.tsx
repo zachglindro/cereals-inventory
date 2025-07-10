@@ -374,30 +374,33 @@ export function DataTable<TData extends Record<string, unknown>>({
 
   const showFilters = filterableFields && filterableFields.length > 0;
 
+  // Wrap export actions to hide on small screens
   const exportActions = showExport ? (
-    <DropdownMenu open={exportDropdownOpen} onOpenChange={setExportDropdownOpen}>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm">
-          <IconDownload className="mr-2 h-4 w-4" />
-          Export
-          <IconChevronDown className={`ml-2 h-4 w-4 transition-transform duration-300 ease-in-out ${exportDropdownOpen ? '-rotate-180' : 'rotate-0'}`} />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => handleExport("xlsx")}>
-          Excel
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => handleExport("xlsx-per-box")}>
-          Excel, per Box Number
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => handleExport("xlsx-per-year")}>
-          Excel, per Year
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => handleExport("csv")}>
-          CSV
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <div className="hidden sm:block">
+      <DropdownMenu open={exportDropdownOpen} onOpenChange={setExportDropdownOpen}>
+        <DropdownMenuTrigger asChild>
+          <Button variant="outline" size="sm">
+            <IconDownload className="mr-2 h-4 w-4" />
+            Export
+            <IconChevronDown className={`ml-2 h-4 w-4 transition-transform duration-300 ease-in-out ${exportDropdownOpen ? '-rotate-180' : 'rotate-0'}`} />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem onClick={() => handleExport("xlsx")}>
+            Excel
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => handleExport("xlsx-per-box")}>
+            Excel, per Box Number
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => handleExport("xlsx-per-year")}>
+            Excel, per Year
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => handleExport("csv")}>
+            CSV
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
   ) : null;
 
   return (
