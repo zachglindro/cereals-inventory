@@ -55,7 +55,7 @@ export const columns: ColumnDef<InventoryFormValues>[] = [
   {
     id: "weight",
     accessorKey: "weight",
-    header: "Weight (g)",
+    header: "Weight (kg)",
     enableSorting: true,
   },
   {
