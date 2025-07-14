@@ -49,14 +49,16 @@ export function SiteHeader() {
             <Menu />
           </Button>
           <Image src="/up-banner.png" alt="UP Banner" width={120} height={32} />
-          Cereals Inventory
+          <span className="hidden sm:inline whitespace-nowrap">
+            Cereals Inventory
+          </span>
         </div>
         <div className="flex items-center gap-2">
           <Avatar>
             <AvatarImage src={profile?.photoURL} alt="User Avatar" />
             <AvatarFallback>{initials}</AvatarFallback>
           </Avatar>
-          <span className="text-sm font-medium">{userName}</span>
+          <span className="hidden sm:inline text-sm font-medium">{userName}</span>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost">
