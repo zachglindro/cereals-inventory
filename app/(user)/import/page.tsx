@@ -165,7 +165,12 @@ export default function BulkAdd() {
     setIsSubmitting(true);
     try {
       await Promise.all(
-        data.map((row) => addDoc(collection(db, "inventory"), row)),
+        data.map((row) =>
+          addDoc(collection(db, "inventory"), {
+            ...row,
+            creatorId: user?.uid,
+          })
+        )
       );
 
       // Add activity log entry

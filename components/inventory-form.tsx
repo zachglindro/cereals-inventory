@@ -56,7 +56,10 @@ export function InventoryForm() {
   async function onSubmit(values: InventoryFormValues) {
     setIsSubmitting(true);
     try {
-      await addDoc(collection(db, "inventory"), values);
+      await addDoc(collection(db, "inventory"), {
+        ...values,
+        creatorId: user?.uid,
+      });
       // Add activity log entry
       await addDoc(collection(db, "activity"), {
         message: `Added inventory: Box ${values.box_number} (${values.type}, ${values.pedigree})`,
