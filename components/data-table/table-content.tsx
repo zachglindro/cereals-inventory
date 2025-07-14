@@ -224,6 +224,14 @@ function RowDialog<TData extends Record<string, any>>({
       await deleteDoc(docRef);
       toast.success("Inventory entry deleted!");
       setOpen(false);
+      // Log deletion activity
+      if (profile) {
+        await addDoc(collection(db, "activity"), {
+          message: `Deleted inventory entry:\n  • Box Number: ${editValues.box_number}\n  • Type: ${editValues.type}\n  • Location Planted: ${editValues.location_planted}\n  • Year: ${editValues.year}\n  • Season: ${editValues.season}\n  • Storage Location: ${editValues.location}\n  • Description: ${editValues.description}\n  • Pedigree: ${editValues.pedigree}\n  • Weight: ${editValues.weight} kg\n  • Remarks: ${editValues.remarks}`,
+          loggedAt: new Date(),
+          loggedBy: profile.email,
+        });
+      }
       // Notify parent to refresh data after delete, pass deleted row info
       onRowUpdate?.({ ...editValues, deleted: true } as TData);
     } catch (error) {

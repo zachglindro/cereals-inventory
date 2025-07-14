@@ -62,9 +62,9 @@ export function InventoryForm() {
       });
       // Add activity log entry
       await addDoc(collection(db, "activity"), {
-        message: `Added inventory: Box ${values.box_number} (${values.type}, ${values.pedigree})`,
+        message: `Added inventory entry:\n  • Box Number: ${values.box_number}\n  • Type: ${values.type}\n  • Location Planted: ${values.location_planted}\n  • Year: ${values.year}\n  • Season: ${values.season}\n  • Storage Location: ${values.location}\n  • Description: ${values.description}\n  • Pedigree: ${values.pedigree}\n  • Weight: ${values.weight} kg\n  • Remarks: ${values.remarks}`,
         loggedAt: serverTimestamp(),
-        loggedBy: user?.email || "unknown"
+        loggedBy: user?.email || "unknown",
       });
       toast.success("Inventory added successfully!");
       // preserve box_number for next entry
