@@ -1,23 +1,34 @@
 "use client";
-import { useSidebar } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
-import { Menu, MoreVertical } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
-import Image from "next/image";
+import { useSidebar } from "@/components/ui/sidebar";
+import { Menu, MoreVertical } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useUser } from "@/context/UserContext";
 import { app } from "@/lib/firebase";
 import { getAuth, signOut } from "firebase/auth";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 export function SiteHeader() {
   const { toggleSidebar } = useSidebar();
   const router = useRouter();
+  const { profile } = useUser();
+
+  // derive user's display name and initials
+  const userName = profile?.displayName ?? "";
+  const initials = userName
+    ? userName
+        .split(" ")
+        .map((part) => part[0])
+        .join("")
+    : undefined;
 
   const handleLogout = async () => {
     const auth = getAuth(app);
@@ -40,16 +51,23 @@ export function SiteHeader() {
           <Image src="/up-banner.png" alt="UP Banner" width={120} height={32} />
           Cereals Inventory
         </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost">
-              <MoreVertical />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div className="flex items-center gap-2">
+          <Avatar>
+            <AvatarImage src={profile?.photoURL} alt="User Avatar" />
+            <AvatarFallback>{initials}</AvatarFallback>
+          </Avatar>
+          <span className="text-sm font-medium">{userName}</span>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost">
+                <MoreVertical />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
     </header>
   );
