@@ -169,10 +169,6 @@ export default function Home() {
 
       {/* Data Table */}
       <div className="mb-8">
-        <div className="mb-6">
-          <h2 className="text-xl font-semibold mb-2">Inventory Table</h2>
-          <p className="text-gray-600">Detailed view of all inventory items</p>
-        </div>
         <DataTable<InventoryFormValues>
           data={data}
           columns={tableColumns}
