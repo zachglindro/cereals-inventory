@@ -104,7 +104,6 @@ export function WeightDistributionCard({ data }: WeightDistributionCardProps) {
       <CardHeader className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
         <div>
           <CardTitle>Weight Distribution</CardTitle>
-          <CardDescription></CardDescription>
         </div>
         <div className="flex flex-col sm:flex-row gap-2 mt-2 sm:mt-0">
           <Select value={binSize} onValueChange={setBinSize}>
