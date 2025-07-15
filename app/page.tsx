@@ -314,7 +314,6 @@ export default function Login() {
                    if (!updated.id) throw new Error("Document ID is missing.");
                    const docRef = doc(db, "inventory", updated.id);
                    await updateDoc(docRef, { weight: updated.weight });
-                   toast.success("Weight updated successfully!");
                  } catch (error) {
                    console.error("Error updating document: ", error);
                    toast.error("Failed to update weight.");
