@@ -151,85 +151,87 @@ export default function Home() {
     data: Array<{ name: string; value: number; fill: string }>;
     description: string;
   }) => (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle>{title}</CardTitle>
-            <CardDescription>{description}</CardDescription>
-          </div>
-          <div className="flex items-center space-x-2">
+    <div className="w-100">
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
             <div>
-              <Select value={selectedChart} onValueChange={setSelectedChart}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select chart" />
-                </SelectTrigger>
-                <SelectContent>
-                  {chartOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <CardTitle>{title}</CardTitle>
+              <CardDescription>{description}</CardDescription>
             </div>
-            <div>
-              <Select
-                value={chartWeightMode ? "weight" : "count"}
-                onValueChange={(value) =>
-                  setChartWeightMode(value === "weight")
+            <div className="flex items-center space-x-2">
+              <div>
+                <Select value={selectedChart} onValueChange={setSelectedChart}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select chart" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {chartOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Select
+                  value={chartWeightMode ? "weight" : "count"}
+                  onValueChange={(value) =>
+                    setChartWeightMode(value === "weight")
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="count"># of entries</SelectItem>
+                    <SelectItem value="weight">Weight (kg)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <ChartContainer
+            config={chartDataField.reduce(
+              (acc, item) => ({
+                ...acc,
+                [item.name]: { label: item.name, color: item.fill },
+              }),
+              {},
+            )}
+          >
+            <PieChart>
+              <Pie
+                data={chartDataField}
+                cx="50%"
+                cy="50%"
+                labelLine={false}
+                label={({ name, percent }) =>
+                  `${name}: ${((percent || 0) * 100).toFixed(0)}%`
                 }
+                outerRadius={120}
+                fill="#8884d8"
+                dataKey="value"
               >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="count"># of entries</SelectItem>
-                  <SelectItem value="weight">Weight (kg)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <ChartContainer
-          config={chartDataField.reduce(
-            (acc, item) => ({
-              ...acc,
-              [item.name]: { label: item.name, color: item.fill },
-            }),
-            {},
-          )}
-        >
-          <PieChart>
-            <Pie
-              data={chartDataField}
-              cx="50%"
-              cy="50%"
-              labelLine={false}
-              label={({ name, percent }) =>
-                `${name}: ${((percent || 0) * 100).toFixed(0)}%`
-              }
-              outerRadius={120}
-              fill="#8884d8"
-              dataKey="value"
-            >
-              {chartDataField.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.fill} />
-              ))}
-            </Pie>
-            <ChartTooltip
-              content={<ChartTooltipContent />}
-              formatter={(value) => [
-                `${value}${chartWeightMode ? " kg" : " entries"}`,
-                chartWeightMode ? "Weight" : "Count",
-              ]}
-            />
-          </PieChart>
-        </ChartContainer>
-      </CardContent>
-    </Card>
+                {chartDataField.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.fill} />
+                ))}
+              </Pie>
+              <ChartTooltip
+                content={<ChartTooltipContent />}
+                formatter={(value) => [
+                  `${value}${chartWeightMode ? " kg" : " entries"}`,
+                  chartWeightMode ? "Weight" : "Count",
+                ]}
+              />
+            </PieChart>
+          </ChartContainer>
+        </CardContent>
+      </Card>
+    </div>
   );
 
   // Low Stock Analytics Card
@@ -426,15 +428,15 @@ export default function Home() {
           <p className="text-gray-600">Distribution data for inventory</p>
         </div>
 
-        <div className="flex flex-col md:flex-row justify-center gap-6">
-          <div className="w-full md:w-1/2 max-w-2xl">
+        <div className="flex flex-col md:flex-row flex-wrap gap-6 items-start justify-center">
+          <div className="flex-shrink-0">
             <PieChartCard
               title={currentChartOption?.label || "Chart"}
               data={currentChartData}
               description={currentChartOption?.description || ""}
             />
           </div>
-          <div className="w-full md:w-1/2 max-w-xs space-y-6">
+          <div className="flex-shrink-0">
             <Card>
               <CardHeader>
                 <CardTitle>Total Weight</CardTitle>
@@ -448,6 +450,8 @@ export default function Home() {
                 </p>
               </CardContent>
             </Card>
+          </div>
+          <div className="flex-shrink-0">
             <LowStockCard />
           </div>
         </div>
