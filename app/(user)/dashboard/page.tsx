@@ -269,7 +269,7 @@ export default function Home() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Low Stock Alert</CardTitle>
+          <CardTitle>Low Stocks</CardTitle>
           <CardDescription>Items with weight below threshold</CardDescription>
         </CardHeader>
         <CardContent>
