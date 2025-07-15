@@ -21,7 +21,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { IconDownload, IconChevronDown } from "@tabler/icons-react";
-import * as XLSX from "xlsx";
+import * as ExcelJS from "exceljs";
 
 import { TableContent } from "./table-content";
 import { TablePagination } from "./table-pagination";
@@ -157,28 +157,39 @@ export function DataTable<TData extends Record<string, unknown>>({
         ),
       ];
 
-      // Create workbook and worksheet
-      const workbook = XLSX.utils.book_new();
-      const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+      // Use ExcelJS to create workbook and worksheet
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet("Inventory");
+      worksheetData.forEach((row) => worksheet.addRow(row));
 
-      // Auto-size columns
-      const columnWidths = columnInfo.map((_, colIndex) => {
+      // Auto-size columns with ExcelJS
+      columnInfo.forEach((_, idx) => {
         const maxLength = Math.max(
-          columnInfo[colIndex].header.length,
+          columnInfo[idx].header.length,
           ...filteredData.map(
-            (row) => String((row as any)[accessorKeys[colIndex]] ?? "").length,
+            (row) => String((row as any)[accessorKeys[idx]] ?? "").length,
           ),
         );
-        return { width: Math.min(Math.max(maxLength + 2, 10), 50) };
+        worksheet.columns[idx].width = Math.min(
+          Math.max(maxLength + 2, 10),
+          50,
+        );
       });
-      worksheet["!cols"] = columnWidths;
-
-      // Add worksheet to workbook
-      XLSX.utils.book_append_sheet(workbook, worksheet, "Inventory");
 
       // Generate and download the file
-      const fileName = `inventory-export-${new Date().toISOString().split("T")[0]}.xlsx`;
-      XLSX.writeFile(workbook, fileName);
+      workbook.xlsx.writeBuffer().then((buffer) => {
+        const blob = new Blob([buffer], {
+          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `inventory-export-${new Date().toISOString().split("T")[0]}.xlsx`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      });
     } else if (format === "xlsx-per-box") {
       const filteredData = table
         .getFilteredRowModel()
@@ -216,8 +227,8 @@ export function DataTable<TData extends Record<string, unknown>>({
         {} as Record<string | number, typeof filteredData>,
       );
 
-      // Create workbook
-      const workbook = XLSX.utils.book_new();
+      // Use ExcelJS to create workbook
+      const workbook = new ExcelJS.Workbook();
 
       // Sort box numbers for consistent ordering
       const sortedBoxNumbers = Object.keys(dataByBox).sort((a, b) => {
@@ -241,30 +252,39 @@ export function DataTable<TData extends Record<string, unknown>>({
           ),
         ];
 
-        // Create worksheet
-        const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+        // Create worksheet for each box
+        const worksheet = workbook.addWorksheet(`Box ${boxNumber}`);
+        worksheetData.forEach((row) => worksheet.addRow(row));
 
         // Auto-size columns
-        const columnWidths = columnInfo.map((_, colIndex) => {
+        columnInfo.forEach((_, idx) => {
           const maxLength = Math.max(
-            columnInfo[colIndex].header.length,
+            columnInfo[idx].header.length,
             ...boxData.map(
-              (row) =>
-                String((row as any)[accessorKeys[colIndex]] ?? "").length,
+              (row) => String((row as any)[accessorKeys[idx]] ?? "").length,
             ),
           );
-          return { width: Math.min(Math.max(maxLength + 2, 10), 50) };
+          worksheet.columns[idx].width = Math.min(
+            Math.max(maxLength + 2, 10),
+            50,
+          );
         });
-        worksheet["!cols"] = columnWidths;
-
-        // Add worksheet to workbook with sanitized sheet name
-        const sheetName = `Box ${boxNumber}`.substring(0, 31); // Excel sheet names max 31 chars
-        XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
       });
 
-      // Generate and download the file
-      const fileName = `inventory-by-box-${new Date().toISOString().split("T")[0]}.xlsx`;
-      XLSX.writeFile(workbook, fileName);
+      // Generate and download workbook
+      workbook.xlsx.writeBuffer().then((buffer) => {
+        const blob = new Blob([buffer], {
+          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `inventory-by-box-${new Date().toISOString().split("T")[0]}.xlsx`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      });
     } else if (format === "xlsx-per-year") {
       const filteredData = table
         .getFilteredRowModel()
@@ -302,8 +322,8 @@ export function DataTable<TData extends Record<string, unknown>>({
         {} as Record<string | number, typeof filteredData>,
       );
 
-      // Create workbook
-      const workbook = XLSX.utils.book_new();
+      // Use ExcelJS to create workbook
+      const workbook = new ExcelJS.Workbook();
 
       // Sort years for consistent ordering (most recent first)
       const sortedYears = Object.keys(dataByYear).sort((a, b) => {
@@ -327,30 +347,39 @@ export function DataTable<TData extends Record<string, unknown>>({
           ),
         ];
 
-        // Create worksheet
-        const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+        // Create worksheet for each year
+        const worksheet = workbook.addWorksheet(`${year}`);
+        worksheetData.forEach((row) => worksheet.addRow(row));
 
         // Auto-size columns
-        const columnWidths = columnInfo.map((_, colIndex) => {
+        columnInfo.forEach((_, idx) => {
           const maxLength = Math.max(
-            columnInfo[colIndex].header.length,
+            columnInfo[idx].header.length,
             ...yearData.map(
-              (row) =>
-                String((row as any)[accessorKeys[colIndex]] ?? "").length,
+              (row) => String((row as any)[accessorKeys[idx]] ?? "").length,
             ),
           );
-          return { width: Math.min(Math.max(maxLength + 2, 10), 50) };
+          worksheet.columns[idx].width = Math.min(
+            Math.max(maxLength + 2, 10),
+            50,
+          );
         });
-        worksheet["!cols"] = columnWidths;
-
-        // Add worksheet to workbook with sanitized sheet name
-        const sheetName = `${year}`.substring(0, 31); // Excel sheet names max 31 chars
-        XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
       });
 
-      // Generate and download the file
-      const fileName = `inventory-by-year-${new Date().toISOString().split("T")[0]}.xlsx`;
-      XLSX.writeFile(workbook, fileName);
+      // Generate and download workbook
+      workbook.xlsx.writeBuffer().then((buffer) => {
+        const blob = new Blob([buffer], {
+          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `inventory-by-year-${new Date().toISOString().split("T")[0]}.xlsx`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      });
     }
   };
 

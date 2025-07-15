@@ -14,7 +14,7 @@ import { FileSpreadsheet, Loader2 } from "lucide-react";
 import Papa from "papaparse";
 import React, { useRef, useState } from "react";
 import { toast } from "sonner";
-import * as XLSX from "xlsx";
+import * as ExcelJS from "exceljs";
 
 export default function BulkAdd() {
   const { user } = useUser();
@@ -111,43 +111,43 @@ export default function BulkAdd() {
           },
         });
       } else if (fileName.endsWith(".xls") || fileName.endsWith(".xlsx")) {
-        const reader = new FileReader();
-        reader.onload = (evt) => {
-          const bytes = evt.target?.result;
-          if (bytes) {
-            const wb = XLSX.read(bytes, { type: "array" });
-            const ws = wb.Sheets[wb.SheetNames[0]];
-            const rows = XLSX.utils.sheet_to_json<unknown[]>(ws, { header: 1 });
+        file.arrayBuffer().then(async (buffer) => {
+          const workbook = new ExcelJS.Workbook();
+          await workbook.xlsx.load(buffer);
+          const worksheet = workbook.worksheets[0];
+          const rows: unknown[][] = [];
+          worksheet.eachRow((row) => {
+            const values = (row.values as unknown[]).slice(1);
+            rows.push(values);
+          });
 
-            const headers = rows[0] as string[];
-            setTableColumns(
-              headers.map((h, index) => ({
-                id: h || `Column ${index + 1}`,
-                accessorKey: h || `Column ${index + 1}`,
-                header: h || `Column ${index + 1}`,
-                enableSorting: true,
-              })),
-            );
+          const headers = rows[0] as string[];
+          setTableColumns(
+            headers.map((h, index) => ({
+              id: h || `Column ${index + 1}`,
+              accessorKey: h || `Column ${index + 1}`,
+              header: h || `Column ${index + 1}`,
+              enableSorting: true,
+            })),
+          );
 
-            const records = rows.slice(1).map((row) => {
-              const obj: Record<string, unknown> = {};
-              headers.forEach((h, i) => {
-                const key = h || `Column ${i + 1}`;
-                const value = row[i as number];
-                if (key === "year") {
-                  obj[key] = String(value);
-                } else if (value !== undefined) {
-                  obj[key] = value;
-                }
-              });
-              return obj;
+          const records = rows.slice(1).map((row) => {
+            const obj: Record<string, unknown> = {};
+            headers.forEach((h, i) => {
+              const key = h || `Column ${i + 1}`;
+              const value = row[i as number];
+              if (key === "year") {
+                obj[key] = String(value);
+              } else if (value !== undefined) {
+                obj[key] = value;
+              }
             });
-            setData(records as InventoryFormValues[]);
-            validateColumns(headers);
-            validateSchema(records);
-          }
-        };
-        reader.readAsArrayBuffer(file);
+            return obj;
+          });
+          setData(records as InventoryFormValues[]);
+          validateColumns(headers);
+          validateSchema(records);
+        });
       } else {
         toast.error(`${file.name} is not a recognized file type.`);
         setData([]);
@@ -194,10 +194,22 @@ export default function BulkAdd() {
   // Add Generate Template handler
   const handleGenerateTemplate = () => {
     const headers = expectedColumns;
-    const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.aoa_to_sheet([headers]);
-    XLSX.utils.book_append_sheet(wb, ws, "Template");
-    XLSX.writeFile(wb, "inventory_template.xlsx");
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("Template");
+    worksheet.addRow(headers);
+    workbook.xlsx.writeBuffer().then((buffer) => {
+      const blob = new Blob([buffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "inventory_template.xlsx";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
   };
 
   return (
