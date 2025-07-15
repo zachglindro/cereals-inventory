@@ -6,15 +6,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  BarChart,
-  Bar,
-} from "recharts";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid } from "recharts";
 import {
   Card,
   CardContent,
@@ -40,7 +32,6 @@ export function ComparativeAnalysisCard({
 }: ComparativeAnalysisCardProps) {
   const [comparisonType, setComparisonType] = useState<string>("yearly");
   const [metric, setMetric] = useState<string>("weight");
-  const [chartType, setChartType] = useState<string>("line");
 
   const { chartData, growthData } = useMemo(() => {
     if (!data.length) return { chartData: [], growthData: [], insights: null };
@@ -182,15 +173,13 @@ export function ComparativeAnalysisCard({
   };
 
   return (
-    <Card className="min-w-96">
+    <Card className="h-80 w-110">
       <CardHeader>
-        <CardTitle>Comparative Analysis</CardTitle>
-        <CardDescription>
-          Compare trends and patterns across different dimensions
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <CardTitle>Comparative Analysis</CardTitle>
+          </div>
+
           {/* Controls */}
           <div className="flex flex-col sm:flex-row gap-2">
             <Select value={comparisonType} onValueChange={setComparisonType}>
@@ -215,22 +204,14 @@ export function ComparativeAnalysisCard({
                 <SelectItem value="avgWeight">Avg Weight</SelectItem>
               </SelectContent>
             </Select>
-
-            <Select value={chartType} onValueChange={setChartType}>
-              <SelectTrigger className="w-full sm:w-28">
-                <SelectValue placeholder="Chart" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="line">Line</SelectItem>
-                <SelectItem value="bar">Bar</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
-
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
           {/* Chart */}
           {chartData.length > 0 ? (
-            <div className="h-64">
-              <ChartContainer
+              <ChartContainer className="h-50"
                 config={{
                   [metric]: {
                     label: getYAxisLabel(),
@@ -238,53 +219,29 @@ export function ComparativeAnalysisCard({
                   },
                 }}
               >
-                {chartType === "line" ? (
-                  <LineChart data={chartData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis
-                      dataKey="period"
-                      fontSize={12}
-                      angle={comparisonType === "seasonal" ? -45 : 0}
-                      textAnchor={
-                        comparisonType === "seasonal" ? "end" : "middle"
-                      }
-                      height={comparisonType === "seasonal" ? 60 : 30}
-                      tickFormatter={formatPeriod}
-                    />
-                    <YAxis />
-                    <ChartTooltip content={<ChartTooltipContent />} />
-                    <Line
-                      type="monotone"
-                      dataKey={metric}
-                      stroke="#8884d8"
-                      strokeWidth={2}
-                      dot={{ fill: "#8884d8", strokeWidth: 2, r: 4 }}
-                    />
-                  </LineChart>
-                ) : (
-                  <BarChart data={chartData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis
-                      dataKey="period"
-                      fontSize={12}
-                      angle={comparisonType === "seasonal" ? -45 : 0}
-                      textAnchor={
-                        comparisonType === "seasonal" ? "end" : "middle"
-                      }
-                      height={comparisonType === "seasonal" ? 60 : 30}
-                      tickFormatter={formatPeriod}
-                    />
-                    <YAxis />
-                    <ChartTooltip content={<ChartTooltipContent />} />
-                    <Bar
-                      dataKey={metric}
-                      fill="#8884d8"
-                      radius={[4, 4, 0, 0]}
-                    />
-                  </BarChart>
-                )}
+                <LineChart data={chartData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis
+                    dataKey="period"
+                    fontSize={12}
+                    angle={comparisonType === "seasonal" ? -45 : 0}
+                    textAnchor={
+                      comparisonType === "seasonal" ? "end" : "middle"
+                    }
+                    height={comparisonType === "seasonal" ? 60 : 30}
+                    tickFormatter={formatPeriod}
+                  />
+                  <YAxis />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <Line
+                    type="monotone"
+                    dataKey={metric}
+                    stroke="#8884d8"
+                    strokeWidth={2}
+                    dot={{ fill: "#8884d8", strokeWidth: 2, r: 4 }}
+                  />
+                </LineChart>
               </ChartContainer>
-            </div>
           ) : (
             <div className="h-64 flex items-center justify-center text-gray-500">
               No data available for comparison
