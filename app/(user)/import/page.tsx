@@ -46,9 +46,33 @@ export default function BulkAdd() {
   const importSchema = inventoryFormSchema.omit({ id: true });
   const expectedColumns = Object.keys(importSchema.shape);
 
+  // Mapping from user-friendly column names to schema field names
+  const columnMapping: Record<string, string> = {
+    Type: "type",
+    "Location Planted": "location_planted",
+    "Year(s)": "year",
+    Season: "season",
+    "Box Number": "box_number",
+    Location: "location",
+    Description: "description",
+    Pedigree: "pedigree",
+    "Weight (kg)": "weight",
+    Remarks: "remarks",
+  };
+
+  // Function to normalize column names
+  const normalizeColumnName = (columnName: string): string => {
+    return columnMapping[columnName] || columnName;
+  };
+
   const validateColumns = (headers: string[]) => {
-    const missing = expectedColumns.filter((h) => !headers.includes(h));
-    const unrecognized = headers.filter((h) => !expectedColumns.includes(h));
+    const normalizedHeaders = headers.map(normalizeColumnName);
+    const missing = expectedColumns.filter(
+      (h) => !normalizedHeaders.includes(h),
+    );
+    const unrecognized = headers.filter(
+      (h) => !expectedColumns.includes(normalizeColumnName(h)),
+    );
     setMissingColumns(missing);
     setUnrecognizedColumns(unrecognized);
   };
@@ -80,23 +104,28 @@ export default function BulkAdd() {
 
     const headers = rows[0] as string[];
     setTableColumns(
-      headers.map((h, index) => ({
-        id: h || `Column ${index + 1}`,
-        accessorKey: h || `Column ${index + 1}`,
-        header: h || `Column ${index + 1}`,
-        enableSorting: true,
-      })),
+      headers.map((h, index) => {
+        const originalKey = h || `Column ${index + 1}`;
+        const normalizedKey = normalizeColumnName(originalKey);
+        return {
+          id: originalKey,
+          accessorKey: normalizedKey,
+          header: originalKey,
+          enableSorting: true,
+        };
+      }),
     );
 
     const records = rows.slice(1).map((row) => {
       const obj: Record<string, unknown> = {};
       headers.forEach((h, i) => {
-        const key = h || `Column ${i + 1}`;
+        const originalKey = h || `Column ${i + 1}`;
+        const normalizedKey = normalizeColumnName(originalKey);
         const value = row[i as number];
-        if (key === "year") {
-          obj[key] = String(value);
+        if (normalizedKey === "year") {
+          obj[normalizedKey] = String(value);
         } else if (value !== undefined) {
-          obj[key] = value;
+          obj[normalizedKey] = value;
         }
       });
       return obj;
@@ -151,27 +180,32 @@ export default function BulkAdd() {
             const rows = results.data as unknown[][];
             const headers = rows[0] as string[];
             setTableColumns(
-              headers.map((h, index) => ({
-                id: h || `Column ${index + 1}`,
-                accessorKey: h || `Column ${index + 1}`,
-                header: h || `Column ${index + 1}`,
-                enableSorting: true,
-              })),
+              headers.map((h, index) => {
+                const originalKey = h || `Column ${index + 1}`;
+                const normalizedKey = normalizeColumnName(originalKey);
+                return {
+                  id: originalKey,
+                  accessorKey: normalizedKey,
+                  header: originalKey,
+                  enableSorting: true,
+                };
+              }),
             );
 
             const records = rows.slice(1).map((row) => {
               const obj: Record<string, unknown> = {};
               headers.forEach((h, index) => {
-                const key = h || `Column ${index + 1}`;
+                const originalKey = h || `Column ${index + 1}`;
+                const normalizedKey = normalizeColumnName(originalKey);
                 let value = row[index];
-                if (key === "box_number") {
+                if (normalizedKey === "box_number") {
                   const parsed = parseInt(String(value), 10);
                   value = isNaN(parsed) ? value : parsed;
-                } else if (key === "weight") {
+                } else if (normalizedKey === "weight") {
                   const parsed = parseFloat(String(value));
                   value = isNaN(parsed) ? value : parsed;
                 }
-                obj[key] = value;
+                obj[normalizedKey] = value;
               });
               return obj;
             });
@@ -250,7 +284,18 @@ export default function BulkAdd() {
 
   // Add Generate Template handler
   const handleGenerateTemplate = () => {
-    const headers = expectedColumns;
+    const headers = [
+      "Type",
+      "Location Planted",
+      "Year(s)",
+      "Season",
+      "Box Number",
+      "Location",
+      "Description",
+      "Pedigree",
+      "Weight (kg)",
+      "Remarks",
+    ];
     const sampleData = [
       "white",
       "LBPD",
