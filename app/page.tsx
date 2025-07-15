@@ -34,15 +34,17 @@ export default function Login() {
   const { user, profile, loading } = useUser();
   const { handleSignOut } = useAuth();
   const tableColumns = columns as ColumnDef<InventoryFormValues, unknown>[];
-  
+
   // Create custom columns for scanned data view - only weight is editable
-  const scannedDataColumns = tableColumns.filter((col) => col.id !== "box_number").map((col) => ({
-    ...col,
-    meta: {
-      ...col.meta,
-      editable: col.id === "weight", // Only weight field is editable
-    },
-  }));
+  const scannedDataColumns = tableColumns
+    .filter((col) => col.id !== "box_number")
+    .map((col) => ({
+      ...col,
+      meta: {
+        ...col.meta,
+        editable: col.id === "weight", // Only weight field is editable
+      },
+    }));
 
   // Add: fetch allowed hosts from environment variable
   const ALLOWED_HOSTS = process.env.NEXT_PUBLIC_ALLOWED_HOSTS

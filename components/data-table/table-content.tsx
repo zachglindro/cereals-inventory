@@ -190,12 +190,12 @@ function RowDialog<TData extends Record<string, any>>({
   const [justEdited, setJustEdited] = useState(false);
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const { profile } = useUser();
-  
+
   // Get editable fields from column metadata
   const getEditableFields = () => {
     const allFields = [
       "box_number",
-      "type", 
+      "type",
       "location_planted",
       "year",
       "season",
@@ -205,24 +205,30 @@ function RowDialog<TData extends Record<string, any>>({
       "weight",
       "remarks",
     ];
-    
+
     // Check if any columns have editable metadata
-    const hasEditableMetadata = row.getVisibleCells().some(cell => 
-      (cell.column.columnDef as any).meta?.editable !== undefined
-    );
-    
+    const hasEditableMetadata = row
+      .getVisibleCells()
+      .some(
+        (cell) => (cell.column.columnDef as any).meta?.editable !== undefined,
+      );
+
     if (hasEditableMetadata) {
       // Only return fields that are marked as editable
-      return allFields.filter(field => {
-        const column = row.getVisibleCells().find(cell => cell.column.id === field);
-        return column && (column.column.columnDef as any).meta?.editable === true;
+      return allFields.filter((field) => {
+        const column = row
+          .getVisibleCells()
+          .find((cell) => cell.column.id === field);
+        return (
+          column && (column.column.columnDef as any).meta?.editable === true
+        );
       });
     }
-    
+
     // Default behavior - all fields are editable
     return allFields;
   };
-  
+
   const handleChange = (key: string, value: any) => {
     setEditValues((prev) => ({ ...prev, [key]: value }));
   };
@@ -488,7 +494,9 @@ function RowDialog<TData extends Record<string, any>>({
                   )}
                 </Button>
               )}
-              <div className={`flex space-x-2 ${disableDelete ? 'ml-auto' : 'ml-auto'}`}>
+              <div
+                className={`flex space-x-2 ${disableDelete ? "ml-auto" : "ml-auto"}`}
+              >
                 <DialogClose asChild>
                   <Button variant="outline">Close</Button>
                 </DialogClose>
