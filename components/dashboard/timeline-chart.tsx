@@ -102,7 +102,7 @@ export function TimelineChart({ data }: TimelineChartProps) {
   };
 
   return (
-    <Card className="w-160">
+    <Card className="w-130 h-80">
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
@@ -132,7 +132,7 @@ export function TimelineChart({ data }: TimelineChartProps) {
             config={{
               count: { label: "Entries", color: "#8884d8" },
             }}
-            className="h-80"
+            className="h-60"
           >
             <LineChart data={timelineData}>
               <CartesianGrid strokeDasharray="3 3" />
