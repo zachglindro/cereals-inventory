@@ -46,7 +46,7 @@ export default function Update() {
     const boxNumber = parseInt(boxNumberInput, 10);
 
     if (isNaN(boxNumber) || boxNumber <= 0) {
-      setError("Please enter a valid positive integer for the box number.");
+      setError("Please enter a valid   box number.");
       setIsLoadingQr(false);
       return;
     }
