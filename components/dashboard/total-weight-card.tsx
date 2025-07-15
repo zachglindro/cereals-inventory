@@ -21,12 +21,12 @@ export function TotalWeightCard({ data }: TotalWeightCardProps) {
   );
 
   return (
-    <Card>
+    <Card className="h-75 flex flex-col">
       <CardHeader>
         <CardTitle>Total Weight</CardTitle>
         <CardDescription>Total weight of all inventory items</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex items-center justify-center flex-1">
         <p className="text-3xl font-bold">{totalWeight.toFixed(2)} kg</p>
       </CardContent>
     </Card>

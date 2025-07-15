@@ -38,9 +38,9 @@ export function DashboardAnalytics({
           chartWeightMode={chartWeightMode}
           onWeightModeChange={onWeightModeChange}
         />
+        <TotalWeightCard data={data} />
         <LowStockCard data={data} />
         <TimelineChart data={data} />
-        <TotalWeightCard data={data} />
         <WeightDistributionCard data={data} />
         <ComparativeAnalysisCard data={data} />
       </div>
