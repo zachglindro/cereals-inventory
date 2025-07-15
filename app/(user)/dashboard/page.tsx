@@ -88,13 +88,15 @@ export default function Home() {
       </div>
 
       {/* Analytics */}
-      <DashboardAnalytics
-        data={data}
-        selectedChart={selectedChart}
-        onChartChange={setSelectedChart}
-        chartWeightMode={chartWeightMode}
-        onWeightModeChange={setChartWeightMode}
-      />
+      <div className="hidden md:block">
+        <DashboardAnalytics
+          data={data}
+          selectedChart={selectedChart}
+          onChartChange={setSelectedChart}
+          chartWeightMode={chartWeightMode}
+          onWeightModeChange={setChartWeightMode}
+        />
+      </div>
     </div>
   );
 }
