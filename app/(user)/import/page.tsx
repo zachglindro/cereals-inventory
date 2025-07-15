@@ -169,8 +169,8 @@ export default function BulkAdd() {
           addDoc(collection(db, "inventory"), {
             ...row,
             creatorId: user?.uid,
-          })
-        )
+          }),
+        ),
       );
 
       // Add activity log entry

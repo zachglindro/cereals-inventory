@@ -24,7 +24,13 @@ import { Button } from "@/components/ui/button";
 import { ColumnDef } from "@tanstack/react-table"; // Import ColumnDef here
 import { useState } from "react";
 import { db } from "@/lib/firebase";
-import { updateDoc, deleteDoc, doc, addDoc, collection } from "firebase/firestore";
+import {
+  updateDoc,
+  deleteDoc,
+  doc,
+  addDoc,
+  collection,
+} from "firebase/firestore";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -167,38 +173,41 @@ function RowDialog<TData extends Record<string, any>>({
     try {
       const docRef = doc(db, "inventory", String(editValues.id));
       await updateDoc(docRef, editValues);
-      
+
       // Log activity after successful update
       if (profile) {
         // Compare original values with edited values to create a detailed message
         const changes: string[] = [];
         const originalData = row.original;
-        
+
         Object.keys(editValues).forEach((key) => {
           if (key === "id") return; // Skip ID field
-          
+
           const originalValue = originalData[key];
           const newValue = editValues[key];
-          
+
           // Only log if the value actually changed
           if (originalValue !== newValue) {
-            const fieldName = key.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+            const fieldName = key
+              .replace("_", " ")
+              .replace(/\b\w/g, (l) => l.toUpperCase());
             changes.push(`${fieldName}: "${originalValue}" → "${newValue}"`);
           }
         });
-        
+
         const baseMessage = `Updated inventory item (Box ${editValues.box_number} - ${editValues.type})`;
-        const changesMessage = changes.length > 0 
-          ? `. Changes: ${changes.join(', ')}`
-          : '. No changes detected';
-        
+        const changesMessage =
+          changes.length > 0
+            ? `. Changes: ${changes.join(", ")}`
+            : ". No changes detected";
+
         await addDoc(collection(db, "activity"), {
           message: baseMessage + changesMessage,
           loggedAt: new Date(),
-          loggedBy: profile.email
+          loggedBy: profile.email,
         });
       }
-      
+
       toast.success("Inventory updated successfully!");
       setOpen(false);
       setJustEdited(true);
@@ -280,113 +289,136 @@ function RowDialog<TData extends Record<string, any>>({
           <div className="text-sm space-y-4">
             {[
               "box_number",
-              "type", 
+              "type",
               "location_planted",
               "year",
               "season",
               "location",
-              "description", 
+              "description",
               "pedigree",
               "weight",
-              "remarks"
-            ].map((key) => {
-              const value = editValues[key];
-              if (key === "id") return null;
-              
-              // Render appropriate input based on field type
-              if (key === "type") {
-                return (
-                  <div key={key} className="flex flex-col space-y-2">
-                    <Label className="font-medium">Type</Label>
-                    <Select
-                      value={String(value)}
-                      onValueChange={(newValue) => handleChange(key, newValue)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {typeOptions.map((option) => (
-                          <SelectItem key={option} value={option}>
-                            {option}
-                          </SelectItem>
+              "remarks",
+            ]
+              .map((key) => {
+                const value = editValues[key];
+                if (key === "id") return null;
+
+                // Render appropriate input based on field type
+                if (key === "type") {
+                  return (
+                    <div key={key} className="flex flex-col space-y-2">
+                      <Label className="font-medium">Type</Label>
+                      <Select
+                        value={String(value)}
+                        onValueChange={(newValue) =>
+                          handleChange(key, newValue)
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {typeOptions.map((option) => (
+                            <SelectItem key={option} value={option}>
+                              {option}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  );
+                }
+
+                if (key === "location_planted") {
+                  return (
+                    <div key={key} className="flex flex-col space-y-2">
+                      <Label className="font-medium">Location Planted</Label>
+                      <Select
+                        value={String(value)}
+                        onValueChange={(newValue) =>
+                          handleChange(key, newValue)
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select location" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {locationPlantedOptions.map((option) => (
+                            <SelectItem key={option} value={option}>
+                              {option}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  );
+                }
+
+                if (key === "season") {
+                  return (
+                    <div key={key} className="flex flex-col space-y-2">
+                      <Label className="font-medium">Season</Label>
+                      <RadioGroup
+                        value={String(value)}
+                        onValueChange={(newValue) =>
+                          handleChange(key, newValue)
+                        }
+                        className="flex flex-row space-x-4"
+                      >
+                        {seasonOptions.map((option) => (
+                          <div
+                            key={option}
+                            className="flex items-center space-x-2"
+                          >
+                            <RadioGroupItem
+                              value={option}
+                              id={`${key}-${option}`}
+                            />
+                            <Label
+                              htmlFor={`${key}-${option}`}
+                              className="capitalize"
+                            >
+                              {option}
+                            </Label>
+                          </div>
                         ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                );
-              }
-              
-              if (key === "location_planted") {
+                      </RadioGroup>
+                    </div>
+                  );
+                }
+
+                // For numeric fields, use number input
+                if (key === "box_number" || key === "weight") {
+                  return (
+                    <div key={key} className="flex flex-col space-y-2">
+                      <Label className="font-medium capitalize">
+                        {key.replace("_", " ")}
+                      </Label>
+                      <Input
+                        type="number"
+                        value={String(value)}
+                        onChange={(e) =>
+                          handleChange(key, parseFloat(e.target.value) || 0)
+                        }
+                      />
+                    </div>
+                  );
+                }
+
+                // Default to text input for other fields
                 return (
                   <div key={key} className="flex flex-col space-y-2">
-                    <Label className="font-medium">Location Planted</Label>
-                    <Select
-                      value={String(value)}
-                      onValueChange={(newValue) => handleChange(key, newValue)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select location" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {locationPlantedOptions.map((option) => (
-                          <SelectItem key={option} value={option}>
-                            {option}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                );
-              }
-              
-              if (key === "season") {
-                return (
-                  <div key={key} className="flex flex-col space-y-2">
-                    <Label className="font-medium">Season</Label>
-                    <RadioGroup
-                      value={String(value)}
-                      onValueChange={(newValue) => handleChange(key, newValue)}
-                      className="flex flex-row space-x-4"
-                    >
-                      {seasonOptions.map((option) => (
-                        <div key={option} className="flex items-center space-x-2">
-                          <RadioGroupItem value={option} id={`${key}-${option}`} />
-                          <Label htmlFor={`${key}-${option}`} className="capitalize">
-                            {option}
-                          </Label>
-                        </div>
-                      ))}
-                    </RadioGroup>
-                  </div>
-                );
-              }
-              
-              // For numeric fields, use number input
-              if (key === "box_number" || key === "weight") {
-                return (
-                  <div key={key} className="flex flex-col space-y-2">
-                    <Label className="font-medium capitalize">{key.replace('_', ' ')}</Label>
+                    <Label className="font-medium capitalize">
+                      {key.replace("_", " ")}
+                    </Label>
                     <Input
-                      type="number"
                       value={String(value)}
-                      onChange={(e) => handleChange(key, parseFloat(e.target.value) || 0)}
+                      onChange={(e) => handleChange(key, e.target.value)}
                     />
                   </div>
                 );
-              }
-              
-              // Default to text input for other fields
-              return (
-                <div key={key} className="flex flex-col space-y-2">
-                  <Label className="font-medium capitalize">{key.replace('_', ' ')}</Label>
-                  <Input
-                    value={String(value)}
-                    onChange={(e) => handleChange(key, e.target.value)}
-                  />
-                </div>
-              );
-            }).filter(Boolean)}
+              })
+              .filter(Boolean)}
           </div>
           <DialogFooter className="flex justify-between items-center">
             <div className="flex w-full items-center">
@@ -430,10 +462,15 @@ function RowDialog<TData extends Record<string, any>>({
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Confirm Delete</DialogTitle>
-            <DialogDescription>Are you sure you want to delete this entry?</DialogDescription>
+            <DialogDescription>
+              Are you sure you want to delete this entry?
+            </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowConfirmDelete(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setShowConfirmDelete(false)}
+            >
               Cancel
             </Button>
             <Button
@@ -453,5 +490,5 @@ function RowDialog<TData extends Record<string, any>>({
         </DialogContent>
       </Dialog>
     </>
-   );
+  );
 }

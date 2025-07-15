@@ -1,5 +1,5 @@
-"use client"
-import { useParams } from 'next/navigation';
+"use client";
+import { useParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "@/lib/firebase";
@@ -31,20 +31,23 @@ export default function Entry() {
         // lookup box number from qrcodes collection
         const qrQuery = query(
           collection(db, "qrcodes"),
-          where("uuid", "==", uuid)
+          where("uuid", "==", uuid),
         );
         const qrSnapshot = await getDocs(qrQuery);
         if (qrSnapshot.empty) {
           setError("Invalid QR code");
           return;
         }
-        const qrData = qrSnapshot.docs[0].data() as { box_number: number; uuid: string };
+        const qrData = qrSnapshot.docs[0].data() as {
+          box_number: number;
+          uuid: string;
+        };
         const foundBox = qrData.box_number;
         setBoxNumber(foundBox);
         // now fetch inventory for that box
         const invQuery = query(
           collection(db, "inventory"),
-          where("box_number", "==", foundBox)
+          where("box_number", "==", foundBox),
         );
         const snapshot = await getDocs(invQuery);
 
@@ -69,7 +72,9 @@ export default function Entry() {
     <div className="p-6">
       <div className="mb-6">
         <h1 className="text-2xl font-bold">Box {boxNumber} Inventory</h1>
-        <p className="text-gray-600">Showing all inventory items in box {boxNumber}</p>
+        <p className="text-gray-600">
+          Showing all inventory items in box {boxNumber}
+        </p>
       </div>
       {error ? (
         <div className="mb-4 text-red-600">Error: {error}</div>
@@ -91,10 +96,12 @@ export default function Entry() {
           onRowUpdate={(updated: InventoryFormValues) => {
             if (updated && (updated as any).deleted) {
               // Remove the deleted row
-              setData(prev => prev.filter(item => item.id !== updated.id));
+              setData((prev) => prev.filter((item) => item.id !== updated.id));
             } else if (updated) {
               // Update the row
-              setData(prev => prev.map(item => item.id === updated.id ? updated : item));
+              setData((prev) =>
+                prev.map((item) => (item.id === updated.id ? updated : item)),
+              );
             }
           }}
         />

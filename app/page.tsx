@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ScanQrCode } from "lucide-react";
 import { app } from "@/lib/firebase";
 import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
-import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { FirebaseError } from "firebase/app";
 import { db } from "@/lib/firebase";
@@ -45,12 +45,12 @@ export default function Login() {
       const urlObj = new URL(url);
       return (
         ALLOWED_HOSTS.includes(urlObj.hostname) ||
-        urlObj.protocol === 'file:' ||
+        urlObj.protocol === "file:" ||
         urlObj.hostname === window.location.hostname
       );
     } catch {
       // If it's not a valid URL, check if it's a relative path
-      return url.startsWith('/') || !url.includes('://');
+      return url.startsWith("/") || !url.includes("://");
     }
   };
 
@@ -59,13 +59,13 @@ export default function Login() {
       const scannedValue = result[0].rawValue;
       setError(null);
       setIsLoading(true);
-      
+
       try {
         // Extract UUID from the scanned URL
         let uuid = "";
-        if (scannedValue.includes('/box/')) {
-          const parts = scannedValue.split('/box/');
-          uuid = parts[1].split('?')[0].split('#')[0]; // Remove query params and fragments
+        if (scannedValue.includes("/box/")) {
+          const parts = scannedValue.split("/box/");
+          uuid = parts[1].split("?")[0].split("#")[0]; // Remove query params and fragments
         } else {
           // If it's just a UUID
           uuid = scannedValue;
@@ -80,23 +80,26 @@ export default function Login() {
         // Lookup box number from qrcodes collection
         const qrQuery = query(
           collection(db, "qrcodes"),
-          where("uuid", "==", uuid)
+          where("uuid", "==", uuid),
         );
         const qrSnapshot = await getDocs(qrQuery);
-        
+
         if (qrSnapshot.empty) {
           setError("Invalid QR code - box not found");
           setIsLoading(false);
           return;
         }
 
-        const qrData = qrSnapshot.docs[0].data() as { box_number: number; uuid: string };
+        const qrData = qrSnapshot.docs[0].data() as {
+          box_number: number;
+          uuid: string;
+        };
         const foundBox = qrData.box_number;
 
         // Fetch inventory for that box
         const invQuery = query(
           collection(db, "inventory"),
-          where("box_number", "==", foundBox)
+          where("box_number", "==", foundBox),
         );
         const snapshot = await getDocs(invQuery);
 
@@ -126,7 +129,7 @@ export default function Login() {
   // Redirect authenticated users to dashboard
   useEffect(() => {
     if (!loading && user && profile?.approved) {
-      router.push('/dashboard');
+      router.push("/dashboard");
     }
   }, [user, profile, loading, router]);
 
@@ -155,7 +158,8 @@ export default function Login() {
         <div className="w-full max-w-md p-6 text-center">
           <h2 className="text-2xl font-bold mb-4">Account Pending Approval</h2>
           <p className="text-gray-600 mb-6">
-            Your account is awaiting admin approval. Please contact an administrator.
+            Your account is awaiting admin approval. Please contact an
+            administrator.
           </p>
           <p className="text-sm text-gray-500 mb-4">
             Signed in as: {user.email}
@@ -197,7 +201,7 @@ export default function Login() {
       }
 
       toast.success("Signed in successfully");
-      router.push('/dashboard');
+      router.push("/dashboard");
     } catch (error: any) {
       let errorMessage = "An unexpected error occurred.";
       if (error instanceof FirebaseError) {
@@ -212,13 +216,16 @@ export default function Login() {
             errorMessage = "Sign-in popup was blocked by the browser.";
             break;
           case "auth/network-request-failed":
-            errorMessage = "Network error, please check your connection and try again.";
+            errorMessage =
+              "Network error, please check your connection and try again.";
             break;
           case "auth/account-exists-with-different-credential":
-            errorMessage = "An account already exists with the same email but different sign-in credentials.";
+            errorMessage =
+              "An account already exists with the same email but different sign-in credentials.";
             break;
           case "auth/unauthorized-domain":
-            errorMessage = "The application is not authorized to run on this domain.";
+            errorMessage =
+              "The application is not authorized to run on this domain.";
             break;
           case "auth/operation-not-allowed":
             errorMessage = "Google sign-in is not enabled for this project.";
@@ -242,8 +249,12 @@ export default function Login() {
               Back to Scanner
             </Button>
             <div>
-              <h1 className="text-2xl font-bold">Box {scannedData.boxNumber} Inventory</h1>
-              <p className="text-gray-600">Showing all inventory items in box {scannedData.boxNumber}</p>
+              <h1 className="text-2xl font-bold">
+                Box {scannedData.boxNumber} Inventory
+              </h1>
+              <p className="text-gray-600">
+                Showing all inventory items in box {scannedData.boxNumber}
+              </p>
             </div>
           </div>
           <DataTable<InventoryFormValues>
@@ -263,16 +274,28 @@ export default function Login() {
             onRowUpdate={(updated: InventoryFormValues) => {
               if (updated && (updated as any).deleted) {
                 // Remove the deleted row
-                setScannedData(prev => prev ? {
-                  ...prev,
-                  inventory: prev.inventory.filter(item => item.id !== updated.id)
-                } : null);
+                setScannedData((prev) =>
+                  prev
+                    ? {
+                        ...prev,
+                        inventory: prev.inventory.filter(
+                          (item) => item.id !== updated.id,
+                        ),
+                      }
+                    : null,
+                );
               } else if (updated) {
                 // Update the row
-                setScannedData(prev => prev ? {
-                  ...prev,
-                  inventory: prev.inventory.map(item => item.id === updated.id ? updated : item)
-                } : null);
+                setScannedData((prev) =>
+                  prev
+                    ? {
+                        ...prev,
+                        inventory: prev.inventory.map((item) =>
+                          item.id === updated.id ? updated : item,
+                        ),
+                      }
+                    : null,
+                );
               }
             }}
           />
@@ -305,8 +328,12 @@ export default function Login() {
                   Cereals Inventory
                 </h1>
               </div>
-              
-              <Button variant="outline" type="button" onClick={handleGoogleSignIn}>
+
+              <Button
+                variant="outline"
+                type="button"
+                onClick={handleGoogleSignIn}
+              >
                 <svg
                   version="1.1"
                   xmlns="http://www.w3.org/2000/svg"
@@ -332,59 +359,67 @@ export default function Login() {
                   ></path>
                   <path fill="none" d="M0 0h48v48H0z"></path>
                 </svg>
-              Continue with Google
-            </Button>
-            <Button variant="outline" type="button" onClick={() => setShowScanner(true)}>
-              <ScanQrCode />
-              Scan QR
-            </Button>
-          </>
-        ) : (
-          <div className="w-full">
-            <div className="mb-4 flex items-center gap-4">
-              <Button variant="outline" onClick={() => setShowScanner(false)}>
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back
+                Continue with Google
               </Button>
-              <div>
-                <h2 className="text-lg font-semibold">Scan QR Code</h2>
-                <p className="text-sm text-gray-600">Point your camera at a box QR code</p>
+              <Button
+                variant="outline"
+                type="button"
+                onClick={() => setShowScanner(true)}
+              >
+                <ScanQrCode />
+                Scan QR
+              </Button>
+            </>
+          ) : (
+            <div className="w-full">
+              <div className="mb-4 flex items-center gap-4">
+                <Button variant="outline" onClick={() => setShowScanner(false)}>
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Back
+                </Button>
+                <div>
+                  <h2 className="text-lg font-semibold">Scan QR Code</h2>
+                  <p className="text-sm text-gray-600">
+                    Point your camera at a box QR code
+                  </p>
+                </div>
+              </div>
+              {error && (
+                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
+                  <p className="text-red-600 text-sm">{error}</p>
+                </div>
+              )}
+              {isLoading && (
+                <div className="mb-4 flex items-center justify-center">
+                  <Spinner className="h-6 w-6 mr-2" />
+                  <span className="text-sm text-gray-600">
+                    Loading box data...
+                  </span>
+                </div>
+              )}
+              <div className="w-full max-w-sm mx-auto">
+                <Scanner
+                  onScan={handleScan}
+                  constraints={{
+                    width: { ideal: 320 },
+                    height: { ideal: 240 },
+                  }}
+                  styles={{
+                    container: {
+                      width: "100%",
+                      maxWidth: "320px",
+                      height: "auto",
+                    },
+                    video: {
+                      width: "100%",
+                      height: "auto",
+                    },
+                  }}
+                />
               </div>
             </div>
-            {error && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
-                <p className="text-red-600 text-sm">{error}</p>
-              </div>
-            )}
-            {isLoading && (
-              <div className="mb-4 flex items-center justify-center">
-                <Spinner className="h-6 w-6 mr-2" />
-                <span className="text-sm text-gray-600">Loading box data...</span>
-              </div>
-            )}
-            <div className="w-full max-w-sm mx-auto">
-              <Scanner 
-                onScan={handleScan} 
-                constraints={{ 
-                  width: { ideal: 320 }, 
-                  height: { ideal: 240 } 
-                }}
-                styles={{
-                  container: { 
-                    width: '100%', 
-                    maxWidth: '320px',
-                    height: 'auto'
-                  },
-                  video: { 
-                    width: '100%', 
-                    height: 'auto' 
-                  }
-                }}
-              />
-            </div>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
       )}
     </main>
   );

@@ -315,7 +315,11 @@ export function FilterControl({
       {hasActiveFilter && (
         <div className="flex flex-wrap gap-1">
           {currentFilter.values?.map((value) => (
-            <Badge key={value} variant="secondary" className="text-xs flex items-center">
+            <Badge
+              key={value}
+              variant="secondary"
+              className="text-xs flex items-center"
+            >
               <span>{value}</span>
               <Button
                 variant="ghost"

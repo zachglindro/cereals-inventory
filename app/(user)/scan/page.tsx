@@ -172,12 +172,17 @@ export default function Update() {
       }
 
       // prepare print window with client-generated QR codes
-      const entries = Array.from(existingMap.entries()).sort((a, b) => a[0] - b[0]);
+      const entries = Array.from(existingMap.entries()).sort(
+        (a, b) => a[0] - b[0],
+      );
       // generate data-URIs for each QR code on the client
       const entriesData = await Promise.all(
         entries.map(async ([bn, uuid]) => ({
           bn,
-          dataUrl: await QRCodeLib.toDataURL(`${SITE_URL}/box/${uuid}`, { width: 80, margin: 0 }),
+          dataUrl: await QRCodeLib.toDataURL(`${SITE_URL}/box/${uuid}`, {
+            width: 80,
+            margin: 0,
+          }),
         })),
       );
       const html = `

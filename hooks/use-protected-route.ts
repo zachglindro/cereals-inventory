@@ -1,39 +1,42 @@
-import { useUser } from '@/context/UserContext';
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useUser } from "@/context/UserContext";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export const useProtectedRoute = (
-  requireApproval: boolean = true, 
-  requiredRole?: string | string[]
+  requireApproval: boolean = true,
+  requiredRole?: string | string[],
 ) => {
   const { user, profile, loading } = useUser();
   const router = useRouter();
 
   // Helper function to check if user has required role
-  const hasRequiredRole = (userRole: string, requiredRole?: string | string[]): boolean => {
+  const hasRequiredRole = (
+    userRole: string,
+    requiredRole?: string | string[],
+  ): boolean => {
     if (!requiredRole) return true;
-    
-    if (typeof requiredRole === 'string') {
+
+    if (typeof requiredRole === "string") {
       return userRole === requiredRole;
     }
-    
+
     return requiredRole.includes(userRole);
   };
 
   useEffect(() => {
     if (!loading) {
       if (!user || !profile) {
-        router.push('/');
+        router.push("/");
         return;
       }
 
       if (requireApproval && !profile.approved) {
-        router.push('/');
+        router.push("/");
         return;
       }
 
       if (requiredRole && !hasRequiredRole(profile.role, requiredRole)) {
-        router.push('/dashboard');
+        router.push("/dashboard");
         return;
       }
     }
@@ -45,6 +48,8 @@ export const useProtectedRoute = (
     loading,
     isAuthenticated: !!user && !!profile,
     isApproved: profile?.approved || false,
-    hasRole: requiredRole ? hasRequiredRole(profile?.role || '', requiredRole) : true,
+    hasRole: requiredRole
+      ? hasRequiredRole(profile?.role || "", requiredRole)
+      : true,
   };
 };

@@ -58,7 +58,9 @@ export function SiteHeader() {
             <AvatarImage src={profile?.photoURL} alt="User Avatar" />
             <AvatarFallback>{initials}</AvatarFallback>
           </Avatar>
-          <span className="hidden sm:inline text-sm font-medium">{userName}</span>
+          <span className="hidden sm:inline text-sm font-medium">
+            {userName}
+          </span>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost">

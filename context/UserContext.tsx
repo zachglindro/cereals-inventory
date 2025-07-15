@@ -1,9 +1,13 @@
 "use client";
 
-import React, { createContext, useState, useEffect, useContext } from 'react';
-import { app, db } from '@/lib/firebase';
-import { getAuth, onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
+import React, { createContext, useState, useEffect, useContext } from "react";
+import { app, db } from "@/lib/firebase";
+import {
+  getAuth,
+  onAuthStateChanged,
+  User as FirebaseUser,
+} from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
 
 export type UserProfile = {
   uid: string;
@@ -22,7 +26,9 @@ type UserContextValue = {
 
 const UserContext = createContext<UserContextValue>({ loading: true });
 
-export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [user, setUser] = useState<FirebaseUser | null>();
   const [profile, setProfile] = useState<UserProfile | null>();
   const [loading, setLoading] = useState(true);
@@ -38,10 +44,13 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return;
       }
       setUser(firebaseUser);
-      const ref = doc(db, 'users', firebaseUser.uid);
+      const ref = doc(db, "users", firebaseUser.uid);
       const snap = await getDoc(ref);
       if (snap.exists()) {
-        setProfile({ uid: firebaseUser.uid, ...(snap.data() as Omit<UserProfile, 'uid'>) });
+        setProfile({
+          uid: firebaseUser.uid,
+          ...(snap.data() as Omit<UserProfile, "uid">),
+        });
       } else {
         setProfile(null);
       }
@@ -51,7 +60,9 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   return (
-    <UserContext.Provider value={{ user, profile: profile ?? undefined, loading }}>
+    <UserContext.Provider
+      value={{ user, profile: profile ?? undefined, loading }}
+    >
       {children}
     </UserContext.Provider>
   );

@@ -70,7 +70,7 @@ export function InventoryForm() {
       // preserve box_number for next entry
       const savedBox = values.box_number;
       form.reset();
-      form.setValue('box_number', savedBox);
+      form.setValue("box_number", savedBox);
     } catch (error) {
       console.error("Error adding document: ", error);
       toast.error("Error adding inventory");
