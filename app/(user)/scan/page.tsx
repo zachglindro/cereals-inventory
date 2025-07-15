@@ -287,7 +287,7 @@ export default function Update() {
               <div className="qr-code-container flex flex-col items-center justify-center">
                 <QRCode
                   value={`${SITE_URL}/box/${generatedUuid}`}
-                  size={80}
+                  size={256}
                   level="H"
                 />
                 <div className="mt-1 text-sm text-gray-600">
