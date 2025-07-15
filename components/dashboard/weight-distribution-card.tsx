@@ -100,107 +100,107 @@ export function WeightDistributionCard({ data }: WeightDistributionCardProps) {
   }, [data, binSize, filterType]);
 
   return (
-    <Card className="min-w-96">
-      <CardHeader>
-        <CardTitle>Weight Distribution</CardTitle>
-        <CardDescription>
-          Statistical analysis of inventory weights
-        </CardDescription>
+    <Card className="min-w-96 h-80">
+      <CardHeader className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
+        <div>
+          <CardTitle>Weight Distribution</CardTitle>
+          <CardDescription></CardDescription>
+        </div>
+        <div className="flex flex-col sm:flex-row gap-2 mt-2 sm:mt-0">
+          <Select value={binSize} onValueChange={setBinSize}>
+            <SelectTrigger className="w-full sm:w-32">
+              <SelectValue placeholder="Bin size" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="0.5">0.5 kg</SelectItem>
+              <SelectItem value="1">1 kg</SelectItem>
+              <SelectItem value="2">2 kg</SelectItem>
+              <SelectItem value="5">5 kg</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select value={filterType} onValueChange={setFilterType}>
+            <SelectTrigger className="w-full sm:w-40">
+              <SelectValue placeholder="Filter by type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Types</SelectItem>
+              {typeOptions.map((type) => (
+                <SelectItem key={type} value={type}>
+                  {type.charAt(0).toUpperCase() + type.slice(1)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
-          {/* Controls */}
-          <div className="flex flex-col sm:flex-row gap-2">
-            <Select value={binSize} onValueChange={setBinSize}>
-              <SelectTrigger className="w-full sm:w-32">
-                <SelectValue placeholder="Bin size" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="0.5">0.5 kg</SelectItem>
-                <SelectItem value="1">1 kg</SelectItem>
-                <SelectItem value="2">2 kg</SelectItem>
-                <SelectItem value="5">5 kg</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Select value={filterType} onValueChange={setFilterType}>
-              <SelectTrigger className="w-full sm:w-40">
-                <SelectValue placeholder="Filter by type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Types</SelectItem>
-                {typeOptions.map((type) => (
-                  <SelectItem key={type} value={type}>
-                    {type.charAt(0).toUpperCase() + type.slice(1)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex-1">
+            {/* Chart */}
+            {chartData.length > 0 ? (
+              <div>
+                <ChartContainer
+                  className="h-60"
+                  config={{
+                    count: {
+                      label: "Number of Items",
+                      color: "#8884d8",
+                    },
+                  }}
+                >
+                  <BarChart data={chartData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis
+                      dataKey="range"
+                      fontSize={12}
+                      angle={-45}
+                      textAnchor="end"
+                      height={60}
+                    />
+                    <YAxis />
+                    <ChartTooltip
+                      content={<ChartTooltipContent />}
+                      formatter={(value, name) => {
+                        const dataPoint = chartData.find(
+                          (d) => d.count === value,
+                        );
+                        return [
+                          `${value} items (${dataPoint?.percentage || 0}%)`,
+                          "Count",
+                        ];
+                      }}
+                    />
+                    <Bar dataKey="count" fill="#8884d8" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ChartContainer>
+              </div>
+            ) : (
+              <div className="h-64 flex items-center justify-center text-gray-500">
+                No data available for the selected filter
+              </div>
+            )}
           </div>
-
-          {/* Chart */}
-          {chartData.length > 0 ? (
-            <div className="h-64">
-              <ChartContainer
-                config={{
-                  count: {
-                    label: "Number of Items",
-                    color: "#8884d8",
-                  },
-                }}
-              >
-                <BarChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis
-                    dataKey="range"
-                    fontSize={12}
-                    angle={-45}
-                    textAnchor="end"
-                    height={60}
-                  />
-                  <YAxis />
-                  <ChartTooltip
-                    content={<ChartTooltipContent />}
-                    formatter={(value, name) => {
-                      const dataPoint = chartData.find(
-                        (d) => d.count === value,
-                      );
-                      return [
-                        `${value} items (${dataPoint?.percentage || 0}%)`,
-                        "Count",
-                      ];
-                    }}
-                  />
-                  <Bar dataKey="count" fill="#8884d8" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ChartContainer>
-            </div>
-          ) : (
-            <div className="h-64 flex items-center justify-center text-gray-500">
-              No data available for the selected filter
-            </div>
-          )}
-
           {/* Statistics */}
           {stats && (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
-              <div className="bg-blue-50 p-2 rounded">
+            <div className="flex flex-col gap-2 text-[13px]">
+              <div className="bg-blue-50 p-1 rounded">
                 <div className="font-semibold text-blue-900">Average</div>
                 <div className="text-blue-700">{stats.avg.toFixed(2)} kg</div>
               </div>
-              <div className="bg-green-50 p-2 rounded">
+              <div className="bg-green-50 p-1 rounded">
                 <div className="font-semibold text-green-900">Median</div>
                 <div className="text-green-700">
                   {stats.median.toFixed(2)} kg
                 </div>
               </div>
-              <div className="bg-orange-50 p-2 rounded">
+              <div className="bg-orange-50 p-1 rounded">
                 <div className="font-semibold text-orange-900">Range</div>
                 <div className="text-orange-700">
                   {stats.min.toFixed(1)} - {stats.max.toFixed(1)} kg
                 </div>
               </div>
-              <div className="bg-purple-50 p-2 rounded">
+              <div className="bg-purple-50 p-1 rounded">
                 <div className="font-semibold text-purple-900">Std Dev</div>
                 <div className="text-purple-700">
                   {stats.stdDev.toFixed(2)} kg
