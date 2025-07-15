@@ -19,9 +19,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import { Spinner } from "@/components/ui/spinner";
 import { useUser } from "@/context/UserContext";
 import { db } from "@/lib/firebase";
 import type { ColumnDef } from "@tanstack/react-table";
+import { toast } from "sonner";
 import {
   addDoc,
   collection,
@@ -286,23 +288,32 @@ function DeleteAllEntriesDialog({
   onConfirm,
   children,
 }: {
-  onConfirm: () => void;
+  onConfirm: () => Promise<void>;
   children: React.ReactNode;
 }) {
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState(1);
   const [confirmationText, setConfirmationText] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
   const requiredText = "I want to delete all entries";
 
   const handleClose = () => {
+    if (isDeleting) return; // Prevent closing during deletion
     setOpen(false);
     setStep(1);
     setConfirmationText("");
+    setIsDeleting(false);
   };
 
-  const handleConfirm = () => {
-    onConfirm();
-    handleClose();
+  const handleConfirm = async () => {
+    setIsDeleting(true);
+    try {
+      await onConfirm();
+      handleClose();
+    } catch (error) {
+      setIsDeleting(false);
+      console.error("Error deleting entries:", error);
+    }
   };
 
   const trigger = React.cloneElement(children as React.ReactElement<any>, {
@@ -355,12 +366,20 @@ function DeleteAllEntriesDialog({
 
           <DialogFooter>
             <DialogClose asChild>
-              <Button variant="outline" onClick={handleClose}>
+              <Button
+                variant="outline"
+                onClick={handleClose}
+                disabled={isDeleting}
+              >
                 Cancel
               </Button>
             </DialogClose>
             {step === 1 && (
-              <Button variant="destructive" onClick={() => setStep(2)}>
+              <Button
+                variant="destructive"
+                onClick={() => setStep(2)}
+                disabled={isDeleting}
+              >
                 Continue
               </Button>
             )}
@@ -368,9 +387,16 @@ function DeleteAllEntriesDialog({
               <Button
                 variant="destructive"
                 onClick={handleConfirm}
-                disabled={confirmationText !== requiredText}
+                disabled={confirmationText !== requiredText || isDeleting}
               >
-                Delete All Entries
+                {isDeleting ? (
+                  <>
+                    <Spinner size="sm" className="mr-2" />
+                    Deleting...
+                  </>
+                ) : (
+                  "Delete All Entries"
+                )}
               </Button>
             )}
           </DialogFooter>
@@ -557,10 +583,15 @@ export default function Admin() {
         loggedBy: user?.email || "unknown",
       });
 
+      // Show success toast
+      toast.success(`Successfully deleted ${totalEntries} inventory entries`);
+
       // Refresh activity if on activity tab
       refreshActivity();
     } catch (error) {
       console.error("Error deleting all entries:", error);
+      toast.error("Failed to delete inventory entries. Please try again.");
+      throw error; // Re-throw to handle in the dialog
     }
   };
 
