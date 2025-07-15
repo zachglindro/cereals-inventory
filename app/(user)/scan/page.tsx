@@ -190,7 +190,7 @@ export default function Update() {
         <style>
           body { margin: 20px; }
           .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 16px; }
-          .item { text-align: center; padding: 8px; margin: 4px; border: 1px solid #ddd; border-radius: 6px; }
+          .item { text-align: center; padding: 8px; margin: 4px; }
           .item img { width: 80px; height: 80px; }
           .caption { margin-top: 4px; font-size: 12px; font-weight: bold; }
         </style>
@@ -287,7 +287,7 @@ export default function Update() {
               <div className="qr-code-container flex flex-col items-center justify-center">
                 <QRCode
                   value={`${SITE_URL}/box/${generatedUuid}`}
-                  size={256}
+                  size={80}
                   level="H"
                 />
                 <div className="mt-1 text-sm text-gray-600">
