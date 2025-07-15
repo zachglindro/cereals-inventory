@@ -4,6 +4,8 @@ import { PieChartCard } from "./pie-chart-card";
 import { LowStockCard } from "./low-stock-card";
 import { TimelineChart } from "./timeline-chart";
 import { TotalWeightCard } from "./total-weight-card";
+import { WeightDistributionCard } from "./weight-distribution-card";
+import { ComparativeAnalysisCard } from "./comparative-analysis-card";
 import type { InventoryFormValues } from "@/lib/schemas/inventory";
 
 interface DashboardAnalyticsProps {
@@ -39,6 +41,8 @@ export function DashboardAnalytics({
         <LowStockCard data={data} />
         <TimelineChart data={data} />
         <TotalWeightCard data={data} />
+        <WeightDistributionCard data={data} />
+        <ComparativeAnalysisCard data={data} />
       </div>
     </div>
   );
