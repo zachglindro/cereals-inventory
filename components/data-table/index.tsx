@@ -377,12 +377,17 @@ export function DataTable<TData extends Record<string, unknown>>({
   // Wrap export actions to hide on small screens
   const exportActions = showExport ? (
     <div className="hidden sm:block">
-      <DropdownMenu open={exportDropdownOpen} onOpenChange={setExportDropdownOpen}>
+      <DropdownMenu
+        open={exportDropdownOpen}
+        onOpenChange={setExportDropdownOpen}
+      >
         <DropdownMenuTrigger asChild>
           <Button variant="outline" size="sm">
             <IconDownload className="mr-2 h-4 w-4" />
             Export
-            <IconChevronDown className={`ml-2 h-4 w-4 transition-transform duration-300 ease-in-out ${exportDropdownOpen ? '-rotate-180' : 'rotate-0'}`} />
+            <IconChevronDown
+              className={`ml-2 h-4 w-4 transition-transform duration-300 ease-in-out ${exportDropdownOpen ? "-rotate-180" : "rotate-0"}`}
+            />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
@@ -405,20 +410,22 @@ export function DataTable<TData extends Record<string, unknown>>({
 
   return (
     <div className="w-full flex-col justify-start gap-6">
-      <div className="relative flex flex-col gap-4 overflow-auto">
-        <TableContent
-          table={table}
-          columns={columns}
-          loading={loading}
-          onRowUpdate={onRowUpdate}
-        />
+      <div className="relative flex flex-col gap-4">
+        <div className="overflow-auto">
+          <TableContent
+            table={table}
+            columns={columns}
+            loading={loading}
+            onRowUpdate={onRowUpdate}
+          />
+        </div>
         <TablePagination table={table} actions={exportActions}>
           {showFilters && (
             <TableFilters
               filterState={filterState}
               onFilterChange={handleFilterChange}
               onClearAllFilters={handleClearAllFilters}
-              data={(data as unknown) as InventoryFormValues[]}
+              data={data as unknown as InventoryFormValues[]}
               filterFields={filterableFields!}
             />
           )}
