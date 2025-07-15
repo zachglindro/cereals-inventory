@@ -1,6 +1,7 @@
 // components/data-table/table-content.tsx
 import { flexRender, Table as RTTable } from "@tanstack/react-table";
 import { IconChevronDown, IconChevronUp } from "@tabler/icons-react";
+import { Pencil } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -298,7 +299,8 @@ function RowDialog<TData extends Record<string, any>>({
           >
             <DialogTrigger asChild>
               <Button variant="outline" size="sm">
-                Edit
+                <Pencil className="h-4 w-4 sm:hidden" />
+                <span className="hidden sm:inline">Edit</span>
               </Button>
             </DialogTrigger>
           </TableCell>
