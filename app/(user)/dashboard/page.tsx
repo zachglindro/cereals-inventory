@@ -143,21 +143,16 @@ export default function Home() {
 
   // Chart component
   const PieChartCard = ({
-    title,
     data: chartDataField,
-    description,
   }: {
-    title: string;
     data: Array<{ name: string; value: number; fill: string }>;
-    description: string;
   }) => (
     <div className="w-100">
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>{title}</CardTitle>
-              <CardDescription>{description}</CardDescription>
+              <CardTitle>Charts</CardTitle>
             </div>
             <div className="flex items-center space-x-2">
               <div>
@@ -221,10 +216,9 @@ export default function Home() {
                 ))}
               </Pie>
               <ChartTooltip
-                content={<ChartTooltipContent />}
+                content={<ChartTooltipContent className="w-auto min-w-max" />}
                 formatter={(value) => [
-                  `${value}${chartWeightMode ? " kg" : " entries"}`,
-                  chartWeightMode ? "Weight" : "Count",
+                  `${chartWeightMode ? Number(value).toFixed(2) : value}${chartWeightMode ? " kg" : " entries"}`,
                 ]}
               />
             </PieChart>
@@ -421,20 +415,16 @@ export default function Home() {
         />
       </div>
 
-      {/* Analytics Charts */}
+      {/* Analytics */}
       <div className="mb-6">
         <div className="mb-6">
-          <h2 className="text-xl font-semibold mb-2">Charts</h2>
-          <p className="text-gray-600">Distribution data for inventory</p>
+          <h2 className="text-xl font-semibold mb-2">Statistics</h2>
+          <p className="text-gray-600">Statistics data for inventory</p>
         </div>
 
         <div className="flex flex-col md:flex-row flex-wrap gap-6 items-start justify-center">
           <div className="flex-shrink-0">
-            <PieChartCard
-              title={currentChartOption?.label || "Chart"}
-              data={currentChartData}
-              description={currentChartOption?.description || ""}
-            />
+            <PieChartCard data={currentChartData} />
           </div>
           <div className="flex-shrink-0">
             <Card>
