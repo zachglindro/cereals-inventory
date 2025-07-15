@@ -59,6 +59,8 @@ export function InventoryForm() {
       await addDoc(collection(db, "inventory"), {
         ...values,
         creatorId: user?.uid,
+        addedAt: serverTimestamp(),
+        addedBy: user?.email || "unknown",
       });
       // Add activity log entry
       await addDoc(collection(db, "activity"), {
