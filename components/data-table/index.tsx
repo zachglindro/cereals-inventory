@@ -37,6 +37,7 @@ interface DataTableProps<TData extends Record<string, unknown>> {
   onRowUpdate?: (updated: TData) => void;
   showExport?: boolean;
   stickyActions?: boolean;
+  disableDelete?: boolean;
 }
 
 export function DataTable<TData extends Record<string, unknown>>({
@@ -47,6 +48,7 @@ export function DataTable<TData extends Record<string, unknown>>({
   onRowUpdate,
   showExport = true,
   stickyActions = false,
+  disableDelete = false,
 }: DataTableProps<TData>) {
   const [pagination, setPagination] = useState({
     pageIndex: 0,
@@ -449,6 +451,7 @@ export function DataTable<TData extends Record<string, unknown>>({
             loading={loading}
             onRowUpdate={onRowUpdate}
             stickyActions={stickyActions}
+            disableDelete={disableDelete}
           />
         </div>
         <TablePagination table={table} actions={exportActions}>

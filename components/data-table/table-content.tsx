@@ -58,6 +58,7 @@ interface TableContentProps<TData extends Record<string, unknown>> {
   /** Callback invoked after a row is updated */
   onRowUpdate?: (updated: TData) => void;
   stickyActions?: boolean;
+  disableDelete?: boolean;
 }
 
 export function TableContent<TData extends Record<string, unknown>>({
@@ -66,6 +67,7 @@ export function TableContent<TData extends Record<string, unknown>>({
   loading,
   onRowUpdate,
   stickyActions = false,
+  disableDelete = false,
 }: TableContentProps<TData>) {
   const renderRows =
     table.getRowModel().rows?.length > 0 ? (
@@ -77,6 +79,7 @@ export function TableContent<TData extends Record<string, unknown>>({
             row={row}
             onRowUpdate={onRowUpdate}
             stickyActions={stickyActions}
+            disableDelete={disableDelete}
           />
         ))
     ) : (
@@ -173,10 +176,12 @@ function RowDialog<TData extends Record<string, any>>({
   row,
   onRowUpdate,
   stickyActions = false,
+  disableDelete = false,
 }: {
   row: Row<TData>;
   onRowUpdate?: (updated: TData) => void;
   stickyActions?: boolean;
+  disableDelete?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [editValues, setEditValues] = useState({ ...row.original });
@@ -185,6 +190,39 @@ function RowDialog<TData extends Record<string, any>>({
   const [justEdited, setJustEdited] = useState(false);
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const { profile } = useUser();
+  
+  // Get editable fields from column metadata
+  const getEditableFields = () => {
+    const allFields = [
+      "box_number",
+      "type", 
+      "location_planted",
+      "year",
+      "season",
+      "location",
+      "description",
+      "pedigree",
+      "weight",
+      "remarks",
+    ];
+    
+    // Check if any columns have editable metadata
+    const hasEditableMetadata = row.getVisibleCells().some(cell => 
+      (cell.column.columnDef as any).meta?.editable !== undefined
+    );
+    
+    if (hasEditableMetadata) {
+      // Only return fields that are marked as editable
+      return allFields.filter(field => {
+        const column = row.getVisibleCells().find(cell => cell.column.id === field);
+        return column && (column.column.columnDef as any).meta?.editable === true;
+      });
+    }
+    
+    // Default behavior - all fields are editable
+    return allFields;
+  };
+  
   const handleChange = (key: string, value: any) => {
     setEditValues((prev) => ({ ...prev, [key]: value }));
   };
@@ -310,18 +348,7 @@ function RowDialog<TData extends Record<string, any>>({
             <DialogTitle className="text-lg font-medium">Edit Row</DialogTitle>
           </DialogHeader>
           <div className="text-sm space-y-4">
-            {[
-              "box_number",
-              "type",
-              "location_planted",
-              "year",
-              "season",
-              "location",
-              "description",
-              "pedigree",
-              "weight",
-              "remarks",
-            ]
+            {getEditableFields()
               .map((key) => {
                 const value = editValues[key];
                 if (key === "id") return null;
@@ -445,21 +472,23 @@ function RowDialog<TData extends Record<string, any>>({
           </div>
           <DialogFooter className="flex justify-between items-center">
             <div className="flex w-full items-center">
-              <Button
-                variant="destructive"
-                onClick={handleDelete}
-                disabled={isSubmitting || isDeleting}
-                className="mr-auto"
-              >
-                {isDeleting ? (
-                  <>
-                    <Spinner size="sm" /> Deleting
-                  </>
-                ) : (
-                  "Delete"
-                )}
-              </Button>
-              <div className="flex space-x-2 ml-auto">
+              {!disableDelete && (
+                <Button
+                  variant="destructive"
+                  onClick={handleDelete}
+                  disabled={isSubmitting || isDeleting}
+                  className="mr-auto"
+                >
+                  {isDeleting ? (
+                    <>
+                      <Spinner size="sm" /> Deleting
+                    </>
+                  ) : (
+                    "Delete"
+                  )}
+                </Button>
+              )}
+              <div className={`flex space-x-2 ${disableDelete ? 'ml-auto' : 'ml-auto'}`}>
                 <DialogClose asChild>
                   <Button variant="outline">Close</Button>
                 </DialogClose>
