@@ -32,6 +32,7 @@ export default function Home() {
   const [data, setData] = useState<InventoryFormValues[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedChart, setSelectedChart] = useState<string>("type");
+  const [chartWeightMode, setChartWeightMode] = useState<boolean>(false);
   const tableColumns = columns as ColumnDef<InventoryFormValues, unknown>[];
 
   // Chart options for dropdown
@@ -91,12 +92,17 @@ export default function Home() {
     // Helper function to create chart data from field counts
     const createChartData = (field: keyof InventoryFormValues) => {
       const counts: Record<string, number> = {};
+      const weights: Record<string, number> = {};
+
       data.forEach((item) => {
         const value = String(item[field] || "Unknown");
         counts[value] = (counts[value] || 0) + 1;
+        weights[value] = (weights[value] || 0) + (item.weight || 0);
       });
 
-      return Object.entries(counts).map(([name, value], index) => ({
+      const dataToUse = chartWeightMode ? weights : counts;
+
+      return Object.entries(dataToUse).map(([name, value], index) => ({
         name,
         value,
         fill: colors[index % colors.length],
@@ -112,7 +118,7 @@ export default function Home() {
       description: createChartData("description"),
       pedigree: createChartData("pedigree"),
     };
-  }, [data]);
+  }, [data, chartWeightMode]);
 
   useEffect(() => {
     async function fetchData() {
@@ -152,19 +158,37 @@ export default function Home() {
             <CardTitle>{title}</CardTitle>
             <CardDescription>{description}</CardDescription>
           </div>
-          <div className="w-40">
-            <Select value={selectedChart} onValueChange={setSelectedChart}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select chart" />
-              </SelectTrigger>
-              <SelectContent>
-                {chartOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="flex items-center space-x-2">
+            <div>
+              <Select value={selectedChart} onValueChange={setSelectedChart}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select chart" />
+                </SelectTrigger>
+                <SelectContent>
+                  {chartOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Select
+                value={chartWeightMode ? "weight" : "count"}
+                onValueChange={(value) =>
+                  setChartWeightMode(value === "weight")
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="count"># of entries</SelectItem>
+                  <SelectItem value="weight">Weight (kg)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </div>
       </CardHeader>
@@ -195,7 +219,13 @@ export default function Home() {
                 <Cell key={`cell-${index}`} fill={entry.fill} />
               ))}
             </Pie>
-            <ChartTooltip content={<ChartTooltipContent />} />
+            <ChartTooltip
+              content={<ChartTooltipContent />}
+              formatter={(value) => [
+                `${value}${chartWeightMode ? " kg" : " entries"}`,
+                chartWeightMode ? "Weight" : "Count",
+              ]}
+            />
           </PieChart>
         </ChartContainer>
       </CardContent>
