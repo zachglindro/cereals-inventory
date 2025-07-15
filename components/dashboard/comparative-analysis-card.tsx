@@ -42,7 +42,7 @@ export function ComparativeAnalysisCard({
   const [metric, setMetric] = useState<string>("weight");
   const [chartType, setChartType] = useState<string>("line");
 
-  const { chartData, growthData, insights } = useMemo(() => {
+  const { chartData, growthData } = useMemo(() => {
     if (!data.length) return { chartData: [], growthData: [], insights: null };
 
     let groupedData: Record<
@@ -143,53 +143,7 @@ export function ComparativeAnalysisCard({
           })
         : [];
 
-    // Helper function to get metric value safely
-    const getMetricValue = (item: (typeof chartData)[0]): number => {
-      switch (metric) {
-        case "count":
-          return item.count;
-        case "weight":
-          return item.weight;
-        case "avgWeight":
-          return item.avgWeight;
-        default:
-          return item.weight;
-      }
-    };
-
-    // Calculate insights
-    const insights =
-      chartData.length > 0
-        ? {
-            totalPeriods: sortedKeys.length,
-            bestPeriod: chartData.reduce(
-              (max, item) =>
-                getMetricValue(item) > getMetricValue(max) ? item : max,
-              chartData[0],
-            ),
-            worstPeriod: chartData.reduce(
-              (min, item) =>
-                getMetricValue(item) < getMetricValue(min) ? item : min,
-              chartData[0],
-            ),
-            avgMetric: Number(
-              (
-                chartData.reduce((sum, item) => sum + getMetricValue(item), 0) /
-                chartData.length
-              ).toFixed(2),
-            ),
-            trend:
-              growthData.length > 1
-                ? growthData[growthData.length - 1][
-                    metric === "weight" ? "weightGrowth" : "growth"
-                  ] > 0
-                  ? "increasing"
-                  : "decreasing"
-                : "stable",
-          }
-        : null;
-
-    return { chartData, growthData, insights };
+    return { chartData, growthData };
   }, [data, comparisonType, metric]);
 
   const getYAxisLabel = () => {
@@ -334,51 +288,6 @@ export function ComparativeAnalysisCard({
           ) : (
             <div className="h-64 flex items-center justify-center text-gray-500">
               No data available for comparison
-            </div>
-          )}
-
-          {/* Insights */}
-          {insights && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
-              <div className="bg-green-50 p-3 rounded">
-                <div className="font-semibold text-green-900">Best Period</div>
-                <div className="text-green-700">
-                  {formatPeriod(insights.bestPeriod.period)}:{" "}
-                  {(() => {
-                    const value =
-                      metric === "count"
-                        ? insights.bestPeriod.count
-                        : metric === "weight"
-                          ? insights.bestPeriod.weight
-                          : insights.bestPeriod.avgWeight;
-                    return value.toFixed(2);
-                  })()}{" "}
-                  {metric === "count" ? "items" : "kg"}
-                </div>
-              </div>
-              <div className="bg-blue-50 p-3 rounded">
-                <div className="font-semibold text-blue-900">Average</div>
-                <div className="text-blue-700">
-                  {insights.avgMetric} {metric === "count" ? "items" : "kg"}
-                </div>
-              </div>
-              <div className="bg-purple-50 p-3 rounded">
-                <div className="font-semibold text-purple-900">Trend</div>
-                <div className="text-purple-700 capitalize">
-                  {insights.trend}
-                  {growthData.length > 1 && (
-                    <span className="ml-1">
-                      (
-                      {
-                        growthData[growthData.length - 1][
-                          metric === "weight" ? "weightGrowth" : "growth"
-                        ]
-                      }
-                      %)
-                    </span>
-                  )}
-                </div>
-              </div>
             </div>
           )}
         </div>
