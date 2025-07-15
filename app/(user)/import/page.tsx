@@ -194,9 +194,23 @@ export default function BulkAdd() {
   // Add Generate Template handler
   const handleGenerateTemplate = () => {
     const headers = expectedColumns;
+    const sampleData = [
+      "white",
+      "LBPD",
+      "2025",
+      "wet",
+      1,
+      "A1 East",
+      "Sample description",
+      "Sample pedigree",
+      1.23,
+      "",
+    ];
+
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Template");
     worksheet.addRow(headers);
+    worksheet.addRow(sampleData);
     workbook.xlsx.writeBuffer().then((buffer) => {
       const blob = new Blob([buffer], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
