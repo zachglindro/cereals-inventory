@@ -282,7 +282,6 @@ export default function Update() {
                 disabled={isLoadingQr}
                 className="col-span-1"
               >
-                {isLoadingQr ? <Spinner size="sm" /> : null}
                 Generate
               </Button>
             </div>
