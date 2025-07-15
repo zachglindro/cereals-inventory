@@ -148,6 +148,8 @@ export default function Home() {
   // Get current chart data and info
   const currentChartOption = chartOptions.find(option => option.value === selectedChart);
   const currentChartData = chartData[selectedChart as keyof typeof chartData] || [];
+  // Calculate total weight of all inventory items
+  const totalWeight = useMemo(() => data.reduce((sum, item) => sum + (item.weight || 0), 0), [data]);
 
   if (loading) {
     return (
@@ -195,6 +197,7 @@ export default function Home() {
         />
       </div>
 
+
       {/* Analytics Charts */}
       <div className="mb-6">
         <div className="mb-6">
@@ -202,13 +205,24 @@ export default function Home() {
           <p className="text-gray-600">Distribution data for inventory</p>
         </div>
         
-        <div className="flex justify-center">
-          <div className="w-full max-w-2xl">
+        <div className="flex flex-col md:flex-row justify-center gap-6">
+          <div className="w-full md:w-1/2 max-w-2xl">
             <PieChartCard 
               title={currentChartOption?.label || "Chart"}
               data={currentChartData}
               description={currentChartOption?.description || ""}
             />
+          </div>
+          <div className="w-full md:w-1/2 max-w-xs">
+            <Card>
+              <CardHeader>
+                <CardTitle>Total Weight</CardTitle>
+                <CardDescription>Total weight of all inventory items</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-3xl font-bold">{totalWeight.toFixed(2)} kg</p>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>
