@@ -54,8 +54,7 @@ export function TablePagination<TData>({
           </Select>
         </div>
         <div className="flex w-fit items-center justify-center text-sm font-medium">
-          <span>Page {table.getState().pagination.pageIndex + 1}</span>
-          <span className="hidden sm:inline"> of {table.getPageCount()}</span>
+          <span>{`Page ${table.getState().pagination.pageIndex + 1} of ${table.getPageCount()}`}</span>
         </div>
         <div className="flex items-center gap-2">
           <Button
