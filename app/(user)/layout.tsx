@@ -1,7 +1,6 @@
 import { SiteHeader } from "@/components/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
-import { Toaster } from "@/components/ui/sonner";
 import { ProtectedRoute } from "@/components/protected-route";
 import { cookies } from "next/headers";
 
@@ -23,7 +22,6 @@ export default async function UserLayout({
             <SidebarInset>{children}</SidebarInset>
           </div>
         </SidebarProvider>
-        <Toaster closeButton />
       </div>
     </ProtectedRoute>
   );
