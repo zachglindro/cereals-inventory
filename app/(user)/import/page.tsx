@@ -257,6 +257,8 @@ export default function BulkAdd() {
           addDoc(collection(db, "inventory"), {
             ...row,
             creatorId: user?.uid,
+            addedAt: serverTimestamp(),
+            addedBy: user?.email || "unknown",
           }),
         ),
       );
