@@ -280,7 +280,7 @@ function UserDetailsDialog({
 }
 
 export default function Admin() {
-  const { user } = useUser();
+  const { user, profile } = useUser();
   const [data, setData] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterType, setFilterType] = useState<
@@ -491,64 +491,71 @@ export default function Admin() {
     {
       id: "actions",
       header: "Actions",
-      cell: ({ row }) => (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm">
-              <EllipsisVertical />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <UserDetailsDialog user={row.original}>
-              <DropdownMenuItem>View</DropdownMenuItem>
-            </UserDetailsDialog>
-            {row.original.approved ? (
-              <ConfirmDialog
-                actionName="Disapprove User"
-                description="disapprove this user"
-                onConfirm={() => handleDisapprove(row.original)}
-              >
-                <DropdownMenuItem>Disapprove</DropdownMenuItem>
-              </ConfirmDialog>
-            ) : (
-              <ConfirmDialog
-                actionName="Approve User"
-                description="approve this user"
-                onConfirm={() => handleApprove(row.original)}
-              >
-                <DropdownMenuItem>Approve</DropdownMenuItem>
-              </ConfirmDialog>
-            )}
-            {row.original.role !== "admin" && (
-              <ConfirmDialog
-                actionName="Make Admin"
-                description="grant admin rights to this user"
-                onConfirm={() => handleRoleChange(row.original, "admin")}
-              >
-                <DropdownMenuItem>Make Admin</DropdownMenuItem>
-              </ConfirmDialog>
-            )}
-            {row.original.role !== "user" && (
-              <ConfirmDialog
-                actionName="Make User"
-                description="set this user role to user"
-                onConfirm={() => handleRoleChange(row.original, "user")}
-              >
-                <DropdownMenuItem>Make User</DropdownMenuItem>
-              </ConfirmDialog>
-            )}
-            <ConfirmDialog
-              actionName="Delete User"
-              description="delete this user"
-              onConfirm={() => handleDelete(row.original)}
-            >
-              <DropdownMenuItem className="text-destructive">
-                Delete
-              </DropdownMenuItem>
-            </ConfirmDialog>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      ),
+      cell: ({ row }) => {
+        const isSelf = profile?.uid === row.original.id;
+        return (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm">
+                <EllipsisVertical />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <UserDetailsDialog user={row.original}>
+                <DropdownMenuItem>View</DropdownMenuItem>
+              </UserDetailsDialog>
+              {!isSelf && (
+                <>
+                  {row.original.approved ? (
+                    <ConfirmDialog
+                      actionName="Disapprove User"
+                      description="disapprove this user"
+                      onConfirm={() => handleDisapprove(row.original)}
+                    >
+                      <DropdownMenuItem>Disapprove</DropdownMenuItem>
+                    </ConfirmDialog>
+                  ) : (
+                    <ConfirmDialog
+                      actionName="Approve User"
+                      description="approve this user"
+                      onConfirm={() => handleApprove(row.original)}
+                    >
+                      <DropdownMenuItem>Approve</DropdownMenuItem>
+                    </ConfirmDialog>
+                  )}
+                  {row.original.role !== "admin" && (
+                    <ConfirmDialog
+                      actionName="Make Admin"
+                      description="grant admin rights to this user"
+                      onConfirm={() => handleRoleChange(row.original, "admin")}
+                    >
+                      <DropdownMenuItem>Make Admin</DropdownMenuItem>
+                    </ConfirmDialog>
+                  )}
+                  {row.original.role !== "user" && (
+                    <ConfirmDialog
+                      actionName="Make User"
+                      description="set this user role to user"
+                      onConfirm={() => handleRoleChange(row.original, "user")}
+                    >
+                      <DropdownMenuItem>Make User</DropdownMenuItem>
+                    </ConfirmDialog>
+                  )}
+                  <ConfirmDialog
+                    actionName="Delete User"
+                    description="delete this user"
+                    onConfirm={() => handleDelete(row.original)}
+                  >
+                    <DropdownMenuItem className="text-destructive">
+                      Delete
+                    </DropdownMenuItem>
+                  </ConfirmDialog>
+                </>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        );
+      },
     },
   ];
 
