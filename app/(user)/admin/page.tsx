@@ -18,6 +18,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
 import { useUser } from "@/context/UserContext";
 import { db } from "@/lib/firebase";
 import type { ColumnDef } from "@tanstack/react-table";
@@ -36,6 +37,7 @@ import {
 import {
   Activity,
   ChevronRight,
+  Database,
   EllipsisVertical,
   User as UserIcon,
 } from "lucide-react";
@@ -279,6 +281,105 @@ function UserDetailsDialog({
   );
 }
 
+// Delete all entries dialog component
+function DeleteAllEntriesDialog({
+  onConfirm,
+  children,
+}: {
+  onConfirm: () => void;
+  children: React.ReactNode;
+}) {
+  const [open, setOpen] = useState(false);
+  const [step, setStep] = useState(1);
+  const [confirmationText, setConfirmationText] = useState("");
+  const requiredText = "I want to delete all entries";
+
+  const handleClose = () => {
+    setOpen(false);
+    setStep(1);
+    setConfirmationText("");
+  };
+
+  const handleConfirm = () => {
+    onConfirm();
+    handleClose();
+  };
+
+  const trigger = React.cloneElement(children as React.ReactElement<any>, {
+    onClick: () => setOpen(true),
+  });
+
+  return (
+    <>
+      {trigger}
+      <Dialog open={open} onOpenChange={handleClose}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete All Entries</DialogTitle>
+            <DialogDescription>
+              {step === 1
+                ? "This action will permanently delete all entries in the database. This cannot be undone."
+                : "Please type the exact sentence below to confirm this action:"}
+            </DialogDescription>
+          </DialogHeader>
+
+          {step === 1 && (
+            <div className="space-y-4">
+              <div className="p-4 bg-red-50 border border-red-200 rounded-md">
+                <p className="text-sm text-red-800 font-medium">
+                  ⚠️ Warning: This action is irreversible
+                </p>
+                <p className="text-sm text-red-700 mt-1">
+                  All inventory entries will be permanently deleted from the
+                  database.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {step === 2 && (
+            <div className="space-y-4">
+              <div className="p-3 bg-gray-100 border rounded-md">
+                <p className="text-sm font-mono text-gray-800">
+                  {requiredText}
+                </p>
+              </div>
+              <Input
+                placeholder="Type the sentence above..."
+                value={confirmationText}
+                onChange={(e) => setConfirmationText(e.target.value)}
+                className="w-full"
+              />
+            </div>
+          )}
+
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline" onClick={handleClose}>
+                Cancel
+              </Button>
+            </DialogClose>
+            {step === 1 && (
+              <Button variant="destructive" onClick={() => setStep(2)}>
+                Continue
+              </Button>
+            )}
+            {step === 2 && (
+              <Button
+                variant="destructive"
+                onClick={handleConfirm}
+                disabled={confirmationText !== requiredText}
+              >
+                Delete All Entries
+              </Button>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
+
 export default function Admin() {
   const { user, profile } = useUser();
   const [data, setData] = useState<User[]>([]);
@@ -286,7 +387,9 @@ export default function Admin() {
   const [filterType, setFilterType] = useState<
     "all" | "approved" | "unapproved"
   >("all");
-  const [activeTab, setActiveTab] = useState<"users" | "activity">("users");
+  const [activeTab, setActiveTab] = useState<"users" | "activity" | "database">(
+    "users",
+  );
   const [activityData, setActivityData] = useState<Activity[]>([]);
   const [activityLoading, setActivityLoading] = useState(false);
 
@@ -433,6 +536,32 @@ export default function Admin() {
 
     // Refresh activity if on activity tab
     refreshActivity();
+  };
+
+  const handleDeleteAllEntries = async () => {
+    try {
+      // Get all inventory entries
+      const inventorySnapshot = await getDocs(collection(db, "inventory"));
+      const totalEntries = inventorySnapshot.size;
+
+      // Delete all inventory entries
+      const deletePromises = inventorySnapshot.docs.map((doc) =>
+        deleteDoc(doc.ref),
+      );
+      await Promise.all(deletePromises);
+
+      // Log activity
+      await addDoc(collection(db, "activity"), {
+        message: `Deleted all ${totalEntries} inventory entries from the database`,
+        loggedAt: serverTimestamp(),
+        loggedBy: user?.email || "unknown",
+      });
+
+      // Refresh activity if on activity tab
+      refreshActivity();
+    } catch (error) {
+      console.error("Error deleting all entries:", error);
+    }
   };
 
   // Filter data
@@ -619,6 +748,17 @@ export default function Admin() {
             <Activity className="w-4 h-4 inline mr-2" />
             System Activity
           </button>
+          <button
+            onClick={() => setActiveTab("database")}
+            className={`py-2 px-1 border-b-2 font-medium text-sm ${
+              activeTab === "database"
+                ? "border-blue-500 text-blue-600"
+                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+            }`}
+          >
+            <Database className="w-4 h-4 inline mr-2" />
+            Database
+          </button>
         </nav>
       </div>
 
@@ -671,6 +811,36 @@ export default function Admin() {
             loading={activityLoading}
             showExport={false}
           />
+        </>
+      )}
+
+      {/* Database Tab Content */}
+      {activeTab === "database" && (
+        <>
+          <div className="mb-4">
+            <p className="text-sm text-gray-600">
+              Manage database operations and maintenance
+            </p>
+          </div>
+          <div className="space-y-6">
+            <div className="border border-red-200 bg-red-50 rounded-lg p-6">
+              <h3 className="text-lg font-medium text-red-900 mb-2">
+                Danger Zone
+              </h3>
+              <p className="text-sm text-red-700 mb-4">
+                This section contains destructive operations that cannot be
+                undone.
+              </p>
+              <DeleteAllEntriesDialog onConfirm={handleDeleteAllEntries}>
+                <Button
+                  variant="destructive"
+                  className="bg-red-600 hover:bg-red-700"
+                >
+                  Delete All Entries
+                </Button>
+              </DeleteAllEntriesDialog>
+            </div>
+          </div>
         </>
       )}
     </div>
