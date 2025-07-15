@@ -41,7 +41,6 @@ export function DashboardAnalytics({
         <TotalWeightCard data={data} />
         <LowStockCard data={data} />
         <TimelineChart data={data} />
-        <WeightDistributionCard data={data} />
         <ComparativeAnalysisCard data={data} />
       </div>
     </div>
