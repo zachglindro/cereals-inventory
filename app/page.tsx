@@ -259,8 +259,9 @@ export default function Login() {
           </div>
           <DataTable<InventoryFormValues>
             data={scannedData.inventory}
-            columns={tableColumns}
+            columns={tableColumns.filter((col) => col.id !== "box_number")}
             loading={isLoading}
+            stickyActions={true}
             filterableFields={[
               { label: "Type", fieldName: "type" },
               { label: "Location Planted", fieldName: "location_planted" },

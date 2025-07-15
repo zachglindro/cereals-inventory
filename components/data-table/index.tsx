@@ -36,6 +36,7 @@ interface DataTableProps<TData extends Record<string, unknown>> {
   filterableFields?: FilterField[];
   onRowUpdate?: (updated: TData) => void;
   showExport?: boolean;
+  stickyActions?: boolean;
 }
 
 export function DataTable<TData extends Record<string, unknown>>({
@@ -45,6 +46,7 @@ export function DataTable<TData extends Record<string, unknown>>({
   filterableFields,
   onRowUpdate,
   showExport = true,
+  stickyActions = false,
 }: DataTableProps<TData>) {
   const [pagination, setPagination] = useState({
     pageIndex: 0,
@@ -446,6 +448,7 @@ export function DataTable<TData extends Record<string, unknown>>({
             columns={columns}
             loading={loading}
             onRowUpdate={onRowUpdate}
+            stickyActions={stickyActions}
           />
         </div>
         <TablePagination table={table} actions={exportActions}>

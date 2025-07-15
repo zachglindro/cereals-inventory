@@ -56,6 +56,7 @@ interface TableContentProps<TData extends Record<string, unknown>> {
   loading?: boolean;
   /** Callback invoked after a row is updated */
   onRowUpdate?: (updated: TData) => void;
+  stickyActions?: boolean;
 }
 
 export function TableContent<TData extends Record<string, unknown>>({
@@ -63,13 +64,19 @@ export function TableContent<TData extends Record<string, unknown>>({
   columns,
   loading,
   onRowUpdate,
+  stickyActions = false,
 }: TableContentProps<TData>) {
   const renderRows =
     table.getRowModel().rows?.length > 0 ? (
       table
         .getRowModel()
         .rows.map((row) => (
-          <RowDialog key={row.id} row={row} onRowUpdate={onRowUpdate} />
+          <RowDialog
+            key={row.id}
+            row={row}
+            onRowUpdate={onRowUpdate}
+            stickyActions={stickyActions}
+          />
         ))
     ) : (
       <TableRow>
@@ -127,14 +134,24 @@ export function TableContent<TData extends Record<string, unknown>>({
                   </TableHead>
                 );
               })}
-              {onRowUpdate && <TableHead key="actions">Actions</TableHead>}
+              {onRowUpdate && (
+                <TableHead
+                  key="actions"
+                  className={stickyActions ? "sticky right-0 bg-muted" : ""}
+                >
+                  Actions
+                </TableHead>
+              )}
             </TableRow>
           ))}
         </TableHeader>
         <TableBody className="**:data-[slot=table-cell]:first:w-8">
           {loading ? (
             <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center">
+              <TableCell
+                colSpan={columns.length + (onRowUpdate ? 1 : 0)}
+                className="h-24 text-center"
+              >
                 <div className="flex items-center justify-center gap-2">
                   <Spinner size="sm" />
                   <span className="text-muted-foreground">Loading...</span>
@@ -154,9 +171,11 @@ export function TableContent<TData extends Record<string, unknown>>({
 function RowDialog<TData extends Record<string, any>>({
   row,
   onRowUpdate,
+  stickyActions = false,
 }: {
   row: Row<TData>;
   onRowUpdate?: (updated: TData) => void;
+  stickyActions?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [editValues, setEditValues] = useState({ ...row.original });
@@ -274,7 +293,9 @@ function RowDialog<TData extends Record<string, any>>({
               {flexRender(cell.column.columnDef.cell, cell.getContext())}
             </TableCell>
           ))}
-          <TableCell>
+          <TableCell
+            className={stickyActions ? "sticky right-0 bg-background" : ""}
+          >
             <DialogTrigger asChild>
               <Button variant="outline" size="sm">
                 Edit
