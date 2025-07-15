@@ -105,6 +105,10 @@ export default function Update() {
             font-weight: bold;
             margin-bottom: 20px;
           }
+          .print-area svg {
+            width: 80px !important;
+            height: 80px !important;
+          }
         }
       </style>
     `;
