@@ -23,6 +23,9 @@ export const inventoryFormSchema = z.object({
   weight: z.number().gte(0, { message: "Required" }),
   remarks: z.string().optional(),
   id: z.string().optional(),
+  addedAt: z.any().optional(), // Firebase Timestamp
+  addedBy: z.string().optional(),
+  creatorId: z.string().optional(),
 });
 
 // Type alias for form values
