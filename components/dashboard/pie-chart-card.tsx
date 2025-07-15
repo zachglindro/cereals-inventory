@@ -121,84 +121,82 @@ export function PieChartCard({
     chartData[selectedChart as keyof typeof chartData] || [];
 
   return (
-    <div className="w-100">
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
+    <Card className="w-100 h-75">
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle>Charts</CardTitle>
+          </div>
+          <div className="flex items-center space-x-2">
             <div>
-              <CardTitle>Charts</CardTitle>
+              <Select value={selectedChart} onValueChange={onChartChange}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select chart" />
+                </SelectTrigger>
+                <SelectContent>
+                  {chartOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
-            <div className="flex items-center space-x-2">
-              <div>
-                <Select value={selectedChart} onValueChange={onChartChange}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select chart" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {chartOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Select
-                  value={chartWeightMode ? "weight" : "count"}
-                  onValueChange={(value) =>
-                    onWeightModeChange(value === "weight")
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="count"># of entries</SelectItem>
-                    <SelectItem value="weight">Weight (kg)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+            <div>
+              <Select
+                value={chartWeightMode ? "weight" : "count"}
+                onValueChange={(value) =>
+                  onWeightModeChange(value === "weight")
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="count"># of entries</SelectItem>
+                  <SelectItem value="weight">Weight (kg)</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
-        </CardHeader>
-        <CardContent>
-          <ChartContainer
-            config={currentChartData.reduce(
-              (acc, item) => ({
-                ...acc,
-                [item.name]: { label: item.name, color: item.fill },
-              }),
-              {},
-            )}
-          >
-            <PieChart>
-              <Pie
-                data={currentChartData}
-                cx="50%"
-                cy="50%"
-                labelLine={false}
-                label={({ name, percent }) =>
-                  `${name}: ${((percent || 0) * 100).toFixed(0)}%`
-                }
-                outerRadius="80%"
-                fill="#8884d8"
-                dataKey="value"
-              >
-                {currentChartData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.fill} />
-                ))}
-              </Pie>
-              <ChartTooltip
-                content={<ChartTooltipContent className="w-auto min-w-max" />}
-                formatter={(value) => [
-                  `${chartWeightMode ? Number(value).toFixed(2) : value}${chartWeightMode ? " kg" : " entries"}`,
-                ]}
-              />
-            </PieChart>
-          </ChartContainer>
-        </CardContent>
-      </Card>
-    </div>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <ChartContainer
+          config={currentChartData.reduce(
+            (acc, item) => ({
+              ...acc,
+              [item.name]: { label: item.name, color: item.fill },
+            }),
+            {},
+          )}
+        >
+          <PieChart>
+            <Pie
+              data={currentChartData}
+              cx="50%"
+              cy="50%"
+              labelLine={false}
+              label={({ name, percent }) =>
+                `${name}: ${((percent || 0) * 100).toFixed(0)}%`
+              }
+              outerRadius="80%"
+              fill="#8884d8"
+              dataKey="value"
+            >
+              {currentChartData.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={entry.fill} />
+              ))}
+            </Pie>
+            <ChartTooltip
+              content={<ChartTooltipContent className="w-auto min-w-max" />}
+              formatter={(value) => [
+                `${chartWeightMode ? Number(value).toFixed(2) : value}${chartWeightMode ? " kg" : " entries"}`,
+              ]}
+            />
+          </PieChart>
+        </ChartContainer>
+      </CardContent>
+    </Card>
   );
 }

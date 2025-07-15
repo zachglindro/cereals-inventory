@@ -102,67 +102,65 @@ export function TimelineChart({ data }: TimelineChartProps) {
   };
 
   return (
-    <div className="w-160">
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle>Entry Additions Timeline</CardTitle>
-              <CardDescription>
-                Track when inventory entries were added
-              </CardDescription>
-            </div>
-            <div>
-              <Select value={timelineMode} onValueChange={setTimelineMode}>
-                <SelectTrigger className="w-32">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="day">Daily</SelectItem>
-                  <SelectItem value="week">Weekly</SelectItem>
-                  <SelectItem value="month">Monthly</SelectItem>
-                  <SelectItem value="year">Yearly</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+    <Card className="w-160">
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle>Entry Additions Timeline</CardTitle>
+            <CardDescription>
+              Track when inventory entries were added
+            </CardDescription>
           </div>
-        </CardHeader>
-        <CardContent>
-          <div className="flex justify-center">
-            <ChartContainer
-              config={{
-                count: { label: "Entries", color: "#8884d8" },
-              }}
-              className="h-80"
-            >
-              <LineChart data={timelineData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis
-                  dataKey="period"
-                  tickFormatter={formatXAxisLabel}
-                  angle={-45}
-                  textAnchor="end"
-                  height={60}
-                />
-                <YAxis />
-                <ChartTooltip
-                  content={<ChartTooltipContent />}
-                  formatter={(value, name) => [`${value} entries`, "Added"]}
-                  labelFormatter={(period) => formatXAxisLabel(period)}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="count"
-                  stroke="#8884d8"
-                  strokeWidth={2}
-                  dot={{ fill: "#8884d8", strokeWidth: 2, r: 4 }}
-                  activeDot={{ r: 6 }}
-                />
-              </LineChart>
-            </ChartContainer>
+          <div>
+            <Select value={timelineMode} onValueChange={setTimelineMode}>
+              <SelectTrigger className="w-32">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="day">Daily</SelectItem>
+                <SelectItem value="week">Weekly</SelectItem>
+                <SelectItem value="month">Monthly</SelectItem>
+                <SelectItem value="year">Yearly</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
-        </CardContent>
-      </Card>
-    </div>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="flex justify-center">
+          <ChartContainer
+            config={{
+              count: { label: "Entries", color: "#8884d8" },
+            }}
+            className="h-80"
+          >
+            <LineChart data={timelineData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis
+                dataKey="period"
+                tickFormatter={formatXAxisLabel}
+                angle={-45}
+                textAnchor="end"
+                height={60}
+              />
+              <YAxis />
+              <ChartTooltip
+                content={<ChartTooltipContent />}
+                formatter={(value, name) => [`${value} entries`, "Added"]}
+                labelFormatter={(period) => formatXAxisLabel(period)}
+              />
+              <Line
+                type="monotone"
+                dataKey="count"
+                stroke="#8884d8"
+                strokeWidth={2}
+                dot={{ fill: "#8884d8", strokeWidth: 2, r: 4 }}
+                activeDot={{ r: 6 }}
+              />
+            </LineChart>
+          </ChartContainer>
+        </div>
+      </CardContent>
+    </Card>
   );
 }

@@ -54,92 +54,90 @@ export function LowStockCard({ data }: LowStockCardProps) {
   }, [lowStockThreshold, lowStockSortBy]);
 
   return (
-    <div className="w-84">
-      <Card>
-        <CardHeader>
-          <CardTitle>Low Stocks</CardTitle>
-          <CardDescription>Items with weight below threshold</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            {lowStockItems.length === 0 ? (
-              <div className="text-sm text-gray-600">
-                All items are well stocked!
+    <Card className="h-75">
+      <CardHeader>
+        <CardTitle>Low Stocks</CardTitle>
+        <CardDescription>Items with weight below threshold</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-2">
+          {lowStockItems.length === 0 ? (
+            <div className="text-sm text-gray-600">
+              All items are well stocked!
+            </div>
+          ) : (
+            <>
+              <div className="max-h-32 overflow-y-auto">
+                {lowStockItems
+                  .slice(0, lowStockDisplayCount)
+                  .map((item, index) => (
+                    <div
+                      key={index}
+                      className="flex justify-between items-center py-1 px-2 bg-red-50 rounded mb-1"
+                    >
+                      <span className="text-xs truncate">
+                        {item.type || "Unknown"} - Box{" "}
+                        {item.box_number || "N/A"}
+                      </span>
+                      <span className="text-xs font-medium text-red-600">
+                        {(item.weight || 0).toFixed(1)}kg
+                      </span>
+                    </div>
+                  ))}
+                {lowStockItems.length > lowStockDisplayCount && (
+                  <button
+                    onClick={() =>
+                      setLowStockDisplayCount((prev) =>
+                        Math.min(prev + 10, lowStockItems.length),
+                      )
+                    }
+                    className="text-xs text-gray-500 hover:text-gray-700 underline cursor-pointer mt-1"
+                  >
+                    ...and {lowStockItems.length - lowStockDisplayCount} more
+                    items
+                  </button>
+                )}
               </div>
-            ) : (
-              <>
-                <div className="max-h-32 overflow-y-auto">
-                  {lowStockItems
-                    .slice(0, lowStockDisplayCount)
-                    .map((item, index) => (
-                      <div
-                        key={index}
-                        className="flex justify-between items-center py-1 px-2 bg-red-50 rounded mb-1"
-                      >
-                        <span className="text-xs truncate">
-                          {item.type || "Unknown"} - Box{" "}
-                          {item.box_number || "N/A"}
-                        </span>
-                        <span className="text-xs font-medium text-red-600">
-                          {(item.weight || 0).toFixed(1)}kg
-                        </span>
-                      </div>
-                    ))}
-                  {lowStockItems.length > lowStockDisplayCount && (
-                    <button
-                      onClick={() =>
-                        setLowStockDisplayCount((prev) =>
-                          Math.min(prev + 10, lowStockItems.length),
-                        )
-                      }
-                      className="text-xs text-gray-500 hover:text-gray-700 underline cursor-pointer mt-1"
-                    >
-                      ...and {lowStockItems.length - lowStockDisplayCount} more
-                      items
-                    </button>
-                  )}
+              <div className="flex items-center justify-between mt-4 gap-2 pt-2 border-t">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-gray-500">Threshold:</span>
+                  <Select
+                    value={lowStockThreshold.toString()}
+                    onValueChange={(value) =>
+                      setLowStockThreshold(Number(value))
+                    }
+                  >
+                    <SelectTrigger className="w-20 h-8 text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="2">2 kg</SelectItem>
+                      <SelectItem value="1">1 kg</SelectItem>
+                      <SelectItem value="0.5">0.5 kg</SelectItem>
+                      <SelectItem value="0">0 kg</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
-                <div className="flex items-center justify-between mt-4 gap-2 pt-2 border-t">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-gray-500">Threshold:</span>
-                    <Select
-                      value={lowStockThreshold.toString()}
-                      onValueChange={(value) =>
-                        setLowStockThreshold(Number(value))
-                      }
-                    >
-                      <SelectTrigger className="w-20 h-8 text-xs">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="2">2 kg</SelectItem>
-                        <SelectItem value="1">1 kg</SelectItem>
-                        <SelectItem value="0.5">0.5 kg</SelectItem>
-                        <SelectItem value="0">0 kg</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-gray-500">Sort:</span>
-                    <Select
-                      value={lowStockSortBy}
-                      onValueChange={setLowStockSortBy}
-                    >
-                      <SelectTrigger className="w-24 h-8 text-xs">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="weight">Weight</SelectItem>
-                        <SelectItem value="box_number">Box #</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-gray-500">Sort:</span>
+                  <Select
+                    value={lowStockSortBy}
+                    onValueChange={setLowStockSortBy}
+                  >
+                    <SelectTrigger className="w-24 h-8 text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="weight">Weight</SelectItem>
+                      <SelectItem value="box_number">Box #</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
-              </>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+              </div>
+            </>
+          )}
+        </div>
+      </CardContent>
+    </Card>
   );
 }

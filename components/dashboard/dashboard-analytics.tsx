@@ -29,21 +29,15 @@ export function DashboardAnalytics({
       </div>
 
       <div className="flex flex-col md:flex-row flex-wrap gap-6 items-start justify-center">
-        <div className="flex-shrink-0">
-          <PieChartCard
-            data={data}
-            selectedChart={selectedChart}
-            onChartChange={onChartChange}
-            chartWeightMode={chartWeightMode}
-            onWeightModeChange={onWeightModeChange}
-          />
-        </div>
-        <div className="flex-shrink-0">
-          <LowStockCard data={data} />
-        </div>
-        <div className="mt-6">
-          <TimelineChart data={data} />
-        </div>
+        <PieChartCard
+          data={data}
+          selectedChart={selectedChart}
+          onChartChange={onChartChange}
+          chartWeightMode={chartWeightMode}
+          onWeightModeChange={onWeightModeChange}
+        />
+        <LowStockCard data={data} />
+        <TimelineChart data={data} />
         <TotalWeightCard data={data} />
       </div>
     </div>
