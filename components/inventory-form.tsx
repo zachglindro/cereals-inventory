@@ -11,6 +11,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
@@ -233,7 +234,7 @@ export function InventoryForm() {
               <FormItem>
                 <FormLabel>Description</FormLabel>
                 <FormControl>
-                  <Input {...field} placeholder="inbred" />
+                  <Textarea {...field} placeholder="inbred" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -283,7 +284,7 @@ export function InventoryForm() {
               <FormItem>
                 <FormLabel>Remarks</FormLabel>
                 <FormControl>
-                  <Input {...field} value={field.value ?? ""} />
+                  <Textarea {...field} value={field.value ?? ""} />
                 </FormControl>
                 <FormDescription>optional</FormDescription>
                 <FormMessage />
