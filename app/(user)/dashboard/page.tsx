@@ -1,9 +1,16 @@
 "use client";
 
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { collection, getDocs, doc, updateDoc, addDoc, serverTimestamp } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  doc,
+  updateDoc,
+  addDoc,
+  serverTimestamp,
+} from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { DataTable } from "@/components/data-table/index";
 import { columns } from "@/lib/schemas/columns";
@@ -17,25 +24,10 @@ export default function Home() {
   const { profile } = useUser();
   const [data, setData] = useState<InventoryFormValues[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState<string>("");
-  const [searchInput, setSearchInput] = useState<string>("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedChart, setSelectedChart] = useState<string>("type");
   const [chartWeightMode, setChartWeightMode] = useState<boolean>(false);
   const tableColumns = columns as ColumnDef<InventoryFormValues, unknown>[];
-
-  const handleSearch = useCallback(() => {
-    setSearchQuery(searchInput);
-  }, [searchInput]);
-
-  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchInput(e.target.value);
-  }, []);
-
-  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      setSearchQuery(searchInput);
-    }
-  }, [searchInput]);
 
   useEffect(() => {
     async function fetchData() {
@@ -58,36 +50,116 @@ export default function Home() {
     fetchData();
   }, []);
 
-  // Prepare filtered data by search query
-  const filteredData = useMemo(() => {
-    const q = searchQuery.trim();
-    if (!q) return data;
-    // Match numeric comparison e.g. weight>10 or year<=2020
-    const match = q.match(/^([a-zA-Z_]+)(<=|>=|<|>|=)(\d+(?:\.\d+)?$)/);
-    if (match) {
-      const [, field, op, valStr] = match;
-      const val = parseFloat(valStr);
-      return data.filter((row) => {
-        const num = Number((row as any)[field]);
-        if (isNaN(num)) return false;
-        switch (op) {
-          case "<": return num < val;
-          case "<=": return num <= val;
-          case ">": return num > val;
-          case ">=": return num >= val;
-          case "=": return num === val;
-          default: return false;
+  // Advanced search function with support for operators
+  const filterData = (
+    items: InventoryFormValues[],
+    query: string,
+  ): InventoryFormValues[] => {
+    if (!query.trim()) return items;
+
+    const searchTerms = query.toLowerCase().trim().split(/\s+/);
+
+    return items.filter((item) => {
+      return searchTerms.every((term) => {
+        // Handle year comparisons (year<20, year>=2020, etc.)
+        if (term.match(/^year\s*([<>=!]+)\s*(\d+)$/)) {
+          const match = term.match(/^year\s*([<>=!]+)\s*(\d+)$/);
+          if (match) {
+            const operator = match[1];
+            const value = parseInt(match[2]);
+            const itemYear = parseInt(item.year);
+
+            switch (operator) {
+              case "<":
+                return itemYear < value;
+              case "<=":
+                return itemYear <= value;
+              case ">":
+                return itemYear > value;
+              case ">=":
+                return itemYear >= value;
+              case "=":
+              case "==":
+                return itemYear === value;
+              case "!=":
+                return itemYear !== value;
+              default:
+                return false;
+            }
+          }
         }
+
+        // Handle weight comparisons (weight<1, weight>=0.5, etc.)
+        if (term.match(/^weight\s*([<>=!]+)\s*(\d*\.?\d+)$/)) {
+          const match = term.match(/^weight\s*([<>=!]+)\s*(\d*\.?\d+)$/);
+          if (match) {
+            const operator = match[1];
+            const value = parseFloat(match[2]);
+            const itemWeight = item.weight;
+
+            switch (operator) {
+              case "<":
+                return itemWeight < value;
+              case "<=":
+                return itemWeight <= value;
+              case ">":
+                return itemWeight > value;
+              case ">=":
+                return itemWeight >= value;
+              case "=":
+              case "==":
+                return itemWeight === value;
+              case "!=":
+                return itemWeight !== value;
+              default:
+                return false;
+            }
+          }
+        }
+
+        // Handle box searches (box 1, box 10-20, etc.)
+        // Handle box= searches (box=1, box=10-20)
+        if (term.match(/^box=(\d+)-(\d+)$/)) {
+          const match = term.match(/^box=(\d+)-(\d+)$/);
+          if (match) {
+            const start = parseInt(match[1]);
+            const end = parseInt(match[2]);
+            const itemBox = item.box_number;
+            return itemBox >= start && itemBox <= end;
+          }
+        }
+        if (term.match(/^box=(\d+)$/)) {
+          const match = term.match(/^box=(\d+)$/);
+          if (match) {
+            const boxNum = parseInt(match[1]);
+            return item.box_number === boxNum;
+          }
+        }
+
+        // Regular text search across all fields
+        const searchableFields = [
+          item.type,
+          item.area_planted,
+          item.year,
+          item.season,
+          item.location,
+          item.description,
+          item.pedigree,
+          item.box_number?.toString(),
+          item.weight?.toString(),
+          item.remarks || "",
+        ];
+
+        return searchableFields.some((field) =>
+          field?.toLowerCase().includes(term),
+        );
       });
-    }
-    // Generic text search across all fields
-    return data.filter((row) =>
-      Object.values(row).some((val) =>
-        String(val).toLowerCase().includes(q.toLowerCase())
-      )
-    );
-  }, [data, searchQuery]);
-  
+    });
+  };
+
+  // Apply search filter to data
+  const filteredData = filterData(data, searchQuery);
+
   if (loading) {
     return (
       <div className="p-6">
@@ -101,7 +173,6 @@ export default function Home() {
 
   return (
     <div className="p-6">
-
       <div className="mb-6">
         <h1 className="text-2xl font-bold">Inventory Dashboard</h1>
         <p className="text-gray-600">
@@ -110,21 +181,59 @@ export default function Home() {
       </div>
 
       {/* Search Bar */}
-      <div className="mb-4 flex gap-2 items-center">
-        <Input
-          type="text"
-          placeholder="Search any field or use e.g. weight>10, year<=2020"
-          value={searchInput}
-          onChange={handleInputChange}
-          onKeyDown={handleKeyDown}
-          className="w-full max-w-md"
-        />
-        <Button onClick={handleSearch}>
-          Search
-        </Button>
+      <div className="mb-6">
+        <div className="relative">
+          <Input
+            placeholder="Search inventory... (e.g., 'box=10-20 white year>=2020 weight<1')"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10 pr-10"
+          />
+          <svg
+            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            />
+          </svg>
+          {searchQuery && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="absolute right-2 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0"
+              onClick={() => setSearchQuery("")}
+            >
+              <svg
+                className="h-4 w-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </Button>
+          )}
+        </div>
       </div>
+
       {/* Data Table */}
       <div className="mb-8">
+        {searchQuery && (
+          <div className="mb-4 text-sm text-gray-600">
+            Found {filteredData.length} of {data.length} items
+          </div>
+        )}
         <DataTable<InventoryFormValues>
           data={filteredData}
           columns={tableColumns}
@@ -177,7 +286,10 @@ export default function Home() {
                   changes,
                 });
               } catch (error) {
-                console.error("Error updating document or writing history:", error);
+                console.error(
+                  "Error updating document or writing history:",
+                  error,
+                );
               }
             }
           }}
@@ -188,7 +300,9 @@ export default function Home() {
       <div className="mb-8 rounded-lg border-2 border-gray-300 overflow-hidden">
         <div className="m-4">
           <h2 className="text-xl font-semibold">Add Inventory</h2>
-          <p className="text-gray-600">Use this form to add a new inventory item.</p>
+          <p className="text-gray-600">
+            Use this form to add a new inventory item.
+          </p>
         </div>
         <InventoryForm />
       </div>
@@ -196,7 +310,7 @@ export default function Home() {
       {/* Analytics */}
       <div className="hidden md:block">
         <DashboardAnalytics
-          data={data}
+          data={searchQuery ? filteredData : data}
           selectedChart={selectedChart}
           onChartChange={setSelectedChart}
           chartWeightMode={chartWeightMode}
