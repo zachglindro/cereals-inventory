@@ -20,11 +20,6 @@ const items = [
     icon: House,
   },
   {
-    title: "Add",
-    url: "/add",
-    icon: Plus,
-  },
-  {
     title: "Import",
     url: "/import",
     icon: Sheet,

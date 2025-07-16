@@ -11,6 +11,7 @@ import { DashboardAnalytics } from "@/components/dashboard";
 import type { InventoryFormValues } from "@/lib/schemas/inventory";
 import type { ColumnDef } from "@tanstack/react-table";
 import { useUser } from "@/context/UserContext";
+import { InventoryForm } from "@/components/inventory-form";
 
 export default function Home() {
   const { profile } = useUser();
@@ -100,6 +101,7 @@ export default function Home() {
 
   return (
     <div className="p-6">
+
       <div className="mb-6">
         <h1 className="text-2xl font-bold">Inventory Dashboard</h1>
         <p className="text-gray-600">
@@ -180,6 +182,15 @@ export default function Home() {
             }
           }}
         />
+      </div>
+
+      {/* Add Inventory Form */}
+      <div className="mb-8 rounded-lg border-2 border-gray-300 overflow-hidden">
+        <div className="m-4">
+          <h2 className="text-xl font-semibold">Add Inventory</h2>
+          <p className="text-gray-600">Use this form to add a new inventory item.</p>
+        </div>
+        <InventoryForm />
       </div>
 
       {/* Analytics */}
