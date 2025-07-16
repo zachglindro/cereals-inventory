@@ -2,15 +2,17 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { Input } from "@/components/ui/input";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, doc, updateDoc, addDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { DataTable } from "@/components/data-table/index";
 import { columns } from "@/lib/schemas/columns";
 import { DashboardAnalytics } from "@/components/dashboard";
 import type { InventoryFormValues } from "@/lib/schemas/inventory";
 import type { ColumnDef } from "@tanstack/react-table";
+import { useUser } from "@/context/UserContext";
 
 export default function Home() {
+  const { profile } = useUser();
   const [data, setData] = useState<InventoryFormValues[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -115,15 +117,31 @@ export default function Home() {
             { label: "Pedigree", fieldName: "pedigree" },
             { label: "Weight", fieldName: "weight" },
           ]}
-          onRowUpdate={(updated: InventoryFormValues) => {
-            if (updated && (updated as any).deleted) {
-              // Remove the deleted row
+          onRowUpdate={async (updated: InventoryFormValues) => {
+            if (!updated) return;
+            // Handle deletion locally
+            if ((updated as any).deleted) {
               setData((prev) => prev.filter((item) => item.id !== updated.id));
-            } else if (updated) {
-              // Update the row
+            } else {
+              // Optimistically update UI
               setData((prev) =>
                 prev.map((item) => (item.id === updated.id ? updated : item)),
               );
+              try {
+                // Update main document
+                const { id, ...fields } = updated;
+                const docRef = doc(db, "inventory", id!);
+                await updateDoc(docRef, fields as any);
+                // Add history entry
+                const histCol = collection(db, "inventory", id!, "history");
+                await addDoc(histCol, {
+                  editedBy: profile?.displayName || profile?.email || "Unknown",
+                  editedAt: serverTimestamp(),
+                  creatorId: profile?.uid,
+                });
+              } catch (error) {
+                console.error("Error updating document or writing history:", error);
+              }
             }
           }}
         />
