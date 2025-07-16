@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { ScanLine } from "lucide-react";
+import { QRScanner } from "@/components/scanner";
 import {
   collection,
   getDocs,
@@ -27,6 +29,7 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedChart, setSelectedChart] = useState<string>("type");
   const [chartWeightMode, setChartWeightMode] = useState<boolean>(false);
+  const [showScanner, setShowScanner] = useState(false);
   const tableColumns = columns as ColumnDef<InventoryFormValues, unknown>[];
 
   useEffect(() => {
@@ -225,6 +228,26 @@ export default function Home() {
             </Button>
           )}
         </div>
+      </div>
+
+      {/* Toggleable Scanner for small screens */}
+      <div className="mb-4 block md:hidden">
+        <Button
+          variant={showScanner ? "secondary" : "outline"}
+          className="w-full flex items-center justify-center gap-2 mb-2"
+          onClick={() => setShowScanner((prev) => !prev)}
+        >
+          <ScanLine className="h-5 w-5" />
+          {showScanner ? "Hide QR Scanner" : "Scan QR"}
+        </Button>
+        {showScanner && (
+          <>
+            <div className="mb-2 text-center text-sm text-gray-700 font-medium">
+              Scan QR Code
+            </div>
+            <QRScanner />
+          </>
+        )}
       </div>
 
       {/* Data Table */}
