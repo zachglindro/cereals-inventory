@@ -43,7 +43,7 @@ export default function BulkAdd() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   // Use a schema without the auto-generated id for import validation
-  const importSchema = inventoryFormSchema.omit({ id: true });
+  const importSchema = inventoryFormSchema.omit({ id: true, addedAt: true, addedBy: true, creatorId: true });
   const expectedColumns = Object.keys(importSchema.shape);
 
   // Mapping from user-friendly column names to schema field names
