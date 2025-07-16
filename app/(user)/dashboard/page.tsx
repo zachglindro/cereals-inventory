@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
+import { Input } from "@/components/ui/input";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { DataTable } from "@/components/data-table/index";
@@ -12,6 +13,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 export default function Home() {
   const [data, setData] = useState<InventoryFormValues[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedChart, setSelectedChart] = useState<string>("type");
   const [chartWeightMode, setChartWeightMode] = useState<boolean>(false);
   const tableColumns = columns as ColumnDef<InventoryFormValues, unknown>[];
@@ -37,6 +39,36 @@ export default function Home() {
     fetchData();
   }, []);
 
+  // Prepare filtered data by search query
+  const filteredData = useMemo(() => {
+    const q = searchQuery.trim();
+    if (!q) return data;
+    // Match numeric comparison e.g. weight>10 or year<=2020
+    const match = q.match(/^([a-zA-Z_]+)(<=|>=|<|>|=)(\d+(?:\.\d+)?)$/);
+    if (match) {
+      const [, field, op, valStr] = match;
+      const val = parseFloat(valStr);
+      return data.filter((row) => {
+        const num = Number((row as any)[field]);
+        if (isNaN(num)) return false;
+        switch (op) {
+          case "<": return num < val;
+          case "<=": return num <= val;
+          case ">": return num > val;
+          case ">=": return num >= val;
+          case "=": return num === val;
+          default: return false;
+        }
+      });
+    }
+    // Generic text search across all fields
+    return data.filter((row) =>
+      Object.values(row).some((val) =>
+        String(val).toLowerCase().includes(q.toLowerCase())
+      )
+    );
+  }, [data, searchQuery]);
+  
   if (loading) {
     return (
       <div className="p-6">
@@ -57,15 +89,25 @@ export default function Home() {
         </p>
       </div>
 
+      {/* Search Bar */}
+      <div className="mb-4">
+        <Input
+          type="text"
+          placeholder="Search any field or use e.g. weight>10, year<=2020"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full max-w-md"
+        />
+      </div>
       {/* Data Table */}
       <div className="mb-8">
         <DataTable<InventoryFormValues>
-          data={data}
+          data={filteredData}
           columns={tableColumns}
           loading={loading}
           filterableFields={[
             { label: "Type", fieldName: "type" },
-            { label: "Location Planted", fieldName: "location_planted" },
+            { label: "Area Planted", fieldName: "area_planted" },
             { label: "Year", fieldName: "year" },
             { label: "Season", fieldName: "season" },
             { label: "Location", fieldName: "location" },

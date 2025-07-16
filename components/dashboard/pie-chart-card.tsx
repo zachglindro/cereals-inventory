@@ -52,7 +52,7 @@ const chartOptions = [
     description: "Distribution by cereal type",
   },
   {
-    value: "location_planted",
+    value: "area_planted",
     label: "Planted",
     description: "Distribution by planting location",
   },
@@ -108,7 +108,7 @@ export function PieChartCard({
 
     return {
       type: createChartData("type"),
-      location_planted: createChartData("location_planted"),
+      area_planted: createChartData("area_planted"),
       year: createChartData("year"),
       season: createChartData("season"),
       location: createChartData("location"),

@@ -46,7 +46,7 @@ import { toast } from "sonner";
 import type { Row } from "@tanstack/react-table";
 import {
   typeOptions,
-  locationPlantedOptions,
+  areaPlantedOptions,
   seasonOptions,
 } from "@/lib/schemas/inventory";
 import { useUser } from "@/context/UserContext";
@@ -196,7 +196,7 @@ function RowDialog<TData extends Record<string, any>>({
     const allFields = [
       "box_number",
       "type",
-      "location_planted",
+      "area_planted",
       "year",
       "season",
       "location",
@@ -300,7 +300,7 @@ function RowDialog<TData extends Record<string, any>>({
       // Log deletion activity
       if (profile) {
         await addDoc(collection(db, "activity"), {
-          message: `Deleted inventory entry:\n  • Box Number: ${editValues.box_number}\n  • Type: ${editValues.type}\n  • Location Planted: ${editValues.location_planted}\n  • Year: ${editValues.year}\n  • Season: ${editValues.season}\n  • Storage Location: ${editValues.location}\n  • Description: ${editValues.description}\n  • Pedigree: ${editValues.pedigree}\n  • Weight: ${editValues.weight} kg\n  • Remarks: ${editValues.remarks}`,
+          message: `Deleted inventory entry:\n  • Box Number: ${editValues.box_number}\n  • Type: ${editValues.type}\n  • Area Planted: ${editValues.area_planted}\n  • Year: ${editValues.year}\n  • Season: ${editValues.season}\n  • Storage Location: ${editValues.location}\n  • Description: ${editValues.description}\n  • Pedigree: ${editValues.pedigree}\n  • Weight: ${editValues.weight} kg\n  • Remarks: ${editValues.remarks}`,
           loggedAt: new Date(),
           loggedBy: profile.email,
         });
@@ -385,10 +385,10 @@ function RowDialog<TData extends Record<string, any>>({
                   );
                 }
 
-                if (key === "location_planted") {
+                if (key === "area_planted") {
                   return (
                     <div key={key} className="flex flex-col space-y-2">
-                      <Label className="font-medium">Location Planted</Label>
+                      <Label className="font-medium">Area Planted</Label>
                       <Select
                         value={String(value)}
                         onValueChange={(newValue) =>
@@ -399,7 +399,7 @@ function RowDialog<TData extends Record<string, any>>({
                           <SelectValue placeholder="Select location" />
                         </SelectTrigger>
                         <SelectContent>
-                          {locationPlantedOptions.map((option) => (
+                          {areaPlantedOptions.map((option) => (
                             <SelectItem key={option} value={option}>
                               {option}
                             </SelectItem>

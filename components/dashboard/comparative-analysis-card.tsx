@@ -85,7 +85,7 @@ export function ComparativeAnalysisCard({
 
       case "location":
         data.forEach((item) => {
-          const key = item.location_planted || "Unknown";
+          const key = item.area_planted || "Unknown";
           if (!groupedData[key]) {
             groupedData[key] = { count: 0, weight: 0, items: [] };
           }

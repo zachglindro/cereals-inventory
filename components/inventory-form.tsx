@@ -24,7 +24,7 @@ import { useForm } from "react-hook-form";
 import {
   inventoryFormSchema,
   typeOptions,
-  locationPlantedOptions,
+  areaPlantedOptions,
   seasonOptions,
   InventoryFormValues,
 } from "@/lib/schemas/inventory";
@@ -41,7 +41,7 @@ export function InventoryForm() {
     resolver: zodResolver(inventoryFormSchema),
     defaultValues: {
       type: "white",
-      location_planted: "LBTR",
+      area_planted: "LBTR",
       year: "",
       season: "wet",
       location: "",
@@ -64,7 +64,7 @@ export function InventoryForm() {
       });
       // Add activity log entry
       await addDoc(collection(db, "activity"), {
-        message: `Added inventory entry:\n  • Box Number: ${values.box_number}\n  • Type: ${values.type}\n  • Location Planted: ${values.location_planted}\n  • Year: ${values.year}\n  • Season: ${values.season}\n  • Storage Location: ${values.location}\n  • Description: ${values.description}\n  • Pedigree: ${values.pedigree}\n  • Weight: ${values.weight} kg\n  • Remarks: ${values.remarks}`,
+        message: `Added inventory entry:\n  • Box Number: ${values.box_number}\n  • Type: ${values.type}\n  • Area Planted: ${values.area_planted}\n  • Year: ${values.year}\n  • Season: ${values.season}\n  • Storage Location: ${values.location}\n  • Description: ${values.description}\n  • Pedigree: ${values.pedigree}\n  • Weight: ${values.weight} kg\n  • Remarks: ${values.remarks}`,
         loggedAt: serverTimestamp(),
         loggedBy: user?.email || "unknown",
       });
@@ -141,10 +141,10 @@ export function InventoryForm() {
           />
           <FormField
             control={form.control}
-            name="location_planted"
+            name="area_planted"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Location Planted</FormLabel>
+                <FormLabel>Area Planted</FormLabel>
                 <FormControl>
                   <Select
                     value={field.value}
@@ -155,7 +155,7 @@ export function InventoryForm() {
                       <SelectValue placeholder="Select location" />
                     </SelectTrigger>
                     <SelectContent>
-                      {locationPlantedOptions.map((option) => (
+                      {areaPlantedOptions.map((option) => (
                         <SelectItem key={option} value={option}>
                           {option}
                         </SelectItem>

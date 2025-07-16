@@ -17,9 +17,9 @@ export const columns: ColumnDef<InventoryFormValues>[] = [
     enableSorting: true,
   },
   {
-    id: "location_planted",
-    accessorKey: "location_planted",
-    header: "Location Planted",
+    id: "area_planted",
+    accessorKey: "area_planted",
+    header: "Area Planted",
     enableSorting: true,
   },
   {

@@ -49,7 +49,7 @@ export default function BulkAdd() {
   // Mapping from user-friendly column names to schema field names
   const columnMapping: Record<string, string> = {
     Type: "type",
-    "Location Planted": "location_planted",
+    "Area Planted": "area_planted",
     "Year(s)": "year",
     Season: "season",
     "Box Number": "box_number",
@@ -288,7 +288,7 @@ export default function BulkAdd() {
   const handleGenerateTemplate = () => {
     const headers = [
       "Type",
-      "Location Planted",
+      "Area Planted",
       "Year(s)",
       "Season",
       "Box Number",

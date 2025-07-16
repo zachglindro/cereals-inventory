@@ -276,7 +276,7 @@ export default function Login() {
             disableDelete={true}
             filterableFields={[
               { label: "Type", fieldName: "type" },
-              { label: "Location Planted", fieldName: "location_planted" },
+              { label: "Area Planted", fieldName: "area_planted" },
               { label: "Year", fieldName: "year" },
               { label: "Season", fieldName: "season" },
               { label: "Location", fieldName: "location" },
