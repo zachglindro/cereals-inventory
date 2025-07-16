@@ -41,6 +41,8 @@ import {
   ChevronRight,
   Database,
   EllipsisVertical,
+  ExternalLink,
+  Github,
   User as UserIcon,
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
@@ -413,9 +415,9 @@ export default function Admin() {
   const [filterType, setFilterType] = useState<
     "all" | "approved" | "unapproved"
   >("all");
-  const [activeTab, setActiveTab] = useState<"users" | "activity" | "database">(
-    "users",
-  );
+  const [activeTab, setActiveTab] = useState<
+    "users" | "activity" | "database" | "links"
+  >("users");
   const [activityData, setActivityData] = useState<Activity[]>([]);
   const [activityLoading, setActivityLoading] = useState(false);
 
@@ -790,6 +792,17 @@ export default function Admin() {
             <Database className="w-4 h-4 inline mr-2" />
             Database
           </button>
+          <button
+            onClick={() => setActiveTab("links")}
+            className={`py-2 px-1 border-b-2 font-medium text-sm ${
+              activeTab === "links"
+                ? "border-blue-500 text-blue-600"
+                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+            }`}
+          >
+            <ExternalLink className="w-4 h-4 inline mr-2" />
+            Links
+          </button>
         </nav>
       </div>
 
@@ -871,6 +884,43 @@ export default function Admin() {
                 </Button>
               </DeleteAllEntriesDialog>
             </div>
+          </div>
+        </>
+      )}
+
+      {/* Links Tab Content */}
+      {activeTab === "links" && (
+        <>
+          <div className="mb-4">
+            <p className="text-sm text-gray-600">Useful external links</p>
+          </div>
+          <div className="space-y-3 space-x-3">
+            <Button
+              variant="outline"
+              onClick={() =>
+                window.open(
+                  "https://github.com/zachglindro/cereals-inventory",
+                  "_blank",
+                )
+              }
+            >
+              <Github className="w-4 h-4 mr-2" />
+              GitHub Repository
+              <ExternalLink className="w-4 h-4 ml-2" />
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() =>
+                window.open(
+                  "https://console.firebase.google.com/project/cereals-inventory-43693/",
+                  "_blank",
+                )
+              }
+            >
+              <Database className="w-4 h-4 mr-2" />
+              Firebase Console
+              <ExternalLink className="w-4 h-4 ml-2" />
+            </Button>
           </div>
         </>
       )}
