@@ -11,6 +11,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Spinner } from "@/components/ui/spinner";
+import { InventoryViewDialog } from "@/components/inventory-view-dialog";
 import {
   Dialog,
   DialogClose,
@@ -341,12 +342,15 @@ function RowDialog<TData extends Record<string, any>>({
           <TableCell
             className={stickyActions ? "sticky right-0 bg-background" : ""}
           >
-            <DialogTrigger asChild>
-              <Button variant="outline" size="sm">
-                <Pencil className="h-4 w-4 sm:hidden" />
-                <span className="hidden sm:inline">Edit</span>
-              </Button>
-            </DialogTrigger>
+            <div className="flex items-center gap-2">
+              <InventoryViewDialog entry={row.original} />
+              <DialogTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <Pencil className="h-4 w-4 sm:hidden" />
+                  <span className="hidden sm:inline">Edit</span>
+                </Button>
+              </DialogTrigger>
+            </div>
           </TableCell>
         </TableRow>
         <DialogContent className="max-h-[70vh] overflow-auto">

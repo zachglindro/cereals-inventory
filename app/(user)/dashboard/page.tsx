@@ -131,13 +131,28 @@ export default function Home() {
                 // Update main document
                 const { id, ...fields } = updated;
                 const docRef = doc(db, "inventory", id!);
+                // Get previous data for diff
+                const prev = data.find((item) => item.id === id);
                 await updateDoc(docRef, fields as any);
+                // Compute changed fields
+                let changes: Record<string, { from: any; to: any }> = {};
+                if (prev) {
+                  Object.keys(fields).forEach((key) => {
+                    if ((prev as any)[key] !== (fields as any)[key]) {
+                      changes[key] = {
+                        from: (prev as any)[key],
+                        to: (fields as any)[key],
+                      };
+                    }
+                  });
+                }
                 // Add history entry
                 const histCol = collection(db, "inventory", id!, "history");
                 await addDoc(histCol, {
                   editedBy: profile?.displayName || profile?.email || "Unknown",
                   editedAt: serverTimestamp(),
                   creatorId: profile?.uid,
+                  changes,
                 });
               } catch (error) {
                 console.error("Error updating document or writing history:", error);
