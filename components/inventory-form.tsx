@@ -283,7 +283,7 @@ export function InventoryForm() {
               <FormItem>
                 <FormLabel>Remarks</FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <Input {...field} value={field.value ?? ""} />
                 </FormControl>
                 <FormDescription>optional</FormDescription>
                 <FormMessage />
