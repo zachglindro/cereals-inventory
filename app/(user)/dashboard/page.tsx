@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { collection, getDocs, doc, updateDoc, addDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { DataTable } from "@/components/data-table/index";
@@ -16,9 +17,24 @@ export default function Home() {
   const [data, setData] = useState<InventoryFormValues[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [searchInput, setSearchInput] = useState<string>("");
   const [selectedChart, setSelectedChart] = useState<string>("type");
   const [chartWeightMode, setChartWeightMode] = useState<boolean>(false);
   const tableColumns = columns as ColumnDef<InventoryFormValues, unknown>[];
+
+  const handleSearch = useCallback(() => {
+    setSearchQuery(searchInput);
+  }, [searchInput]);
+
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchInput(e.target.value);
+  }, []);
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      setSearchQuery(searchInput);
+    }
+  }, [searchInput]);
 
   useEffect(() => {
     async function fetchData() {
@@ -46,7 +62,7 @@ export default function Home() {
     const q = searchQuery.trim();
     if (!q) return data;
     // Match numeric comparison e.g. weight>10 or year<=2020
-    const match = q.match(/^([a-zA-Z_]+)(<=|>=|<|>|=)(\d+(?:\.\d+)?)$/);
+    const match = q.match(/^([a-zA-Z_]+)(<=|>=|<|>|=)(\d+(?:\.\d+)?$)/);
     if (match) {
       const [, field, op, valStr] = match;
       const val = parseFloat(valStr);
@@ -92,14 +108,18 @@ export default function Home() {
       </div>
 
       {/* Search Bar */}
-      <div className="mb-4">
+      <div className="mb-4 flex gap-2 items-center">
         <Input
           type="text"
           placeholder="Search any field or use e.g. weight>10, year<=2020"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          value={searchInput}
+          onChange={handleInputChange}
+          onKeyDown={handleKeyDown}
           className="w-full max-w-md"
         />
+        <Button onClick={handleSearch}>
+          Search
+        </Button>
       </div>
       {/* Data Table */}
       <div className="mb-8">
