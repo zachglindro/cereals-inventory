@@ -72,7 +72,16 @@ export default function Home() {
   ): InventoryFormValues[] => {
     if (!query.trim()) return items;
 
-    const searchTerms = query.toLowerCase().trim().split(/\s+/);
+    // Pre-process the query to handle multi-word patterns like "box 1" or "box 1-20"
+    let processedQuery = query.toLowerCase().trim();
+
+    // Replace "box " patterns with "box=" to normalize them
+    processedQuery = processedQuery.replace(
+      /\bbox\s+(\d+(?:-\d+)?)/g,
+      "box=$1",
+    );
+
+    const searchTerms = processedQuery.split(/\s+/);
 
     return items.filter((item) => {
       return searchTerms.every((term) => {
@@ -132,8 +141,7 @@ export default function Home() {
           }
         }
 
-        // Handle box searches (box 1, box 10-20, etc.)
-        // Handle box= searches (box=1, box=10-20)
+        // Handle box searches (box=1, box=10-20)
         if (term.match(/^box=(\d+)-(\d+)$/)) {
           const match = term.match(/^box=(\d+)-(\d+)$/);
           if (match) {
@@ -226,7 +234,7 @@ export default function Home() {
       <div className="mb-6">
         <div className="relative">
           <Input
-            placeholder="box=1 white year=2020 weight<1"
+            placeholder="box 1 white year=2020 weight<1"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10 pr-10"
