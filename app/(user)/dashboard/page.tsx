@@ -47,13 +47,18 @@ export default function Home() {
     });
     setData(sortedRows);
     sessionStorage.setItem("inventoryData", JSON.stringify(sortedRows));
+    sessionStorage.setItem("inventoryDataUpdatedAt", new Date().toISOString());
+    setLastUpdated(new Date());
     setLoading(false);
   };
 
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   useEffect(() => {
     const cached = sessionStorage.getItem("inventoryData");
+    const cachedAt = sessionStorage.getItem("inventoryDataUpdatedAt");
     if (cached) {
       setData(JSON.parse(cached));
+      if (cachedAt) setLastUpdated(new Date(cachedAt));
       setLoading(false);
     } else {
       fetchAndCacheData();
@@ -196,12 +201,18 @@ export default function Home() {
       <div className="mb-6 flex flex-row items-center justify-between gap-2 flex-wrap">
         <div className="flex flex-col">
           <h1 className="text-2xl font-bold">Dashboard</h1>
+          <span className="text-xs text-gray-500 mt-1">
+            {lastUpdated
+              ? `Data last updated at: ${lastUpdated.toLocaleString()}`
+              : ""}
+          </span>
         </div>
         <Button
           variant="outline"
           className="flex items-center justify-center gap-2"
           onClick={() => {
             sessionStorage.removeItem("inventoryData");
+            sessionStorage.removeItem("inventoryDataUpdatedAt");
             fetchAndCacheData();
           }}
           disabled={loading}
