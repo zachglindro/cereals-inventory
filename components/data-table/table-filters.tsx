@@ -46,7 +46,7 @@ export function TableFilters({
         type="number"
         placeholder="Box #"
         className="w-20 sm:w-28 md:w-36 lg:w-48 appearance-none [&::-webkit-inner-spin-button]:hidden [&::-webkit-outer-spin-button]:hidden [&::-moz-appearance-textfield]:appearance-none"
-        value={filterState["box_number"]?.numericValue ?? ""}
+        value={filterState["box_number"] && filterState["box_number"].type === "numeric" ? filterState["box_number"].numericValue ?? "" : ""}
         onChange={(e) => {
           const val = e.target.value;
           const num = parseFloat(val);
@@ -152,7 +152,7 @@ export function TableFilters({
                 <Input
                   type="text"
                   placeholder={`Search ${label.toLowerCase()}...`}
-                  value={filterState[field]?.textValue ?? ""}
+                  value={filterState[field] && filterState[field].type === "text" ? filterState[field].textValue ?? "" : ""}
                   onChange={(e) => {
                     const val = e.target.value;
                     onFilterChange(
@@ -164,12 +164,108 @@ export function TableFilters({
               </div>
             ))}
 
-            {/* Numeric filters with addable conditions */}
-            {[
-              { label: "Year", field: "year" },
-              { label: "Weight", field: "weight" },
-            ].map(({ label, field }) => {
-              // Support multiple numeric conditions per field
+            {/* Year filter: string-based, UI same as numeric */}
+            {[{ label: "Year", field: "year" }].map(({ label, field }) => {
+              let conditions: FilterValue[] = Array.isArray(filterState[field])
+                ? (filterState[field] as FilterValue[])
+                : filterState[field]
+                  ? [filterState[field] as FilterValue]
+                  : [];
+              if (conditions.length === 0) {
+                conditions = [
+                  {
+                    type: "string" as const,
+                    stringOperator: "=" as const,
+                    stringValue: "",
+                  },
+                ];
+              }
+              return (
+                <div key={field}>
+                  <div className="font-medium mb-1 flex items-center justify-between">
+                    <span>{label}</span>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="ml-2"
+                      onClick={() => {
+                        const next = [
+                          ...conditions,
+                          {
+                            type: "string" as const,
+                            stringOperator: "=" as const,
+                            stringValue: "",
+                          },
+                        ];
+                        onFilterChange(field, next);
+                      }}
+                      aria-label={`Add ${label} condition`}
+                    >
+                      <span className="text-lg">+</span>
+                    </Button>
+                  </div>
+                  <div className="space-y-2">
+                    {conditions.map((cond, idx) => (
+                      <div key={idx} className="flex items-center gap-2">
+                        {cond.type === "string" && (
+                          <>
+                            <select
+                              className="border rounded px-2 py-1 text-sm"
+                              value={cond.stringOperator}
+                              onChange={(e) => {
+                                const op = e.target.value as
+                                  | ">"
+                                  | ">="
+                                  | "<="
+                                  | "="
+                                  | "range";
+                                const next = conditions.map((c, i) =>
+                                  i === idx && c.type === "string" ? { ...c, stringOperator: op } : c,
+                                );
+                                onFilterChange(field, next);
+                              }}
+                            >
+                              <option value=">">&gt;</option>
+                              <option value=">=">&ge;</option>
+                              <option value="<=">&le;</option>
+                              <option value="=">=</option>
+                              <option value="range">range</option>
+                            </select>
+                            <Input
+                              type="text"
+                              className="w-24"
+                              value={cond.stringValue ?? ""}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                const next = conditions.map((c, i) =>
+                                  i === idx && c.type === "string" ? { ...c, stringValue: val } : c,
+                                );
+                                onFilterChange(field, next);
+                              }}
+                            />
+                          </>
+                        )}
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-destructive"
+                          onClick={() => {
+                            const next = conditions.filter((_, i) => i !== idx);
+                            onFilterChange(field, next.length ? next : null);
+                          }}
+                          aria-label={`Remove ${label} condition`}
+                        >
+                          &times;
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+
+            {/* Weight filter: numeric, unchanged */}
+            {[{ label: "Weight", field: "weight" }].map(({ label, field }) => {
               let conditions: FilterValue[] = Array.isArray(filterState[field])
                 ? (filterState[field] as FilterValue[])
                 : filterState[field]
@@ -211,41 +307,45 @@ export function TableFilters({
                   <div className="space-y-2">
                     {conditions.map((cond, idx) => (
                       <div key={idx} className="flex items-center gap-2">
-                        <select
-                          className="border rounded px-2 py-1 text-sm"
-                          value={cond.numericOperator}
-                          onChange={(e) => {
-                            const op = e.target.value as
-                              | ">"
-                              | ">="
-                              | "<="
-                              | "="
-                              | "range";
-                            const next = conditions.map((c, i) =>
-                              i === idx ? { ...c, numericOperator: op } : c,
-                            );
-                            onFilterChange(field, next);
-                          }}
-                        >
-                          <option value=">">&gt;</option>
-                          <option value=">=">&ge;</option>
-                          <option value="<=">&le;</option>
-                          <option value="=">=</option>
-                          <option value="range">range</option>
-                        </select>
-                        <Input
-                          type="number"
-                          className="w-24"
-                          value={cond.numericValue ?? 0}
-                          onChange={(e) => {
-                            const val = e.target.value;
-                            const num = val === "" ? 0 : parseFloat(val);
-                            const next = conditions.map((c, i) =>
-                              i === idx ? { ...c, numericValue: num } : c,
-                            );
-                            onFilterChange(field, next);
-                          }}
-                        />
+                        {cond.type === "numeric" && (
+                          <>
+                            <select
+                              className="border rounded px-2 py-1 text-sm"
+                              value={cond.numericOperator}
+                              onChange={(e) => {
+                                const op = e.target.value as
+                                  | ">"
+                                  | ">="
+                                  | "<="
+                                  | "="
+                                  | "range";
+                                const next = conditions.map((c, i) =>
+                                  i === idx && c.type === "numeric" ? { ...c, numericOperator: op } : c,
+                                );
+                                onFilterChange(field, next);
+                              }}
+                            >
+                              <option value=">">&gt;</option>
+                              <option value=">=">&ge;</option>
+                              <option value="<=">&le;</option>
+                              <option value="=">=</option>
+                              <option value="range">range</option>
+                            </select>
+                            <Input
+                              type="number"
+                              className="w-24"
+                              value={cond.numericValue ?? 0}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                const num = val === "" ? 0 : parseFloat(val);
+                                const next = conditions.map((c, i) =>
+                                  i === idx && c.type === "numeric" ? { ...c, numericValue: num } : c,
+                                );
+                                onFilterChange(field, next);
+                              }}
+                            />
+                          </>
+                        )}
                         <Button
                           variant="ghost"
                           size="icon"

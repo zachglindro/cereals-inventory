@@ -22,14 +22,27 @@ import {
   type InventoryFormValues,
 } from "@/lib/schemas/inventory";
 
-export type FilterValue = {
-  type: "multi" | "numeric" | "text";
-  values?: string[];
-  numericOperator?: ">" | ">=" | "<=" | "=" | "range";
-  numericValue?: number;
-  numericValue2?: number; // for range
-  textValue?: string;
-};
+export type FilterValue =
+  | {
+      type: "multi";
+      values: string[];
+    }
+  | {
+      type: "numeric";
+      numericOperator: ">" | ">=" | "<=" | "=" | "range";
+      numericValue: number;
+      numericValue2?: number; // for range
+    }
+  | {
+      type: "text";
+      textValue: string;
+    }
+  | {
+      type: "string";
+      stringOperator: ">" | ">=" | "<" | "<=" | "=" | "range";
+      stringValue: string;
+      stringValue2?: string; // for range
+    };
 
 export type FilterState = Record<string, FilterValue>;
 
@@ -84,19 +97,19 @@ export function FilterControl({
   };
 
   const handleMultiSelect = (value: string, checked: boolean) => {
-    const currentValues = currentFilter?.values || [];
-    const newValues = checked
-      ? [...currentValues, value]
-      : currentValues.filter((v) => v !== value);
+  const currentValues = currentFilter && currentFilter.type === "multi" ? currentFilter.values : [];
+  const newValues = checked
+    ? [...currentValues, value]
+    : currentValues.filter((v) => v !== value);
 
-    if (newValues.length === 0) {
-      onFilterChange(fieldName as string, null);
-    } else {
-      onFilterChange(fieldName as string, {
-        type: "multi",
-        values: newValues,
-      });
-    }
+  if (newValues.length === 0) {
+    onFilterChange(fieldName as string, null);
+  } else {
+    onFilterChange(fieldName as string, {
+      type: "multi",
+      values: newValues,
+    });
+  }
   };
 
   const handleNumericFilter = (
@@ -136,7 +149,7 @@ export function FilterControl({
   };
 
   const hasActiveFilter = currentFilter != null;
-  const selectedCount = currentFilter?.values?.length || 0;
+  const selectedCount = currentFilter && currentFilter.type === "multi" ? currentFilter.values.length : 0;
 
   return (
     <div className="space-y-2 m-4">
@@ -154,11 +167,13 @@ export function FilterControl({
                     ? selectedCount > 0
                       ? `${selectedCount} selected`
                       : "Filter..."
-                    : `${currentFilter.numericOperator} ${currentFilter.numericValue}${
-                        currentFilter.numericOperator === "range"
-                          ? ` - ${currentFilter.numericValue2}`
-                          : ""
-                      }`}
+                    : currentFilter.type === "numeric"
+                      ? `${currentFilter.numericOperator} ${currentFilter.numericValue}${
+                          currentFilter.numericOperator === "range"
+                            ? ` - ${currentFilter.numericValue2}`
+                            : ""
+                        }`
+                      : "Filter..."}
                 </>
               ) : (
                 "Filter..."
@@ -182,7 +197,9 @@ export function FilterControl({
                       <Checkbox
                         id={`${fieldName}-${value}`}
                         checked={
-                          currentFilter?.values?.includes(value) || false
+                          currentFilter && currentFilter.type === "multi"
+                            ? currentFilter.values.includes(value)
+                            : false
                         }
                         onCheckedChange={(checked) =>
                           handleMultiSelect(value, checked as boolean)
@@ -208,11 +225,11 @@ export function FilterControl({
             )}
 
             {/* Single-number input for box number */}
-            {isBoxNumberField && (
+            {isBoxNumberField && currentFilter && currentFilter.type === "numeric" && (
               <Input
                 type="number"
                 placeholder="Box number"
-                value={currentFilter?.numericValue ?? ""}
+                value={currentFilter.numericValue ?? ""}
                 onChange={(e) => {
                   const val = e.target.value;
                   const num = parseFloat(val);
@@ -229,10 +246,10 @@ export function FilterControl({
               />
             )}
             {/* Numeric filter for weight */}
-            {isNumericField && (
+            {isNumericField && currentFilter && currentFilter.type === "numeric" && (
               <div className="space-y-3">
                 <Select
-                  value={currentFilter?.numericOperator || ""}
+                  value={currentFilter.numericOperator || ""}
                   onValueChange={(operator) => {
                     if (operator === "range") {
                       // Initialize range with empty values
@@ -243,7 +260,7 @@ export function FilterControl({
                         numericValue2: 0,
                       });
                     } else {
-                      const value = currentFilter?.numericValue || 0;
+                      const value = currentFilter.numericValue || 0;
                       handleNumericFilter(operator, String(value));
                     }
                   }}
@@ -262,14 +279,14 @@ export function FilterControl({
                   </SelectContent>
                 </Select>
 
-                {currentFilter?.numericOperator === "range" ? (
+                {currentFilter.numericOperator === "range" ? (
                   <div className="flex items-center space-x-2">
                     <Input
                       type="number"
                       placeholder="Min"
-                      value={currentFilter?.numericValue || ""}
+                      value={currentFilter.numericValue || ""}
                       onChange={(e) => {
-                        const max = currentFilter?.numericValue2 || 0;
+                        const max = currentFilter.numericValue2 || 0;
                         handleNumericFilter(
                           "range",
                           e.target.value,
@@ -281,9 +298,9 @@ export function FilterControl({
                     <Input
                       type="number"
                       placeholder="Max"
-                      value={currentFilter?.numericValue2 || ""}
+                      value={currentFilter.numericValue2 || ""}
                       onChange={(e) => {
-                        const min = currentFilter?.numericValue || 0;
+                        const min = currentFilter.numericValue || 0;
                         handleNumericFilter(
                           "range",
                           String(min),
@@ -292,14 +309,14 @@ export function FilterControl({
                       }}
                     />
                   </div>
-                ) : currentFilter?.numericOperator ? (
+                ) : currentFilter.numericOperator ? (
                   <Input
                     type="number"
                     placeholder="Enter value"
-                    value={currentFilter?.numericValue || ""}
+                    value={currentFilter.numericValue || ""}
                     onChange={(e) => {
                       handleNumericFilter(
-                        currentFilter.numericOperator!,
+                        currentFilter.numericOperator,
                         e.target.value,
                       );
                     }}
@@ -312,9 +329,9 @@ export function FilterControl({
       </Popover>
 
       {/* Show active filter badges */}
-      {hasActiveFilter && (
+      {hasActiveFilter && currentFilter.type === "multi" && (
         <div className="flex flex-wrap gap-1">
-          {currentFilter.values?.map((value) => (
+          {currentFilter.values.map((value) => (
             <Badge
               key={value}
               variant="secondary"

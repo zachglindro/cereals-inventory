@@ -45,6 +45,31 @@ export const globalFilterFn = <TData>(
           }
           break;
       }
+    } else if (filter.type === "string" && filter.stringOperator && filter.stringValue !== undefined) {
+      const strValue = String(cellValue || "");
+      const filterValue = filter.stringValue;
+      switch (filter.stringOperator) {
+        case ">":
+          if (!(strValue > filterValue)) return false;
+          break;
+        case ">=":
+          if (!(strValue >= filterValue)) return false;
+          break;
+        case "<":
+          if (!(strValue < filterValue)) return false;
+          break;
+        case "<=":
+          if (!(strValue <= filterValue)) return false;
+          break;
+        case "=":
+          if (strValue !== filterValue) return false;
+          break;
+        case "range":
+          if (filter.stringValue2 !== undefined) {
+            if (!(strValue >= filterValue && strValue <= filter.stringValue2)) return false;
+          }
+          break;
+      }
     } else if (filter.type === "text" && filter.textValue) {
       if (
         !String(cellValue)
