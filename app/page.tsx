@@ -41,14 +41,14 @@ export default function Login() {
   const { handleSignOut } = useAuth();
   const tableColumns = columns as ColumnDef<InventoryFormValues, unknown>[];
 
-  // Create custom columns for scanned data view - only weight is editable
+  // Create custom columns for scanned data view - only weight and remarks are editable
   const scannedDataColumns = tableColumns
     .filter((col) => col.id !== "box_number" && col.id !== "shelf_code")
     .map((col) => ({
       ...col,
       meta: {
         ...col.meta,
-        editable: col.id === "weight", // Only weight field is editable
+        editable: col.id === "weight" || col.id === "remarks", // Weight and remarks fields are editable
       },
     }));
 
@@ -311,13 +311,15 @@ export default function Login() {
                     : null,
                 );
               } else if (updated) {
-                // Get previous value for history BEFORE updating state
+                // Get previous values for history BEFORE updating state
                 let prevWeight: any = undefined;
+                let prevRemarks: any = undefined;
                 if (scannedData) {
                   const found = scannedData.inventory.find(
                     (item) => item.id === updated.id,
                   );
                   prevWeight = found ? found.weight : undefined;
+                  prevRemarks = found ? found.remarks : undefined;
                 }
 
                 // Update local state immediately
@@ -336,24 +338,36 @@ export default function Login() {
                   if (!updated.id) throw new Error("Document ID is missing.");
                   const docRef = doc(db, "inventory", updated.id);
 
-                  await updateDoc(docRef, { weight: updated.weight });
+                  // Only update fields that changed
+                  const updatePayload: any = {};
+                  const changes: any = {};
+                  if (updated.weight !== prevWeight) {
+                    updatePayload.weight = updated.weight;
+                    changes.weight = { from: prevWeight, to: updated.weight };
+                  }
+                  if (updated.remarks !== prevRemarks) {
+                    updatePayload.remarks = updated.remarks;
+                    changes.remarks = {
+                      from: prevRemarks,
+                      to: updated.remarks,
+                    };
+                  }
 
-                  // Add to history subcollection with changes
-                  const historyRef = collection(docRef, "history");
-                  await setDoc(doc(historyRef), {
-                    creatorId: "anonymous",
-                    editedAt: serverTimestamp(),
-                    editedBy: "Anonymous (logged out user)",
-                    changes: {
-                      weight: {
-                        from: prevWeight,
-                        to: updated.weight,
-                      },
-                    },
-                  });
+                  if (Object.keys(updatePayload).length > 0) {
+                    await updateDoc(docRef, updatePayload);
+
+                    // Add to history subcollection with changes
+                    const historyRef = collection(docRef, "history");
+                    await setDoc(doc(historyRef), {
+                      creatorId: "anonymous",
+                      editedAt: serverTimestamp(),
+                      editedBy: "Anonymous (logged out user)",
+                      changes,
+                    });
+                  }
                 } catch (error) {
                   console.error("Error updating document: ", error);
-                  toast.error("Failed to update weight.");
+                  toast.error("Failed to update item.");
                 }
               }
             }}
