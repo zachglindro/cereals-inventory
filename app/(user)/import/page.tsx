@@ -101,7 +101,7 @@ export default function BulkAdd() {
 
   // Map enum fields to their allowed values for friendlier error messages
   const enumOptions: Record<string, string[]> = {
-    location: ["LBTR", "LBPD", "CMU"],
+    area_planted: ["LBTR", "LBPD", "CMU"],
     type: ["white", "yellow", "sorghum", "special maize"],
     season: ["wet", "dry"],
   };
@@ -361,28 +361,28 @@ export default function BulkAdd() {
   // Add Generate Template handler
   const handleGenerateTemplate = () => {
     const headers = [
+      "Box Number",
+      "Shelf Code",
       "Type",
       "Area Planted",
       "Year(s)",
       "Season",
-      "Box Number",
       "Location",
-      "Shelf Code",
       "Description",
       "Pedigree",
       "Weight (kg)",
       "Remarks",
     ];
     const sampleData = [
+      1,
+      "A",
       "white",
-      "LBPD",
+      "A1 East",
       "2025",
       "wet",
-      1,
-      "A1 East",
-      "S-12",
+      "LBPD",
       "Sample description",
-      "Sample pedigree",
+      "S-12",
       1.23,
       "",
     ];
