@@ -46,6 +46,7 @@ export function InventoryForm() {
       year: "",
       season: "wet",
       location: "",
+      shelf_code: "",
       description: "",
       pedigree: "",
       remarks: "",
@@ -107,6 +108,19 @@ export function InventoryForm() {
                       );
                     }}
                   />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="shelf_code"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Shelf Code</FormLabel>
+                <FormControl>
+                  <Input {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

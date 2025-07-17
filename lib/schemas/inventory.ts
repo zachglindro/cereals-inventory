@@ -18,6 +18,7 @@ export const inventoryFormSchema = z.object({
   season: z.enum(seasonOptions),
   box_number: z.number().int().gte(0, { message: "Required" }),
   location: z.string().min(1, "Required"),
+  shelf_code: z.string().min(1, "Required"),
   description: z.string().min(1, "Required"),
   pedigree: z.string().min(1, "Required"),
   weight: z.number().gte(0, { message: "Required" }),
