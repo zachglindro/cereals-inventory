@@ -34,6 +34,7 @@ export default function Update() {
   const [showGenerateQrDialog, setShowGenerateQrDialog] = useState(false);
   const [boxNumberInput, setBoxNumberInput] = useState("");
   const [generatedUuid, setGeneratedUuid] = useState("");
+  const [lastGeneratedBoxNumber, setLastGeneratedBoxNumber] = useState("");
   const [isLoadingQr, setIsLoadingQr] = useState(false);
   const [isLoadingPrintAll, setIsLoadingPrintAll] = useState(false);
   const [error, setError] = useState("");
@@ -69,6 +70,7 @@ export default function Update() {
         });
       }
       setGeneratedUuid(uuid);
+      setLastGeneratedBoxNumber(boxNumberInput);
     } catch (e) {
       console.error("Error generating QR code:", e);
       setError("An error occurred while generating the QR code.");
@@ -305,7 +307,7 @@ export default function Update() {
                   level="H"
                 />
                 <div className="mt-1 text-xl font-bold">
-                  Box #{boxNumberInput}
+                  Box #{lastGeneratedBoxNumber}
                 </div>
               </div>
             )}
