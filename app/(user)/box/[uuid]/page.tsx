@@ -1,8 +1,9 @@
 "use client";
 import { useParams } from "next/navigation";
 import { useState, useEffect } from "react";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { collection, getDocs, query, where, doc, updateDoc, addDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { useUser } from "@/context/UserContext";
 import { DataTable } from "@/components/data-table/index";
 import { columns } from "@/lib/schemas/columns";
 import type { InventoryFormValues } from "@/lib/schemas/inventory";
@@ -11,6 +12,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 export default function Entry() {
   const params = useParams();
   const uuid = params.uuid;
+  const { profile } = useUser();
   const [data, setData] = useState<InventoryFormValues[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -93,15 +95,42 @@ export default function Entry() {
             { label: "Pedigree", fieldName: "pedigree" },
             { label: "Weight", fieldName: "weight" },
           ]}
-          onRowUpdate={(updated: InventoryFormValues) => {
+          onRowUpdate={async (updated: InventoryFormValues) => {
             if (updated && (updated as any).deleted) {
               // Remove the deleted row
               setData((prev) => prev.filter((item) => item.id !== updated.id));
             } else if (updated) {
-              // Update the row
+              // Update the row in UI
               setData((prev) =>
                 prev.map((item) => (item.id === updated.id ? updated : item)),
               );
+              // Update Firestore and add to history
+              try {
+                const { id, ...fields } = updated;
+                const docRef = doc(db, "inventory", id!);
+                const prev = data.find((item) => item.id === id);
+                await updateDoc(docRef, fields as any);
+                let changes: Record<string, { from: any; to: any }> = {};
+                if (prev) {
+                  Object.keys(fields).forEach((key) => {
+                    if ((prev as any)[key] !== (fields as any)[key]) {
+                      changes[key] = {
+                        from: (prev as any)[key],
+                        to: (fields as any)[key],
+                      };
+                    }
+                  });
+                }
+                const histCol = collection(db, "inventory", id!, "history");
+                await addDoc(histCol, {
+                  editedBy: profile?.displayName || profile?.email || "Unknown",
+                  editedAt: serverTimestamp(),
+                  creatorId: profile?.uid,
+                  changes,
+                });
+              } catch (err) {
+                console.error("Error updating document or writing history:", err);
+              }
             }
           }}
         />
