@@ -46,7 +46,12 @@ export function TableFilters({
         type="number"
         placeholder="Box #"
         className="w-20 sm:w-28 md:w-36 lg:w-48 appearance-none [&::-webkit-inner-spin-button]:hidden [&::-webkit-outer-spin-button]:hidden [&::-moz-appearance-textfield]:appearance-none"
-        value={filterState["box_number"] && filterState["box_number"].type === "numeric" ? filterState["box_number"].numericValue ?? "" : ""}
+        value={
+          filterState["box_number"] &&
+          filterState["box_number"].type === "numeric"
+            ? (filterState["box_number"].numericValue ?? "")
+            : ""
+        }
         onChange={(e) => {
           const val = e.target.value;
           const num = parseFloat(val);
@@ -152,7 +157,11 @@ export function TableFilters({
                 <Input
                   type="text"
                   placeholder={`Search ${label.toLowerCase()}...`}
-                  value={filterState[field] && filterState[field].type === "text" ? filterState[field].textValue ?? "" : ""}
+                  value={
+                    filterState[field] && filterState[field].type === "text"
+                      ? (filterState[field].textValue ?? "")
+                      : ""
+                  }
                   onChange={(e) => {
                     const val = e.target.value;
                     onFilterChange(
@@ -220,7 +229,9 @@ export function TableFilters({
                                   | "="
                                   | "range";
                                 const next = conditions.map((c, i) =>
-                                  i === idx && c.type === "string" ? { ...c, stringOperator: op } : c,
+                                  i === idx && c.type === "string"
+                                    ? { ...c, stringOperator: op }
+                                    : c,
                                 );
                                 onFilterChange(field, next);
                               }}
@@ -238,7 +249,9 @@ export function TableFilters({
                               onChange={(e) => {
                                 const val = e.target.value;
                                 const next = conditions.map((c, i) =>
-                                  i === idx && c.type === "string" ? { ...c, stringValue: val } : c,
+                                  i === idx && c.type === "string"
+                                    ? { ...c, stringValue: val }
+                                    : c,
                                 );
                                 onFilterChange(field, next);
                               }}
@@ -320,7 +333,9 @@ export function TableFilters({
                                   | "="
                                   | "range";
                                 const next = conditions.map((c, i) =>
-                                  i === idx && c.type === "numeric" ? { ...c, numericOperator: op } : c,
+                                  i === idx && c.type === "numeric"
+                                    ? { ...c, numericOperator: op }
+                                    : c,
                                 );
                                 onFilterChange(field, next);
                               }}
@@ -339,7 +354,9 @@ export function TableFilters({
                                 const val = e.target.value;
                                 const num = val === "" ? 0 : parseFloat(val);
                                 const next = conditions.map((c, i) =>
-                                  i === idx && c.type === "numeric" ? { ...c, numericValue: num } : c,
+                                  i === idx && c.type === "numeric"
+                                    ? { ...c, numericValue: num }
+                                    : c,
                                 );
                                 onFilterChange(field, next);
                               }}

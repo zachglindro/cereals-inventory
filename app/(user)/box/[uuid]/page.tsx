@@ -1,7 +1,16 @@
 "use client";
 import { useParams } from "next/navigation";
 import { useState, useEffect } from "react";
-import { collection, getDocs, query, where, doc, updateDoc, addDoc, serverTimestamp } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  query,
+  where,
+  doc,
+  updateDoc,
+  addDoc,
+  serverTimestamp,
+} from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useUser } from "@/context/UserContext";
 import { DataTable } from "@/components/data-table/index";
@@ -129,7 +138,10 @@ export default function Entry() {
                   changes,
                 });
               } catch (err) {
-                console.error("Error updating document or writing history:", err);
+                console.error(
+                  "Error updating document or writing history:",
+                  err,
+                );
               }
             }
           }}

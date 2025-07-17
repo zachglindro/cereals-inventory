@@ -97,19 +97,22 @@ export function FilterControl({
   };
 
   const handleMultiSelect = (value: string, checked: boolean) => {
-  const currentValues = currentFilter && currentFilter.type === "multi" ? currentFilter.values : [];
-  const newValues = checked
-    ? [...currentValues, value]
-    : currentValues.filter((v) => v !== value);
+    const currentValues =
+      currentFilter && currentFilter.type === "multi"
+        ? currentFilter.values
+        : [];
+    const newValues = checked
+      ? [...currentValues, value]
+      : currentValues.filter((v) => v !== value);
 
-  if (newValues.length === 0) {
-    onFilterChange(fieldName as string, null);
-  } else {
-    onFilterChange(fieldName as string, {
-      type: "multi",
-      values: newValues,
-    });
-  }
+    if (newValues.length === 0) {
+      onFilterChange(fieldName as string, null);
+    } else {
+      onFilterChange(fieldName as string, {
+        type: "multi",
+        values: newValues,
+      });
+    }
   };
 
   const handleNumericFilter = (
@@ -149,7 +152,10 @@ export function FilterControl({
   };
 
   const hasActiveFilter = currentFilter != null;
-  const selectedCount = currentFilter && currentFilter.type === "multi" ? currentFilter.values.length : 0;
+  const selectedCount =
+    currentFilter && currentFilter.type === "multi"
+      ? currentFilter.values.length
+      : 0;
 
   return (
     <div className="space-y-2 m-4">
@@ -225,105 +231,111 @@ export function FilterControl({
             )}
 
             {/* Single-number input for box number */}
-            {isBoxNumberField && currentFilter && currentFilter.type === "numeric" && (
-              <Input
-                type="number"
-                placeholder="Box number"
-                value={currentFilter.numericValue ?? ""}
-                onChange={(e) => {
-                  const val = e.target.value;
-                  const num = parseFloat(val);
-                  if (val === "" || isNaN(num)) {
-                    clearFilter();
-                  } else {
-                    onFilterChange(fieldName as string, {
-                      type: "numeric",
-                      numericOperator: "=",
-                      numericValue: num,
-                    });
-                  }
-                }}
-              />
-            )}
-            {/* Numeric filter for weight */}
-            {isNumericField && currentFilter && currentFilter.type === "numeric" && (
-              <div className="space-y-3">
-                <Select
-                  value={currentFilter.numericOperator || ""}
-                  onValueChange={(operator) => {
-                    if (operator === "range") {
-                      // Initialize range with empty values
+            {isBoxNumberField &&
+              currentFilter &&
+              currentFilter.type === "numeric" && (
+                <Input
+                  type="number"
+                  placeholder="Box number"
+                  value={currentFilter.numericValue ?? ""}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    const num = parseFloat(val);
+                    if (val === "" || isNaN(num)) {
+                      clearFilter();
+                    } else {
                       onFilterChange(fieldName as string, {
                         type: "numeric",
-                        numericOperator: "range",
-                        numericValue: 0,
-                        numericValue2: 0,
+                        numericOperator: "=",
+                        numericValue: num,
                       });
-                    } else {
-                      const value = currentFilter.numericValue || 0;
-                      handleNumericFilter(operator, String(value));
                     }
                   }}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select operator" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value=">">&gt; Greater than</SelectItem>
-                    <SelectItem value=">=">
-                      &gt;= Greater than or equal
-                    </SelectItem>
-                    <SelectItem value="<=">&lt;= Less than or equal</SelectItem>
-                    <SelectItem value="=">=Equal to</SelectItem>
-                    <SelectItem value="range">Range</SelectItem>
-                  </SelectContent>
-                </Select>
+                />
+              )}
+            {/* Numeric filter for weight */}
+            {isNumericField &&
+              currentFilter &&
+              currentFilter.type === "numeric" && (
+                <div className="space-y-3">
+                  <Select
+                    value={currentFilter.numericOperator || ""}
+                    onValueChange={(operator) => {
+                      if (operator === "range") {
+                        // Initialize range with empty values
+                        onFilterChange(fieldName as string, {
+                          type: "numeric",
+                          numericOperator: "range",
+                          numericValue: 0,
+                          numericValue2: 0,
+                        });
+                      } else {
+                        const value = currentFilter.numericValue || 0;
+                        handleNumericFilter(operator, String(value));
+                      }
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select operator" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value=">">&gt; Greater than</SelectItem>
+                      <SelectItem value=">=">
+                        &gt;= Greater than or equal
+                      </SelectItem>
+                      <SelectItem value="<=">
+                        &lt;= Less than or equal
+                      </SelectItem>
+                      <SelectItem value="=">=Equal to</SelectItem>
+                      <SelectItem value="range">Range</SelectItem>
+                    </SelectContent>
+                  </Select>
 
-                {currentFilter.numericOperator === "range" ? (
-                  <div className="flex items-center space-x-2">
+                  {currentFilter.numericOperator === "range" ? (
+                    <div className="flex items-center space-x-2">
+                      <Input
+                        type="number"
+                        placeholder="Min"
+                        value={currentFilter.numericValue || ""}
+                        onChange={(e) => {
+                          const max = currentFilter.numericValue2 || 0;
+                          handleNumericFilter(
+                            "range",
+                            e.target.value,
+                            String(max),
+                          );
+                        }}
+                      />
+                      <span>-</span>
+                      <Input
+                        type="number"
+                        placeholder="Max"
+                        value={currentFilter.numericValue2 || ""}
+                        onChange={(e) => {
+                          const min = currentFilter.numericValue || 0;
+                          handleNumericFilter(
+                            "range",
+                            String(min),
+                            e.target.value,
+                          );
+                        }}
+                      />
+                    </div>
+                  ) : currentFilter.numericOperator ? (
                     <Input
                       type="number"
-                      placeholder="Min"
+                      placeholder="Enter value"
                       value={currentFilter.numericValue || ""}
                       onChange={(e) => {
-                        const max = currentFilter.numericValue2 || 0;
                         handleNumericFilter(
-                          "range",
-                          e.target.value,
-                          String(max),
-                        );
-                      }}
-                    />
-                    <span>-</span>
-                    <Input
-                      type="number"
-                      placeholder="Max"
-                      value={currentFilter.numericValue2 || ""}
-                      onChange={(e) => {
-                        const min = currentFilter.numericValue || 0;
-                        handleNumericFilter(
-                          "range",
-                          String(min),
+                          currentFilter.numericOperator,
                           e.target.value,
                         );
                       }}
                     />
-                  </div>
-                ) : currentFilter.numericOperator ? (
-                  <Input
-                    type="number"
-                    placeholder="Enter value"
-                    value={currentFilter.numericValue || ""}
-                    onChange={(e) => {
-                      handleNumericFilter(
-                        currentFilter.numericOperator,
-                        e.target.value,
-                      );
-                    }}
-                  />
-                ) : null}
-              </div>
-            )}
+                  ) : null}
+                </div>
+              )}
           </div>
         </PopoverContent>
       </Popover>
