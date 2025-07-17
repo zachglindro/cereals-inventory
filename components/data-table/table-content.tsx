@@ -187,15 +187,21 @@ function RowDialog<TData extends Record<string, any>>({
   const [open, setOpen] = useState(false);
   // Store weight as string for input, convert to number on submit
   const initialEditValues = { ...row.original };
-  if (typeof (initialEditValues as any).weight === "number" || typeof (initialEditValues as any).weight === "undefined") {
-    (initialEditValues as any).weight = ((initialEditValues as any).weight?.toString() ?? "");
+  if (
+    typeof (initialEditValues as any).weight === "number" ||
+    typeof (initialEditValues as any).weight === "undefined"
+  ) {
+    (initialEditValues as any).weight =
+      (initialEditValues as any).weight?.toString() ?? "";
   }
   const [editValues, setEditValues] = useState(initialEditValues);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [weightError, setWeightError] = useState<string | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
+  const [requiredError, setRequiredError] = useState<string | null>(null);
+  const [missingFields, setMissingFields] = useState<string[]>([]);
   const [justEdited, setJustEdited] = useState(false);
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const { profile } = useUser();
 
   // Get editable fields from column metadata
@@ -242,14 +248,47 @@ function RowDialog<TData extends Record<string, any>>({
   };
   const handleSubmit = async () => {
     setWeightError(null);
+    setRequiredError(null);
     // Check if weight is a valid number
     const weightValue = (editValues as any).weight;
-    const parsedWeight = typeof weightValue === "string" ? parseFloat(weightValue) : weightValue;
-    if (weightValue === undefined || weightValue === null || weightValue === "" || isNaN(parsedWeight)) {
+    const parsedWeight =
+      typeof weightValue === "string" ? parseFloat(weightValue) : weightValue;
+    if (
+      weightValue === undefined ||
+      weightValue === null ||
+      weightValue === "" ||
+      isNaN(parsedWeight)
+    ) {
       setWeightError("Weight must be a valid number.");
       return;
     }
-    setIsSubmitting(true);
+    // Check required fields (all except remarks)
+    const requiredFields = [
+      "box_number",
+      "shelf_code",
+      "type",
+      "area_planted",
+      "year",
+      "season",
+      "location",
+      "description",
+      "pedigree",
+      "weight",
+    ];
+    const missing: string[] = [];
+    for (const field of requiredFields) {
+      const val = (editValues as any)[field];
+      if (val === undefined || val === null || val === "") {
+        missing.push(field);
+      }
+    }
+    if (missing.length > 0) {
+      setRequiredError("Please fill in all required fields.");
+      setMissingFields(missing);
+      return;
+    } else {
+      setMissingFields([]);
+    }
     try {
       // Prepare values for saving: convert weight to number if possible
       const valuesToSave = { ...editValues };
@@ -497,7 +536,9 @@ function RowDialog<TData extends Record<string, any>>({
                         aria-invalid={!!weightError}
                       />
                       {weightError && (
-                        <span className="text-red-500 text-xs mt-1">{weightError}</span>
+                        <span className="text-red-500 text-xs mt-1">
+                          {weightError}
+                        </span>
                       )}
                     </div>
                   );
@@ -519,6 +560,9 @@ function RowDialog<TData extends Record<string, any>>({
               .filter(Boolean)}
           </div>
           <DialogFooter className="flex justify-between items-center">
+            {requiredError && (
+              <span className="text-red-500 text-xs ml-2">{requiredError}</span>
+            )}
             <div className="flex w-full items-center">
               {!disableDelete && (
                 <Button
