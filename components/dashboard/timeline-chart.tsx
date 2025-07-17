@@ -40,9 +40,7 @@ export function TimelineChart({ data }: TimelineChartProps) {
       if (!item.addedAt) return;
 
       // Convert Firebase timestamp to Date
-      const date = item.addedAt.toDate
-        ? item.addedAt.toDate()
-        : new Date(item.addedAt);
+      const date = new Date(item.addedAt.seconds * 1000);
 
       let key: string;
       switch (timelineMode) {
