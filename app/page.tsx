@@ -43,7 +43,7 @@ export default function Login() {
 
   // Create custom columns for scanned data view - only weight is editable
   const scannedDataColumns = tableColumns
-    .filter((col) => col.id !== "box_number")
+    .filter((col) => col.id !== "box_number" && col.id !== "shelf_code")
     .map((col) => ({
       ...col,
       meta: {
