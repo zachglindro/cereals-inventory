@@ -185,8 +185,14 @@ function RowDialog<TData extends Record<string, any>>({
   disableDelete?: boolean;
 }) {
   const [open, setOpen] = useState(false);
-  const [editValues, setEditValues] = useState({ ...row.original });
+  // Store weight as string for input, convert to number on submit
+  const initialEditValues = { ...row.original };
+  if (typeof (initialEditValues as any).weight === "number" || typeof (initialEditValues as any).weight === "undefined") {
+    (initialEditValues as any).weight = ((initialEditValues as any).weight?.toString() ?? "");
+  }
+  const [editValues, setEditValues] = useState(initialEditValues);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [weightError, setWeightError] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [justEdited, setJustEdited] = useState(false);
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
@@ -235,50 +241,63 @@ function RowDialog<TData extends Record<string, any>>({
     setEditValues((prev) => ({ ...prev, [key]: value }));
   };
   const handleSubmit = async () => {
+    setWeightError(null);
+    // Check if weight is a valid number
+    const weightValue = (editValues as any).weight;
+    const parsedWeight = typeof weightValue === "string" ? parseFloat(weightValue) : weightValue;
+    if (weightValue === undefined || weightValue === null || weightValue === "" || isNaN(parsedWeight)) {
+      setWeightError("Weight must be a valid number.");
+      return;
+    }
     setIsSubmitting(true);
     try {
+      // Prepare values for saving: convert weight to number if possible
+      const valuesToSave = { ...editValues };
+      if (typeof (valuesToSave as any).weight === "string") {
+        const parsed = parseFloat((valuesToSave as any).weight);
+        (valuesToSave as any).weight = isNaN(parsed) ? null : parsed;
+      }
+      if (typeof (valuesToSave as any).box_number === "string") {
+        const parsedBox = parseFloat((valuesToSave as any).box_number);
+        (valuesToSave as any).box_number = isNaN(parsedBox) ? null : parsedBox;
+      }
+      // Compare original and new values to detect changes
+      const changes: string[] = [];
+      const originalData = row.original;
+      Object.keys(valuesToSave).forEach((key) => {
+        if (key === "id") return;
+        const originalValue = originalData[key];
+        const newValue = valuesToSave[key];
+        if (originalValue !== newValue) {
+          const fieldName = key
+            .replace("_", " ")
+            .replace(/\b\w/g, (l) => l.toUpperCase());
+          changes.push(`${fieldName}: "${originalValue}" → "${newValue}"`);
+        }
+      });
+      // Only update if there are changes
+      if (changes.length === 0) {
+        toast.info("No changes detected.");
+        setIsSubmitting(false);
+        return;
+      }
       const docRef = doc(db, "inventory", String(editValues.id));
-      await updateDoc(docRef, editValues);
-
+      await updateDoc(docRef, valuesToSave);
       // Log activity after successful update
       if (profile) {
-        // Compare original values with edited values to create a detailed message
-        const changes: string[] = [];
-        const originalData = row.original;
-
-        Object.keys(editValues).forEach((key) => {
-          if (key === "id") return; // Skip ID field
-
-          const originalValue = originalData[key];
-          const newValue = editValues[key];
-
-          // Only log if the value actually changed
-          if (originalValue !== newValue) {
-            const fieldName = key
-              .replace("_", " ")
-              .replace(/\b\w/g, (l) => l.toUpperCase());
-            changes.push(`${fieldName}: "${originalValue}" → "${newValue}"`);
-          }
-        });
-
-        const baseMessage = `Updated inventory item (Box ${editValues.box_number} - ${editValues.type})`;
-        const changesMessage =
-          changes.length > 0
-            ? `. Changes: ${changes.join(", ")}`
-            : ". No changes detected";
-
+        const baseMessage = `Updated inventory item (Box ${valuesToSave.box_number} - ${valuesToSave.type})`;
+        const changesMessage = `. Changes: ${changes.join(", ")}`;
         await addDoc(collection(db, "activity"), {
           message: baseMessage + changesMessage,
           loggedAt: new Date(),
           loggedBy: profile.email,
         });
       }
-
       toast.success("Inventory updated successfully!");
       setOpen(false);
       setJustEdited(true);
       setTimeout(() => setJustEdited(false), 1200);
-      onRowUpdate?.(editValues as TData);
+      onRowUpdate?.(valuesToSave as TData);
     } catch (error) {
       console.error("Error updating document: ", error);
       toast.error("Error updating inventory");
@@ -449,7 +468,7 @@ function RowDialog<TData extends Record<string, any>>({
                 }
 
                 // For numeric fields, use number input
-                if (key === "box_number" || key === "weight") {
+                if (key === "box_number") {
                   return (
                     <div key={key} className="flex flex-col space-y-2">
                       <Label className="font-medium capitalize">
@@ -458,10 +477,28 @@ function RowDialog<TData extends Record<string, any>>({
                       <Input
                         type="number"
                         value={String(value)}
-                        onChange={(e) =>
-                          handleChange(key, parseFloat(e.target.value) || 0)
-                        }
+                        onChange={(e) => handleChange(key, e.target.value)}
                       />
+                    </div>
+                  );
+                }
+                if (key === "weight") {
+                  return (
+                    <div key={key} className="flex flex-col space-y-2">
+                      <Label className="font-medium capitalize">
+                        {key.replace("_", " ")}
+                      </Label>
+                      <Input
+                        type="number"
+                        step="any"
+                        value={value ?? ""}
+                        onChange={(e) => handleChange(key, e.target.value)}
+                        inputMode="decimal"
+                        aria-invalid={!!weightError}
+                      />
+                      {weightError && (
+                        <span className="text-red-500 text-xs mt-1">{weightError}</span>
+                      )}
                     </div>
                   );
                 }
@@ -473,7 +510,7 @@ function RowDialog<TData extends Record<string, any>>({
                       {key.replace("_", " ")}
                     </Label>
                     <Input
-                      value={String(value)}
+                      value={value ?? ""}
                       onChange={(e) => handleChange(key, e.target.value)}
                     />
                   </div>
