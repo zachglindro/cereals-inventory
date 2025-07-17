@@ -101,7 +101,12 @@ export function TableFilters({
                     .map((d) => d[field as keyof InventoryFormValues])
                     .filter(Boolean),
                 ),
-              );
+              ).sort((a, b) => {
+                // Sort as strings, case-insensitive
+                return String(a).localeCompare(String(b), undefined, {
+                  sensitivity: "base",
+                });
+              });
               return (
                 <div key={field}>
                   <div className="font-medium mb-1">{label}</div>
