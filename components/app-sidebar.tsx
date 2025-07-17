@@ -9,7 +9,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { Camera, House, Plus, RefreshCw, Sheet, Shield } from "lucide-react";
+import { Camera, House, Shield, Upload } from "lucide-react";
 import Link from "next/link";
 import { useUser } from "@/context/UserContext";
 
@@ -22,7 +22,7 @@ const items = [
   {
     title: "Import",
     url: "/import",
-    icon: Sheet,
+    icon: Upload,
   },
   {
     title: "Scan",
