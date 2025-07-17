@@ -166,6 +166,26 @@ export default function Home() {
 
   return (
     <div className="p-6">
+      {/* Toggleable Scanner for small screens */}
+      <div className="mb-4 block md:hidden">
+        <Button
+          variant={showScanner ? "secondary" : "outline"}
+          className="w-full flex items-center justify-center gap-2 mb-2 h-30 text-base"
+          onClick={() => setShowScanner((prev) => !prev)}
+        >
+          <ScanLine className="h-5 w-5" />
+          {showScanner ? "Hide QR Scanner" : "Scan QR"}
+        </Button>
+        {showScanner && (
+          <>
+            <div className="mb-2 text-center text-sm text-gray-700 font-medium">
+              Scan QR Code
+            </div>
+            <QRScanner />
+          </>
+        )}
+      </div>
+
       <div className="mb-6">
         <h1 className="text-2xl font-bold">Inventory Dashboard</h1>
         <p className="text-gray-600">
@@ -177,7 +197,7 @@ export default function Home() {
       <div className="mb-6">
         <div className="relative">
           <Input
-            placeholder="Search inventory... (e.g., 'box=10-20 white year>=2020 weight<1')"
+            placeholder="box=1 white year=2020 weight<1"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10 pr-10"
@@ -218,26 +238,6 @@ export default function Home() {
             </Button>
           )}
         </div>
-      </div>
-
-      {/* Toggleable Scanner for small screens */}
-      <div className="mb-4 block md:hidden">
-        <Button
-          variant={showScanner ? "secondary" : "outline"}
-          className="w-full flex items-center justify-center gap-2 mb-2"
-          onClick={() => setShowScanner((prev) => !prev)}
-        >
-          <ScanLine className="h-5 w-5" />
-          {showScanner ? "Hide QR Scanner" : "Scan QR"}
-        </Button>
-        {showScanner && (
-          <>
-            <div className="mb-2 text-center text-sm text-gray-700 font-medium">
-              Scan QR Code
-            </div>
-            <QRScanner />
-          </>
-        )}
       </div>
 
       {/* Data Table */}
