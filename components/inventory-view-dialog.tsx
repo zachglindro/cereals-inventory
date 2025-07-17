@@ -117,6 +117,12 @@ export function InventoryViewDialog<TData = any>({
                 </div>
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">
+                    Shelf Code
+                  </label>
+                  <p className="text-sm">{(entry as any).shelf_code}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">
                     Type
                   </label>
                   <p className="text-sm">
