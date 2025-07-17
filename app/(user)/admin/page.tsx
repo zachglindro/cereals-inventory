@@ -918,7 +918,7 @@ export default function Admin() {
               }
             >
               <Database className="w-4 h-4 mr-2" />
-              Firebase Console
+              Database
               <ExternalLink className="w-4 h-4 ml-2" />
             </Button>
           </div>
