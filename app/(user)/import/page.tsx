@@ -101,7 +101,7 @@ export default function BulkAdd() {
 
   // Map enum fields to their allowed values for friendlier error messages
   const enumOptions: Record<string, string[]> = {
-    area_planted: ["LBTR", "LBPD", "CMU"],
+    location: ["LBTR", "LBPD", "CMU"],
     type: ["white", "yellow", "sorghum", "special maize"],
     season: ["wet", "dry"],
   };
