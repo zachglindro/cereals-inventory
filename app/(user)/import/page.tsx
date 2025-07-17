@@ -59,6 +59,7 @@ export default function BulkAdd() {
     Season: "season",
     "Box Number": "box_number",
     Location: "location",
+    "Shelf Code": "shelf_code",
     Description: "description",
     Pedigree: "pedigree",
     "Weight (kg)": "weight",
@@ -82,6 +83,63 @@ export default function BulkAdd() {
     setUnrecognizedColumns(unrecognized);
   };
 
+  // Map schema field names to user-friendly labels
+  const fieldLabels: Record<string, string> = {
+    type: "Type",
+    area_planted: "Area Planted",
+    year: "Year(s)",
+    season: "Season",
+    box_number: "Box Number",
+    location: "Location",
+    shelf_code: "Shelf Code",
+    description: "Description",
+    pedigree: "Pedigree",
+    weight: "Weight (kg)",
+    remarks: "Remarks",
+  };
+
+  // Map enum fields to their allowed values for friendlier error messages
+  const enumOptions: Record<string, string[]> = {
+    area_planted: ["LBTR", "LBPD", "CMU"],
+    type: ["white", "yellow", "sorghum", "special maize"],
+    season: ["wet", "dry"],
+  };
+
+  function friendlyError(field: string, message: string, received?: string) {
+    // Required
+    if (message === "Required") {
+      return `${fieldLabels[field] || field}: This field is required.`;
+    }
+    // Enum
+    if (message.startsWith("Invalid enum value")) {
+      const allowed = enumOptions[field];
+      if (allowed) {
+        return (
+          `${fieldLabels[field] || field}: Must be one of: ${allowed.join(", ")}.` +
+          (received ? ` (Received: '${received}')` : "")
+        );
+      }
+    }
+    // Min length
+    if (message.startsWith("String must contain at least")) {
+      return `${fieldLabels[field] || field}: This field is required.`;
+    }
+    // Number
+    if (message.includes("Expected number")) {
+      return `${fieldLabels[field] || field}: Must be a number.`;
+    }
+    // Int
+    if (message.includes("Expected integer")) {
+      return `${fieldLabels[field] || field}: Must be an integer.`;
+    }
+    // GTE
+    if (message.includes("Number must be greater than or equal to")) {
+      return `${fieldLabels[field] || field}: Must be greater than or equal to 0.`;
+    }
+    // Default fallback
+    return `${fieldLabels[field] || field}: ${message}`;
+  }
+
   const validateSchema = (records: Record<string, unknown>[]) => {
     const errors = records
       .map((row, idx) => {
@@ -89,9 +147,19 @@ export default function BulkAdd() {
         if (!parsed.success) {
           return {
             rowIndex: idx,
-            errors: parsed.error.errors.map(
-              (e) => `${e.path.join(".")}: ${e.message}`,
-            ),
+            errors: parsed.error.errors.map((e) => {
+              const field = e.path.join(".");
+              // Try to extract received value for enum errors
+              let received = undefined;
+              if (
+                e.message.startsWith("Invalid enum value") &&
+                e.message.includes("received")
+              ) {
+                const match = e.message.match(/received '([^']+)'/);
+                if (match) received = match[1];
+              }
+              return friendlyError(field, e.message, received);
+            }),
           };
         }
         return null;
@@ -298,6 +366,7 @@ export default function BulkAdd() {
       "Season",
       "Box Number",
       "Location",
+      "Shelf Code",
       "Description",
       "Pedigree",
       "Weight (kg)",
@@ -310,6 +379,7 @@ export default function BulkAdd() {
       "wet",
       1,
       "A1 East",
+      "S-12",
       "Sample description",
       "Sample pedigree",
       1.23,
