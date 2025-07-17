@@ -250,7 +250,18 @@ export default function Update() {
           </Button>
         </>
       ) : (
-        <QRScanner />
+        <div className="flex flex-col items-center justify-center w-full">
+          <div className="w-full flex justify-center mb-4">
+            <Button
+              variant="default"
+              onClick={() => setShowScanner(false)}
+              className="mx-auto"
+            >
+              ← Back
+            </Button>
+          </div>
+          <QRScanner />
+        </div>
       )}
 
       <Dialog
