@@ -163,17 +163,6 @@ export default function Home() {
   // Apply search filter to data
   const filteredData = filterData(data, searchQuery);
 
-  if (loading) {
-    return (
-      <div className="p-6">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold">Dashboard</h1>
-          <p className="text-gray-600">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="p-6">
       <div className="mb-6">
