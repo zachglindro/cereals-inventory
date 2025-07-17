@@ -559,11 +559,11 @@ function RowDialog<TData extends Record<string, any>>({
               })
               .filter(Boolean)}
           </div>
-          <DialogFooter className="flex justify-between items-center">
+          <div className="space-y-3">
             {requiredError && (
-              <span className="text-red-500 text-xs ml-2">{requiredError}</span>
+              <div className="text-red-500 text-xs">{requiredError}</div>
             )}
-            <div className="flex w-full items-center">
+            <DialogFooter className="flex w-full items-center">
               {!disableDelete && (
                 <Button
                   variant="destructive"
@@ -599,8 +599,8 @@ function RowDialog<TData extends Record<string, any>>({
                   )}
                 </Button>
               </div>
-            </div>
-          </DialogFooter>
+            </DialogFooter>
+          </div>
         </DialogContent>
       </Dialog>
       {/* Confirmation dialog */}
