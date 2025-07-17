@@ -196,6 +196,7 @@ function RowDialog<TData extends Record<string, any>>({
   const getEditableFields = () => {
     const allFields = [
       "box_number",
+      "shelf_code",
       "type",
       "area_planted",
       "year",

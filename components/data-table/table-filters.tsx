@@ -19,13 +19,16 @@ export interface FilterField {
   fieldName: keyof InventoryFormValues;
 }
 
-interface TableFiltersProps {
+type TableFiltersProps = {
   filterState: FilterState;
-  onFilterChange: (fieldName: string, value: FilterValue | null) => void;
+  onFilterChange: (
+    fieldName: string,
+    value: FilterValue | FilterValue[] | null,
+  ) => void;
   onClearAllFilters: () => void;
   data: InventoryFormValues[];
   filterFields: FilterField[];
-}
+};
 
 export function TableFilters({
   filterState,
@@ -71,29 +74,203 @@ export function TableFilters({
           </Button>
         </SheetTrigger>
         <SheetContent>
-          <SheetHeader className="border-b">
+          <div className="m-4">
             <SheetTitle>Filter Data</SheetTitle>
             <SheetDescription>
-              Set filters to narrow down the data shown in the table.
+              Select filters to refine your inventory results.
             </SheetDescription>
-          </SheetHeader>
-          <div className="overflow-y-auto">
-            {filterFields.map((field) => (
-              <FilterControl
-                key={String(field.fieldName)}
-                label={field.label}
-                fieldName={field.fieldName}
-                filterState={filterState}
-                onFilterChange={onFilterChange}
-                data={data}
-              />
-            ))}
           </div>
-          <SheetFooter className="border-t">
-            <Button variant="outline" onClick={onClearAllFilters}>
-              Clear All
-            </Button>
-          </SheetFooter>
+          <div className="border-b" />
+          <div className="m-4 overflow-auto max-h-screen space-y-6">
+            {/* Checkbox filters */}
+            {[
+              { label: "Type", field: "type" },
+              { label: "Area Planted", field: "area_planted" },
+              { label: "Season", field: "season" },
+              { label: "Shelf Code", field: "sheet_code" },
+            ].map(({ label, field }) => {
+              // Get unique options from data
+              const options = Array.from(
+                new Set(
+                  data
+                    .map((d) => d[field as keyof InventoryFormValues])
+                    .filter(Boolean),
+                ),
+              );
+              return (
+                <div key={field}>
+                  <div className="font-medium mb-1">{label}</div>
+                  <div className="flex flex-wrap gap-2">
+                    {options.map((option) => {
+                      const multi =
+                        filterState[field] &&
+                        filterState[field].type === "multi"
+                          ? (filterState[field].values as string[])
+                          : [];
+                      const isChecked = multi.includes(option as string);
+                      return (
+                        <Button
+                          key={option as string}
+                          variant={isChecked ? "default" : "outline"}
+                          size="sm"
+                          className="rounded-full"
+                          onClick={() => {
+                            const next = isChecked
+                              ? multi.filter((v) => v !== option)
+                              : [...multi, option as string];
+                            onFilterChange(
+                              field,
+                              next.length
+                                ? { type: "multi", values: next }
+                                : null,
+                            );
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isChecked}
+                            readOnly
+                            className="mr-2"
+                          />
+                          {option as string}
+                        </Button>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+
+            {/* Text filters */}
+            {[
+              { label: "Description", field: "description" },
+              { label: "Pedigree", field: "pedigree" },
+              { label: "Location", field: "location" },
+            ].map(({ label, field }) => (
+              <div key={field}>
+                <div className="font-medium mb-1">{label}</div>
+                <Input
+                  type="text"
+                  placeholder={`Search ${label.toLowerCase()}...`}
+                  value={filterState[field]?.textValue ?? ""}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    onFilterChange(
+                      field,
+                      val ? { type: "text", textValue: val } : null,
+                    );
+                  }}
+                />
+              </div>
+            ))}
+
+            {/* Numeric filters with addable conditions */}
+            {[
+              { label: "Year", field: "year" },
+              { label: "Weight", field: "weight" },
+            ].map(({ label, field }) => {
+              // Support multiple numeric conditions per field
+              let conditions: FilterValue[] = Array.isArray(filterState[field])
+                ? (filterState[field] as FilterValue[])
+                : filterState[field]
+                  ? [filterState[field] as FilterValue]
+                  : [];
+              if (conditions.length === 0) {
+                conditions = [
+                  {
+                    type: "numeric" as const,
+                    numericOperator: "=" as const,
+                    numericValue: 0,
+                  },
+                ];
+              }
+              return (
+                <div key={field}>
+                  <div className="font-medium mb-1 flex items-center justify-between">
+                    <span>{label}</span>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="ml-2"
+                      onClick={() => {
+                        const next = [
+                          ...conditions,
+                          {
+                            type: "numeric" as const,
+                            numericOperator: "=" as const,
+                            numericValue: 0,
+                          },
+                        ];
+                        onFilterChange(field, next);
+                      }}
+                      aria-label={`Add ${label} condition`}
+                    >
+                      <span className="text-lg">+</span>
+                    </Button>
+                  </div>
+                  <div className="space-y-2">
+                    {conditions.map((cond, idx) => (
+                      <div key={idx} className="flex items-center gap-2">
+                        <select
+                          className="border rounded px-2 py-1 text-sm"
+                          value={cond.numericOperator}
+                          onChange={(e) => {
+                            const op = e.target.value as
+                              | ">"
+                              | ">="
+                              | "<="
+                              | "="
+                              | "range";
+                            const next = conditions.map((c, i) =>
+                              i === idx ? { ...c, numericOperator: op } : c,
+                            );
+                            onFilterChange(field, next);
+                          }}
+                        >
+                          <option value=">">&gt;</option>
+                          <option value=">=">&ge;</option>
+                          <option value="<=">&le;</option>
+                          <option value="=">=</option>
+                          <option value="range">range</option>
+                        </select>
+                        <Input
+                          type="number"
+                          className="w-24"
+                          value={cond.numericValue ?? 0}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            const num = val === "" ? 0 : parseFloat(val);
+                            const next = conditions.map((c, i) =>
+                              i === idx ? { ...c, numericValue: num } : c,
+                            );
+                            onFilterChange(field, next);
+                          }}
+                        />
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-destructive"
+                          onClick={() => {
+                            const next = conditions.filter((_, i) => i !== idx);
+                            onFilterChange(field, next.length ? next : null);
+                          }}
+                          aria-label={`Remove ${label} condition`}
+                        >
+                          &times;
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+
+            <SheetFooter className="pt-4">
+              <Button variant="secondary" onClick={onClearAllFilters}>
+                Clear All Filters
+              </Button>
+            </SheetFooter>
+          </div>
         </SheetContent>
       </Sheet>
     </div>
