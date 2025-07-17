@@ -33,24 +33,30 @@ export default function Home() {
   const tableColumns = columns as ColumnDef<InventoryFormValues, unknown>[];
 
   useEffect(() => {
-    async function fetchData() {
-      setLoading(true);
-      const snapshot = await getDocs(collection(db, "inventory"));
-      const rows = snapshot.docs.map((doc) => {
-        return {
-          ...(doc.data() as InventoryFormValues),
-          id: doc.id,
-        };
-      });
-      // Sort by box_number field
-      const sortedRows = rows.sort((a, b) => {
-        return Number(a.box_number ?? 0) - Number(b.box_number ?? 0);
-      });
-      setData(sortedRows);
+    const cached = sessionStorage.getItem("inventoryData");
+    if (cached) {
+      setData(JSON.parse(cached));
       setLoading(false);
+    } else {
+      async function fetchData() {
+        setLoading(true);
+        const snapshot = await getDocs(collection(db, "inventory"));
+        const rows = snapshot.docs.map((doc) => {
+          return {
+            ...(doc.data() as InventoryFormValues),
+            id: doc.id,
+          };
+        });
+        // Sort by box_number field
+        const sortedRows = rows.sort((a, b) => {
+          return Number(a.box_number ?? 0) - Number(b.box_number ?? 0);
+        });
+        setData(sortedRows);
+        sessionStorage.setItem("inventoryData", JSON.stringify(sortedRows));
+        setLoading(false);
+      }
+      fetchData();
     }
-
-    fetchData();
   }, []);
 
   // Advanced search function with support for operators
@@ -264,22 +270,31 @@ export default function Home() {
           ]}
           onRowUpdate={async (updated: InventoryFormValues) => {
             if (!updated) return;
-            // Handle deletion locally
             if ((updated as any).deleted) {
-              setData((prev) => prev.filter((item) => item.id !== updated.id));
+              setData((prev) => {
+                const newData = prev.filter((item) => item.id !== updated.id);
+                sessionStorage.setItem(
+                  "inventoryData",
+                  JSON.stringify(newData),
+                );
+                return newData;
+              });
             } else {
-              // Optimistically update UI
-              setData((prev) =>
-                prev.map((item) => (item.id === updated.id ? updated : item)),
-              );
+              setData((prev) => {
+                const newData = prev.map((item) =>
+                  item.id === updated.id ? updated : item,
+                );
+                sessionStorage.setItem(
+                  "inventoryData",
+                  JSON.stringify(newData),
+                );
+                return newData;
+              });
               try {
-                // Update main document
                 const { id, ...fields } = updated;
                 const docRef = doc(db, "inventory", id!);
-                // Get previous data for diff
                 const prev = data.find((item) => item.id === id);
                 await updateDoc(docRef, fields as any);
-                // Compute changed fields
                 let changes: Record<string, { from: any; to: any }> = {};
                 if (prev) {
                   Object.keys(fields).forEach((key) => {
@@ -291,7 +306,6 @@ export default function Home() {
                     }
                   });
                 }
-                // Add history entry
                 const histCol = collection(db, "inventory", id!, "history");
                 await addDoc(histCol, {
                   editedBy: profile?.displayName || profile?.email || "Unknown",
