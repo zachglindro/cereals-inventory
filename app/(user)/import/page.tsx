@@ -36,6 +36,7 @@ export default function BulkAdd() {
   const [rowErrors, setRowErrors] = useState<
     { rowIndex: number; errors: string[] }[]
   >([]);
+  const [visibleErrorCount, setVisibleErrorCount] = useState(3);
   const [isSheetDialogOpen, setIsSheetDialogOpen] = useState(false);
   const [availableSheets, setAvailableSheets] = useState<
     { name: string; index: number }[]
@@ -486,11 +487,29 @@ export default function BulkAdd() {
           unrecognizedColumns.length === 0 &&
           rowErrors.length > 0 && (
             <div className="mt-2 text-sm text-red-600 text-center">
-              {rowErrors.map((err) => (
+              {rowErrors.slice(0, visibleErrorCount).map((err) => (
                 <div key={err.rowIndex}>
                   Row {err.rowIndex + 2} errors: {err.errors.join(", ")}
                 </div>
               ))}
+              {rowErrors.length > visibleErrorCount && (
+                <div className="flex flex-row items-center gap-2 justify-center mt-2">
+                  <Button
+                    variant="ghost"
+                    className="text-xs text-blue-600 underline"
+                    onClick={() => setVisibleErrorCount((c) => c + 3)}
+                  >
+                    Show more errors
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    className="text-xs text-blue-600 underline"
+                    onClick={() => setVisibleErrorCount(rowErrors.length)}
+                  >
+                    Show all errors
+                  </Button>
+                </div>
+              )}
             </div>
           )}
         {tableColumns.length > 0 && (
