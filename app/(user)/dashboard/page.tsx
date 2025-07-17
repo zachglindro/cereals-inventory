@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { ScanLine } from "lucide-react";
+import { ScanLine, RotateCcw } from "lucide-react";
 import { QRScanner } from "@/components/scanner";
 import {
   collection,
@@ -32,30 +32,31 @@ export default function Home() {
   const [showScanner, setShowScanner] = useState(false);
   const tableColumns = columns as ColumnDef<InventoryFormValues, unknown>[];
 
+  // Helper to fetch and cache data
+  const fetchAndCacheData = async () => {
+    setLoading(true);
+    const snapshot = await getDocs(collection(db, "inventory"));
+    const rows = snapshot.docs.map((doc) => {
+      return {
+        ...(doc.data() as InventoryFormValues),
+        id: doc.id,
+      };
+    });
+    const sortedRows = rows.sort((a, b) => {
+      return Number(a.box_number ?? 0) - Number(b.box_number ?? 0);
+    });
+    setData(sortedRows);
+    sessionStorage.setItem("inventoryData", JSON.stringify(sortedRows));
+    setLoading(false);
+  };
+
   useEffect(() => {
     const cached = sessionStorage.getItem("inventoryData");
     if (cached) {
       setData(JSON.parse(cached));
       setLoading(false);
     } else {
-      async function fetchData() {
-        setLoading(true);
-        const snapshot = await getDocs(collection(db, "inventory"));
-        const rows = snapshot.docs.map((doc) => {
-          return {
-            ...(doc.data() as InventoryFormValues),
-            id: doc.id,
-          };
-        });
-        // Sort by box_number field
-        const sortedRows = rows.sort((a, b) => {
-          return Number(a.box_number ?? 0) - Number(b.box_number ?? 0);
-        });
-        setData(sortedRows);
-        sessionStorage.setItem("inventoryData", JSON.stringify(sortedRows));
-        setLoading(false);
-      }
-      fetchData();
+      fetchAndCacheData();
     }
   }, []);
 
@@ -192,11 +193,22 @@ export default function Home() {
         )}
       </div>
 
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold">Inventory Dashboard</h1>
-        <p className="text-gray-600">
-          Complete view of inventory data and analytics
-        </p>
+      <div className="mb-6 flex flex-row items-center justify-between gap-2 flex-wrap">
+        <div className="flex flex-col">
+          <h1 className="text-2xl font-bold">Dashboard</h1>
+        </div>
+        <Button
+          variant="outline"
+          className="flex items-center justify-center gap-2"
+          onClick={() => {
+            sessionStorage.removeItem("inventoryData");
+            fetchAndCacheData();
+          }}
+          disabled={loading}
+        >
+          <RotateCcw className="h-4 w-4" />
+          <span className="hidden md:inline">Refresh</span>
+        </Button>
       </div>
 
       {/* Search Bar */}
