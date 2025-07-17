@@ -58,7 +58,10 @@ export function DataTable<TData extends Record<string, unknown>>({
   const [filterState, setFilterState] = useState<FilterState>({});
   const [exportDropdownOpen, setExportDropdownOpen] = useState(false);
 
-  const handleFilterChange = (fieldName: string, value: FilterValue | null) => {
+  const handleFilterChange = (
+    fieldName: string,
+    value: FilterValue | FilterValue[] | null,
+  ) => {
     setFilterState((prev) => updateFilterState(prev, fieldName, value));
   };
 

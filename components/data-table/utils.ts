@@ -64,11 +64,15 @@ export const globalFilterFn = <TData>(
 export const updateFilterState = (
   prev: FilterState,
   fieldName: string,
-  value: FilterValue | null,
+  value: FilterValue | FilterValue[] | null,
 ): FilterState => {
   const newState = { ...prev };
   if (value === null) {
     delete newState[fieldName];
+  } else if (Array.isArray(value)) {
+    // Handle array of FilterValue by taking the first one
+    // This is a simplified approach - you might want to implement more complex logic
+    newState[fieldName] = value[0];
   } else {
     newState[fieldName] = value;
   }
