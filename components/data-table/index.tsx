@@ -400,7 +400,7 @@ export function DataTable<TData extends Record<string, unknown>>({
     },
     onPaginationChange: setPagination,
     onSortingChange: setSorting,
-    getRowId: (_row, index) => index.toString(),
+    getRowId: (row) => String((row as any).id),
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),

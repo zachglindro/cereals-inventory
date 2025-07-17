@@ -36,16 +36,16 @@ import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { useUser } from "@/context/UserContext";
 
-export function InventoryForm() {
+export function InventoryForm({ onAdd }: { onAdd?: (item: any) => void } = {}) {
   const { user } = useUser();
   const form = useForm<InventoryFormValues>({
     resolver: zodResolver(inventoryFormSchema),
     defaultValues: {
       type: "white",
-      area_planted: "LBTR",
+      area_planted: "",
       year: "",
       season: "wet",
-      location: "",
+      location: "LBTR",
       shelf_code: "",
       description: "",
       pedigree: "",
@@ -58,7 +58,7 @@ export function InventoryForm() {
   async function onSubmit(values: InventoryFormValues) {
     setIsSubmitting(true);
     try {
-      await addDoc(collection(db, "inventory"), {
+      const docRef = await addDoc(collection(db, "inventory"), {
         ...values,
         creatorId: user?.uid,
         addedAt: serverTimestamp(),
@@ -71,6 +71,10 @@ export function InventoryForm() {
         loggedBy: user?.email || "unknown",
       });
       toast.success("Inventory added successfully!");
+      // Call onAdd with the new item (with id)
+      if (onAdd) {
+        onAdd({ ...values, id: docRef.id });
+      }
       // preserve box_number for next entry
       const savedBox = values.box_number;
       form.reset();
@@ -161,22 +165,7 @@ export function InventoryForm() {
               <FormItem>
                 <FormLabel>Area Planted</FormLabel>
                 <FormControl>
-                  <Select
-                    value={field.value}
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select location" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {areaPlantedOptions.map((option) => (
-                        <SelectItem key={option} value={option}>
-                          {option}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Input {...field} placeholder="A1 East" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -235,7 +224,22 @@ export function InventoryForm() {
               <FormItem>
                 <FormLabel>Location</FormLabel>
                 <FormControl>
-                  <Input {...field} placeholder="A1 East" />
+                  <Select
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select location" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {areaPlantedOptions.map((option) => (
+                        <SelectItem key={option} value={option}>
+                          {option}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </FormControl>
                 <FormMessage />
               </FormItem>

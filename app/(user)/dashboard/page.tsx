@@ -363,7 +363,20 @@ export default function Home() {
             Use this form to add a new inventory item.
           </p>
         </div>
-        <InventoryForm />
+        <InventoryForm
+          onAdd={(newItem) => {
+            setData((prev) => {
+              const newData = [newItem, ...prev];
+              sessionStorage.setItem("inventoryData", JSON.stringify(newData));
+              sessionStorage.setItem(
+                "inventoryDataUpdatedAt",
+                new Date().toISOString(),
+              );
+              return newData;
+            });
+            setLastUpdated(new Date());
+          }}
+        />
       </div>
 
       {/* Analytics */}
