@@ -247,6 +247,7 @@ function RowDialog<TData extends Record<string, any>>({
     setEditValues((prev) => ({ ...prev, [key]: value }));
   };
   const handleSubmit = async () => {
+    setIsSubmitting(true);
     setWeightError(null);
     setRequiredError(null);
     // Check if weight is a valid number
