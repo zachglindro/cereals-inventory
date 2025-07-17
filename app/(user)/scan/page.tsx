@@ -196,7 +196,7 @@ export default function Update() {
           .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 16px; }
           .item { text-align: center; padding: 8px; margin: 4px; }
           .item img { width: 80px; height: 80px; }
-          .caption { margin-top: 4px; font-size: 12px; font-weight: bold; }
+          .caption { margin-top: 4px; font-size: 18px; font-weight: bold; }
         </style>
         </head><body>
         <div class="grid">
@@ -304,7 +304,7 @@ export default function Update() {
                   size={256}
                   level="H"
                 />
-                <div className="mt-1 text-sm text-gray-600">
+                <div className="mt-1 text-xl font-bold">
                   Box #{boxNumberInput}
                 </div>
               </div>
