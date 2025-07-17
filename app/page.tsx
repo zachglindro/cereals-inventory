@@ -311,6 +311,15 @@ export default function Login() {
                     : null,
                 );
               } else if (updated) {
+                // Get previous value for history BEFORE updating state
+                let prevWeight: any = undefined;
+                if (scannedData) {
+                  const found = scannedData.inventory.find(
+                    (item) => item.id === updated.id,
+                  );
+                  prevWeight = found ? found.weight : undefined;
+                }
+
                 // Update local state immediately
                 setScannedData((prev) =>
                   prev
@@ -326,18 +335,22 @@ export default function Login() {
                 try {
                   if (!updated.id) throw new Error("Document ID is missing.");
                   const docRef = doc(db, "inventory", updated.id);
+
                   await updateDoc(docRef, { weight: updated.weight });
 
-                  // Add to history subcollection
+                  // Add to history subcollection with changes
                   const historyRef = collection(docRef, "history");
-                  await setDoc(
-                    doc(historyRef),
-                    {
-                      creatorId: "anonymous",
-                      editedAt: serverTimestamp(),
-                      editedBy: "Anonymous (logged out user)",
-                    }
-                  );
+                  await setDoc(doc(historyRef), {
+                    creatorId: "anonymous",
+                    editedAt: serverTimestamp(),
+                    editedBy: "Anonymous (logged out user)",
+                    changes: {
+                      weight: {
+                        from: prevWeight,
+                        to: updated.weight,
+                      },
+                    },
+                  });
                 } catch (error) {
                   console.error("Error updating document: ", error);
                   toast.error("Failed to update weight.");
