@@ -92,7 +92,7 @@ export function TableFilters({
               { label: "Type", field: "type" },
               { label: "Area Planted", field: "area_planted" },
               { label: "Season", field: "season" },
-              { label: "Shelf Code", field: "sheet_code" },
+              { label: "Shelf Code", field: "shelf_code" },
             ].map(({ label, field }) => {
               // Get unique options from data
               const options = Array.from(
