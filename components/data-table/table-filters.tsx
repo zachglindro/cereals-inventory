@@ -90,7 +90,7 @@ export function TableFilters({
             {/* Checkbox filters */}
             {[
               { label: "Type", field: "type" },
-              { label: "Area Planted", field: "area_planted" },
+              { label: "Location", field: "location" }, // switched: Location is now a checkbox filter
               { label: "Season", field: "season" },
               { label: "Shelf Code", field: "shelf_code" },
             ].map(({ label, field }) => {
@@ -155,7 +155,7 @@ export function TableFilters({
             {[
               { label: "Description", field: "description" },
               { label: "Pedigree", field: "pedigree" },
-              { label: "Location", field: "location" },
+              { label: "Area Planted", field: "area_planted" }, // switched: Area Planted is now a text filter
             ].map(({ label, field }) => (
               <div key={field}>
                 <div className="font-medium mb-1">{label}</div>
