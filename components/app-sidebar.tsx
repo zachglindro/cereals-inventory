@@ -9,7 +9,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { Camera, House, Shield, Upload } from "lucide-react";
+import { House, QrCode, Shield, Upload } from "lucide-react";
 import Link from "next/link";
 import { useUser } from "@/context/UserContext";
 
@@ -25,9 +25,9 @@ const items = [
     icon: Upload,
   },
   {
-    title: "Scan",
+    title: "QR",
     url: "/scan",
-    icon: Camera,
+    icon: QrCode,
   },
 ];
 
