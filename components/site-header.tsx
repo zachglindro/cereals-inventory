@@ -33,6 +33,9 @@ export function SiteHeader() {
   const handleLogout = async () => {
     const auth = getAuth(app);
     try {
+      // Clear cached inventory data on logout
+      sessionStorage.removeItem("inventoryData");
+      sessionStorage.removeItem("inventoryDataUpdatedAt");
       await signOut(auth);
       toast("Signed out successfully.");
       router.push("/");
