@@ -413,7 +413,7 @@ export default function Admin() {
   const [data, setData] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterType, setFilterType] = useState<
-    "all" | "approved" | "unapproved"
+    "all" | "approved" | "unapproved" | "admin" | "user"
   >("all");
   const [activeTab, setActiveTab] = useState<
     "users" | "activity" | "database" | "links"
@@ -612,7 +612,10 @@ export default function Admin() {
   const filtered = data.filter((u) => {
     if (filterType === "all") return true;
     if (filterType === "approved") return u.approved;
-    return !u.approved;
+    if (filterType === "unapproved") return !u.approved;
+    if (filterType === "admin") return u.role === "admin";
+    if (filterType === "user") return u.role === "user";
+    return true;
   });
 
   // Define columns
@@ -841,6 +844,20 @@ export default function Admin() {
               onClick={() => setFilterType("unapproved")}
             >
               Unapproved
+            </Button>
+            <Button
+              size="sm"
+              variant={filterType === "admin" ? "default" : "outline"}
+              onClick={() => setFilterType("admin")}
+            >
+              Admin
+            </Button>
+            <Button
+              size="sm"
+              variant={filterType === "user" ? "default" : "outline"}
+              onClick={() => setFilterType("user")}
+            >
+              User
             </Button>
           </div>
           <DataTable<User>
