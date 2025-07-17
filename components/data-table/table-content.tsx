@@ -452,6 +452,20 @@ function RowDialog<TData extends Record<string, any>>({
                   return (
                     <div key={key} className="flex flex-col space-y-2">
                       <Label className="font-medium">Area Planted</Label>
+                      <Input
+                        value={value ?? ""}
+                        onChange={(e) => handleChange(key, e.target.value)}
+                        placeholder="Enter area planted"
+                      />
+                    </div>
+                  );
+                }
+                if (key === "location") {
+                  // location should be a select with enum values
+                  const locationOptions = ["LBTR", "LBPD", "CMU"];
+                  return (
+                    <div key={key} className="flex flex-col space-y-2">
+                      <Label className="font-medium">Location</Label>
                       <Select
                         value={String(value)}
                         onValueChange={(newValue) =>
@@ -462,9 +476,9 @@ function RowDialog<TData extends Record<string, any>>({
                           <SelectValue placeholder="Select location" />
                         </SelectTrigger>
                         <SelectContent>
-                          {areaPlantedOptions.map((option) => (
+                          {locationOptions.map((option) => (
                             <SelectItem key={option} value={option}>
-                              {option}
+                              {option.toUpperCase()}
                             </SelectItem>
                           ))}
                         </SelectContent>
