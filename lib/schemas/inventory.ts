@@ -23,10 +23,12 @@ export const inventoryFormSchema = z.object({
   weight: z.number().gte(0, { message: "Required" }),
   remarks: z.string().optional(),
   id: z.string().optional(),
-  addedAt: z.object({
-    seconds: z.number(),
-    nanoseconds: z.number(),
-  }).optional(),
+  addedAt: z
+    .object({
+      seconds: z.number(),
+      nanoseconds: z.number(),
+    })
+    .optional(),
   addedBy: z.string().optional(),
   creatorId: z.string().optional(),
 });

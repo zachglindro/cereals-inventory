@@ -211,37 +211,36 @@ export function ComparativeAnalysisCard({
         <div className="space-y-4">
           {/* Chart */}
           {chartData.length > 0 ? (
-              <ChartContainer className="h-50"
-                config={{
-                  [metric]: {
-                    label: getYAxisLabel(),
-                    color: "#8884d8",
-                  },
-                }}
-              >
-                <LineChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis
-                    dataKey="period"
-                    fontSize={12}
-                    angle={comparisonType === "seasonal" ? -45 : 0}
-                    textAnchor={
-                      comparisonType === "seasonal" ? "end" : "middle"
-                    }
-                    height={comparisonType === "seasonal" ? 60 : 30}
-                    tickFormatter={formatPeriod}
-                  />
-                  <YAxis />
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                  <Line
-                    type="monotone"
-                    dataKey={metric}
-                    stroke="#8884d8"
-                    strokeWidth={2}
-                    dot={{ fill: "#8884d8", strokeWidth: 2, r: 4 }}
-                  />
-                </LineChart>
-              </ChartContainer>
+            <ChartContainer
+              className="h-50"
+              config={{
+                [metric]: {
+                  label: getYAxisLabel(),
+                  color: "#8884d8",
+                },
+              }}
+            >
+              <LineChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis
+                  dataKey="period"
+                  fontSize={12}
+                  angle={comparisonType === "seasonal" ? -45 : 0}
+                  textAnchor={comparisonType === "seasonal" ? "end" : "middle"}
+                  height={comparisonType === "seasonal" ? 60 : 30}
+                  tickFormatter={formatPeriod}
+                />
+                <YAxis />
+                <ChartTooltip content={<ChartTooltipContent />} />
+                <Line
+                  type="monotone"
+                  dataKey={metric}
+                  stroke="#8884d8"
+                  strokeWidth={2}
+                  dot={{ fill: "#8884d8", strokeWidth: 2, r: 4 }}
+                />
+              </LineChart>
+            </ChartContainer>
           ) : (
             <div className="h-64 flex items-center justify-center text-gray-500">
               No data available for comparison

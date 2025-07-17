@@ -32,17 +32,25 @@ interface InventoryViewDialogProps<TData = any> {
   trigger?: React.ReactNode;
 }
 
-export function InventoryViewDialog<TData = any>({ entry, trigger }: InventoryViewDialogProps<TData>) {
+export function InventoryViewDialog<TData = any>({
+  entry,
+  trigger,
+}: InventoryViewDialogProps<TData>) {
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [open, setOpen] = useState(false);
 
   const fetchHistory = async () => {
     if (!(entry as any).id) return;
-    
+
     setLoadingHistory(true);
     try {
-      const historyRef = collection(db, "inventory", (entry as any).id, "history");
+      const historyRef = collection(
+        db,
+        "inventory",
+        (entry as any).id,
+        "history",
+      );
       const q = query(historyRef, orderBy("editedAt", "desc"));
       const snapshot = await getDocs(q);
       const historyData = snapshot.docs.map((doc) => ({
@@ -63,7 +71,9 @@ export function InventoryViewDialog<TData = any>({ entry, trigger }: InventoryVi
     }
   }, [open, (entry as any).id]);
 
-  const formatDate = (timestamp: { seconds: number; nanoseconds: number } | undefined) => {
+  const formatDate = (
+    timestamp: { seconds: number; nanoseconds: number } | undefined,
+  ) => {
     if (!timestamp) return "N/A";
     const date = new Date(timestamp.seconds * 1000);
     return date.toLocaleString();
@@ -72,7 +82,7 @@ export function InventoryViewDialog<TData = any>({ entry, trigger }: InventoryVi
   const formatFieldName = (fieldName: string) => {
     return fieldName
       .split("_")
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(" ");
   };
 
@@ -90,7 +100,7 @@ export function InventoryViewDialog<TData = any>({ entry, trigger }: InventoryVi
         <DialogHeader>
           <DialogTitle>Inventory Entry Details</DialogTitle>
         </DialogHeader>
-        
+
         <div className="space-y-6">
           {/* Entry Details */}
           <Card>
@@ -118,7 +128,9 @@ export function InventoryViewDialog<TData = any>({ entry, trigger }: InventoryVi
                     Area Planted
                   </label>
                   <p className="text-sm">
-                    <Badge variant="outline">{(entry as any).area_planted}</Badge>
+                    <Badge variant="outline">
+                      {(entry as any).area_planted}
+                    </Badge>
                   </p>
                 </div>
                 <div>
@@ -139,12 +151,14 @@ export function InventoryViewDialog<TData = any>({ entry, trigger }: InventoryVi
                   <label className="text-sm font-medium text-muted-foreground">
                     Weight (kg)
                   </label>
-                  <p className="text-sm font-semibold">{(entry as any).weight}</p>
+                  <p className="text-sm font-semibold">
+                    {(entry as any).weight}
+                  </p>
                 </div>
               </div>
-              
+
               <Separator />
-              
+
               <div className="space-y-2">
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">
@@ -173,9 +187,9 @@ export function InventoryViewDialog<TData = any>({ entry, trigger }: InventoryVi
                   </div>
                 )}
               </div>
-              
+
               <Separator />
-              
+
               <div className="grid grid-cols-2 gap-4 text-xs text-muted-foreground">
                 {(entry as any).addedBy && (
                   <div>
@@ -203,40 +217,62 @@ export function InventoryViewDialog<TData = any>({ entry, trigger }: InventoryVi
             </CardHeader>
             <CardContent>
               {loadingHistory ? (
-                <p className="text-sm text-muted-foreground">Loading history...</p>
+                <p className="text-sm text-muted-foreground">
+                  Loading history...
+                </p>
               ) : history.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No edit history found.</p>
+                <p className="text-sm text-muted-foreground">
+                  No edit history found.
+                </p>
               ) : (
                 <div className="space-y-3">
                   {history.map((historyItem) => (
-                    <div key={historyItem.id} className="flex flex-col gap-2 p-3 bg-muted rounded-lg">
+                    <div
+                      key={historyItem.id}
+                      className="flex flex-col gap-2 p-3 bg-muted rounded-lg"
+                    >
                       <div className="flex items-center gap-3">
                         <User className="h-4 w-4 text-muted-foreground" />
                         <div className="flex-1">
-                          <p className="text-sm font-medium">{historyItem.editedBy}</p>
+                          <p className="text-sm font-medium">
+                            {historyItem.editedBy}
+                          </p>
                           <p className="text-xs text-muted-foreground">
                             {formatDate(historyItem.editedAt)}
                           </p>
                         </div>
                       </div>
-                      {historyItem.changes && Object.keys(historyItem.changes).length > 0 && (
-                        <div className="mt-2 ml-7">
-                          <div className="text-xs font-semibold text-muted-foreground mb-1">Edited Fields:</div>
-                          <ul className="list-disc ml-4">
-                            {Object.entries(historyItem.changes).map(([field, change]) => (
-                              <li key={field} className="text-xs">
-                                <span className="font-medium">{formatFieldName(field)}:</span>
-                                &nbsp;
-                                <span className="text-red-700">{String((change as any).from)}</span>
-                                &nbsp;
-                                <span className="text-muted-foreground">→</span>
-                                &nbsp;
-                                <span className="text-green-700">{String((change as any).to)}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
+                      {historyItem.changes &&
+                        Object.keys(historyItem.changes).length > 0 && (
+                          <div className="mt-2 ml-7">
+                            <div className="text-xs font-semibold text-muted-foreground mb-1">
+                              Edited Fields:
+                            </div>
+                            <ul className="list-disc ml-4">
+                              {Object.entries(historyItem.changes).map(
+                                ([field, change]) => (
+                                  <li key={field} className="text-xs">
+                                    <span className="font-medium">
+                                      {formatFieldName(field)}:
+                                    </span>
+                                    &nbsp;
+                                    <span className="text-red-700">
+                                      {String((change as any).from)}
+                                    </span>
+                                    &nbsp;
+                                    <span className="text-muted-foreground">
+                                      →
+                                    </span>
+                                    &nbsp;
+                                    <span className="text-green-700">
+                                      {String((change as any).to)}
+                                    </span>
+                                  </li>
+                                ),
+                              )}
+                            </ul>
+                          </div>
+                        )}
                     </div>
                   ))}
                 </div>

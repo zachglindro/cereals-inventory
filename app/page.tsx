@@ -8,7 +8,13 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { FirebaseError } from "firebase/app";
 import { db } from "@/lib/firebase";
-import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from "firebase/firestore";
+import {
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+  serverTimestamp,
+} from "firebase/firestore";
 import { useUser } from "@/context/UserContext";
 import { useAuth } from "@/hooks/use-auth";
 import { useEffect, useState } from "react";
@@ -292,40 +298,40 @@ export default function Login() {
               { label: "Weight", fieldName: "weight" },
             ]}
             onRowUpdate={async (updated: InventoryFormValues) => {
-               if (updated && (updated as any).deleted) {
-                 // Remove the deleted row
-                 setScannedData((prev) =>
-                   prev
-                     ? {
-                         ...prev,
-                         inventory: prev.inventory.filter(
-                           (item) => item.id !== updated.id,
-                         ),
-                       }
-                     : null,
-                 );
-               } else if (updated) {
-                 // Update local state immediately
-                 setScannedData((prev) =>
-                   prev
-                     ? {
-                         ...prev,
-                         inventory: prev.inventory.map((item) =>
-                           item.id === updated.id ? updated : item,
-                         ),
-                       }
-                     : null,
-                 );
-                 // Save the change to Firestore
-                 try {
-                   if (!updated.id) throw new Error("Document ID is missing.");
-                   const docRef = doc(db, "inventory", updated.id);
-                   await updateDoc(docRef, { weight: updated.weight });
-                 } catch (error) {
-                   console.error("Error updating document: ", error);
-                   toast.error("Failed to update weight.");
-                 }
-               }
+              if (updated && (updated as any).deleted) {
+                // Remove the deleted row
+                setScannedData((prev) =>
+                  prev
+                    ? {
+                        ...prev,
+                        inventory: prev.inventory.filter(
+                          (item) => item.id !== updated.id,
+                        ),
+                      }
+                    : null,
+                );
+              } else if (updated) {
+                // Update local state immediately
+                setScannedData((prev) =>
+                  prev
+                    ? {
+                        ...prev,
+                        inventory: prev.inventory.map((item) =>
+                          item.id === updated.id ? updated : item,
+                        ),
+                      }
+                    : null,
+                );
+                // Save the change to Firestore
+                try {
+                  if (!updated.id) throw new Error("Document ID is missing.");
+                  const docRef = doc(db, "inventory", updated.id);
+                  await updateDoc(docRef, { weight: updated.weight });
+                } catch (error) {
+                  console.error("Error updating document: ", error);
+                  toast.error("Failed to update weight.");
+                }
+              }
             }}
           />
         </div>
