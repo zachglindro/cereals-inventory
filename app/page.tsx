@@ -322,11 +322,22 @@ export default function Login() {
                       }
                     : null,
                 );
-                // Save the change to Firestore
+                // Save the change to Firestore and add to history
                 try {
                   if (!updated.id) throw new Error("Document ID is missing.");
                   const docRef = doc(db, "inventory", updated.id);
                   await updateDoc(docRef, { weight: updated.weight });
+
+                  // Add to history subcollection
+                  const historyRef = collection(docRef, "history");
+                  await setDoc(
+                    doc(historyRef),
+                    {
+                      creatorId: "anonymous",
+                      editedAt: serverTimestamp(),
+                      editedBy: "Anonymous (logged out user)",
+                    }
+                  );
                 } catch (error) {
                   console.error("Error updating document: ", error);
                   toast.error("Failed to update weight.");
