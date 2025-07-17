@@ -515,6 +515,9 @@ export default function Admin() {
       loggedBy: user?.email || "unknown",
     });
 
+    // Show toast
+    toast.success(`Approved ${u.displayName}`);
+
     // Refresh activity if on activity tab
     refreshActivity();
   };
@@ -531,6 +534,9 @@ export default function Admin() {
       loggedAt: serverTimestamp(),
       loggedBy: user?.email || "unknown",
     });
+
+    // Show toast
+    toast.success(`Disapproved ${u.displayName}`);
 
     // Refresh activity if on activity tab
     refreshActivity();
@@ -561,6 +567,11 @@ export default function Admin() {
       loggedAt: serverTimestamp(),
       loggedBy: user?.email || "unknown",
     });
+
+    // Show toast
+    toast.success(
+      `Changed role for ${u.displayName} to ${role.charAt(0).toUpperCase() + role.slice(1)}`,
+    );
 
     // Refresh activity if on activity tab
     refreshActivity();
