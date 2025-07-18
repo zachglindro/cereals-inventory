@@ -226,7 +226,7 @@ To deploy this app to [Vercel](https://vercel.com/):
 3. During setup, add all required environment variables from your `.env` file to the Vercel dashboard (Settings > Environment Variables).
 4. Click "Deploy". Vercel will build and host your app automatically.
 
-For more details, see the [Vercel documentation](https://vercel.com/docs/deploying).
+For more details, see the [Vercel documentation](https://vercel.com/docs/deployments).
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
