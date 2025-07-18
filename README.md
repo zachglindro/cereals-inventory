@@ -39,55 +39,194 @@
 
 ## About The Project
 
-[![Product Name Screen Shot][product-screenshot]](https://example.com)
 
-Here's a blank template to get started. To avoid retyping too much info, do a search and replace with your text editor for the following: `github_username`, `repo_name`, `twitter_handle`, `linkedin_username`, `email_client`, `email`, `Cereals Inventory`, `An inventory web application for the Cereal Crops Section.`, `project_license`
+[![Dashboard Screen Shot][product-screenshot]](https://example.com)
+
+Cereals Inventory is a web application designed for the Cereal Crops Section to efficiently manage and track seed inventory. Built with Next.js, React, and Firebase, it provides a modern, user-friendly interface for users.
+
+**Key Features:**
+
+- **Inventory Management:** Add, edit, view, and delete detailed records for each inventory item, including type, area planted, year, season, box number, location, shelf code, description, pedigree, weight, and remarks.
+- **QR Code Integration:** Quickly scan QR codes to access and update box-specific inventory, streamlining physical-to-digital tracking.
+- **Bulk Import:** Import inventory data from spreadsheets (Excel/CSV) with validation and error feedback, making large-scale updates fast and reliable.
+- **Dashboard & Analytics:** Visualize inventory statistics with interactive charts, including total weight, low stock alerts, weight distribution, and comparative analysis over time or by category.
+- **Advanced Search:** Powerful search tools for quickly finding items by type, year, box, and more.
+- **User Roles & Admin Panel:** Role-based access control with admin features for user approval, role management, and database maintenance (including bulk deletion and activity logs).
+- **Edit History:** Track changes to inventory entries with detailed edit history, including who made each change and when.
+- **Responsive Design:** Optimized for both desktop and mobile devices, with a mobile-friendly QR scanner and adaptive layouts.
+
+This application is tailored for storage operations, helping maintain accurate, up-to-date records.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ### Built With
 
-- [![Next][Next.js]][Next-url]
-- [![React][React.js]][React-url]
+ - [![Next][Next.js]][Next-url]
+ - [![React][React.js]][React-url]
+ - [![TypeScript][TypeScript-badge]][TypeScript-url]
+ - [![Tailwind][Tailwind-badge]][Tailwind-url]
+ - [![Firebase][Firebase-badge]][Firebase-url]
+ - [![Vercel][Vercel-badge]][Vercel-url]
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 <!-- GETTING STARTED -->
+## Project Structure
+
+
+Below is an overview of the main files and folders in this project, along with a brief explanation of their purpose:
+
+```text
+├── app/
+│   ├── (user)/
+│   │   ├── admin/
+│   │   ├── box/[uuid]/
+│   │   ├── dashboard/
+│   │   ├── import/
+│   │   ├── scan/
+│   │   └── layout.tsx
+│   ├── globals.css
+│   ├── layout.tsx
+│   └── page.tsx
+├── components/
+│   ├── app-sidebar.tsx
+│   ├── filter.tsx
+│   ├── inventory-form.tsx
+│   ├── inventory-view-dialog.tsx
+│   ├── protected-route.tsx
+│   ├── scanner.tsx
+│   ├── site-header.tsx
+│   ├── dashboard/
+│   ├── data-table/
+│   └── ui/
+├── context/
+├── hooks/
+├── lib/
+│   ├── firebase.ts
+│   ├── utils.ts
+│   └── schemas/
+├── public/
+│   ├── docs/
+│   └── screenshots/
+├── scripts/
+├── .env
+├── package.json
+├── tsconfig.json
+├── README.md
+└── ...
+```
+
+**Directory/Files Overview:**
+
+- `app/`: Main Next.js application folder. Contains all routes, layouts, and pages.
+  - `(user)/`: User-facing routes, grouped by feature (e.g., `admin/`, `dashboard/`, `import/`, `scan/`, etc.).
+  - `box/[uuid]/`: Dynamic route for viewing/editing inventory by box UUID.
+  - `globals.css`: Global styles for the app.
+  - `layout.tsx`, `page.tsx`: Root layout and landing page.
+- `components/`: Reusable React components.
+  - `dashboard/`: Dashboard widgets and analytics cards.
+  - `data-table/`: Data table components and utilities.
+  - `ui/`: UI primitives (buttons, dialogs, forms, etc.).
+- `context/`: React context providers (e.g., user context).
+- `hooks/`: Custom React hooks (e.g., authentication, role checks).
+- `lib/`: Library code and utilities.
+  - `firebase.ts`: Firebase client and admin setup.
+  - `utils.ts`: General utility functions.
+  - `schemas/`: Zod schemas for validation (e.g., inventory, columns).
+- `public/`: Static assets.
+  - `docs/`: Documentation (e.g., user manual).
+  - `screenshots/`: App screenshots for README/docs.
+- `scripts/`: Utility scripts (if any).
+- `.env`: Environment variables (not committed to version control).
+- `package.json`: Project dependencies and scripts.
+- `tsconfig.json`: TypeScript configuration.
+- `README.md`: Project documentation (this file).
+
+This structure is based on the Next.js project organization conventions.
 
 ## Getting Started
 
-This is an example of how you may give instructions on setting up your project locally.
-To get a local copy up and running follow these simple example steps.
+Follow these steps to set up and run the Cereals Inventory app locally on your machine.
 
 ### Prerequisites
 
-This is an example of how to list things you need to use the software and how to install them.
 
-- npm
-  ```sh
-  npm install npm@latest -g
-  ```
+Before you begin, ensure you have the following installed on your machine:
+
+- **Node.js**: [Download Node.js](https://nodejs.org/)
+- **npm** (comes with Node.js)
+- **git** (for cloning the repository): [Download git](https://git-scm.com/)
+- **Firebase account & project**: [Create a Firebase project](https://firebase.google.com/)
+
+You will need access to a Firebase project to configure authentication and database settings for the app.
 
 ### Installation
 
-1. Get a free API Key at [https://example.com](https://example.com)
-2. Clone the repo
-   ```sh
-   git clone https://github.com/github_username/repo_name.git
-   ```
-3. Install NPM packages
+
+
+1. Obtain the source code:
+   - **Option 1:** Clone the repository from GitHub:
+     ```sh
+     git clone https://github.com/zachglindro/cereals-inventory.git
+     ```
+   - **Option 2:** Download and extract the provided source code zip file to your desired directory.
+
+2. Install dependencies:
    ```sh
    npm install
    ```
-4. Enter your API in `config.js`
-   ```js
-   const API_KEY = "ENTER YOUR API";
+
+### Configuration
+
+
+1. Create a Firebase project in the [Firebase Console](https://console.firebase.google.com/).
+2. In your project directory, create a `.env` file and add the following environment variables with your own values:
+   ```env
+   # Client-side Firebase config
+   NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key
+   NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_auth_domain
+   NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
+   NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_storage_bucket
+   NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_messaging_sender_id
+   NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
+   NEXT_PUBLIC_SITE_URL=http://localhost:3000
+
+   # Server-side Firebase Admin SDK config
+   FIREBASE_PROJECT_ID=your_project_id
+   FIREBASE_CLIENT_EMAIL=your_firebase_admin_client_email
+   FIREBASE_PRIVATE_KEY="your_firebase_private_key"
+
+   # Allowed hosts for client link validation (comma-separated)
+   NEXT_PUBLIC_ALLOWED_HOSTS=localhost,example.com
    ```
-5. Change git remote url to avoid accidental pushes to base project
-   ```sh
-   git remote set-url origin github_username/repo_name
-   git remote -v # confirm the changes
-   ```
+   - You can find most of these values in your Firebase project settings.
+   - For `FIREBASE_PRIVATE_KEY`, be sure to keep this value secret and wrap it in double quotes if it contains line breaks (as shown above).
+   - Do not commit your `.env` file to version control.
+
+### Running the App
+
+To start the development server:
+```sh
+npm run dev
+```
+The app will be available at [http://localhost:3000](http://localhost:3000).
+
+To build for production:
+```sh
+npm run build
+npm start
+```
+
+### Deployment (Vercel)
+
+To deploy this app to [Vercel](https://vercel.com/):
+
+1. Push your code to a GitHub (or GitLab/Bitbucket) repository.
+2. Go to [vercel.com/import](https://vercel.com/import) and import your repository.
+3. During setup, add all required environment variables from your `.env` file to the Vercel dashboard (Settings > Environment Variables).
+4. Click "Deploy". Vercel will build and host your app automatically.
+
+For more details, see the [Vercel documentation](https://vercel.com/docs/deploying).
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -95,9 +234,18 @@ This is an example of how to list things you need to use the software and how to
 
 ## Usage
 
-Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
 
-_For more examples, please refer to the [Documentation](https://example.com)_
+Cereals Inventory allows users to:
+
+- Log in with their account
+- Scan QR codes to view and update box inventory
+- Add, edit, and delete inventory items
+- Import inventory data in bulk from spreadsheets
+- View analytics and statistics on the dashboard
+- Use advanced search and filtering tools
+- Manage users and roles (admin only)
+
+For detailed instructions, screenshots, and workflows, please refer to the full [User Manual (DOCX)](public/docs/MANUAL.docx).
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -112,32 +260,16 @@ Email: zmglindro2@up.edu.ph
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
 
-[contributors-shield]: https://img.shields.io/github/contributors/github_username/repo_name.svg?style=for-the-badge
-[contributors-url]: https://github.com/github_username/repo_name/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/github_username/repo_name.svg?style=for-the-badge
-[forks-url]: https://github.com/github_username/repo_name/network/members
-[stars-shield]: https://img.shields.io/github/stars/github_username/repo_name.svg?style=for-the-badge
-[stars-url]: https://github.com/github_username/repo_name/stargazers
-[issues-shield]: https://img.shields.io/github/issues/github_username/repo_name.svg?style=for-the-badge
-[issues-url]: https://github.com/github_username/repo_name/issues
-[license-shield]: https://img.shields.io/github/license/github_username/repo_name.svg?style=for-the-badge
-[license-url]: https://github.com/github_username/repo_name/blob/master/LICENSE.txt
-[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
-[linkedin-url]: https://linkedin.com/in/linkedin_username
-[product-screenshot]: images/screenshot.png
+[product-screenshot]: public/screenshots/dashboard.png
 [Next.js]: https://img.shields.io/badge/next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white
 [Next-url]: https://nextjs.org/
 [React.js]: https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB
 [React-url]: https://reactjs.org/
-[Vue.js]: https://img.shields.io/badge/Vue.js-35495E?style=for-the-badge&logo=vuedotjs&logoColor=4FC08D
-[Vue-url]: https://vuejs.org/
-[Angular.io]: https://img.shields.io/badge/Angular-DD0031?style=for-the-badge&logo=angular&logoColor=white
-[Angular-url]: https://angular.io/
-[Svelte.dev]: https://img.shields.io/badge/Svelte-4A4A55?style=for-the-badge&logo=svelte&logoColor=FF3E00
-[Svelte-url]: https://svelte.dev/
-[Laravel.com]: https://img.shields.io/badge/Laravel-FF2D20?style=for-the-badge&logo=laravel&logoColor=white
-[Laravel-url]: https://laravel.com
-[Bootstrap.com]: https://img.shields.io/badge/Bootstrap-563D7C?style=for-the-badge&logo=bootstrap&logoColor=white
-[Bootstrap-url]: https://getbootstrap.com
-[JQuery.com]: https://img.shields.io/badge/jQuery-0769AD?style=for-the-badge&logo=jquery&logoColor=white
-[JQuery-url]: https://jquery.com
+[Firebase-badge]: https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=white
+[Firebase-url]: https://firebase.google.com/
+[TypeScript-badge]: https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white
+[TypeScript-url]: https://www.typescriptlang.org/
+[Tailwind-badge]: https://img.shields.io/badge/TailwindCSS-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white
+[Tailwind-url]: https://tailwindcss.com/
+[Vercel-badge]: https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white
+[Vercel-url]: https://vercel.com/
