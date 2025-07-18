@@ -965,6 +965,21 @@ export default function Admin() {
               Download Manual
               <ExternalLink className="w-4 h-4 ml-2" />
             </Button>
+            <Button
+              variant="outline"
+              onClick={() => {
+                const link = document.createElement("a");
+                link.href = "/docs/cereals-inventory-system.zip";
+                link.download = "cereals-inventory-system.zip";
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+              }}
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Download Source Code
+              <ExternalLink className="w-4 h-4 ml-2" />
+            </Button>
           </div>
         </>
       )}
