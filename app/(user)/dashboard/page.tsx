@@ -46,16 +46,16 @@ export default function Home() {
       return Number(a.box_number ?? 0) - Number(b.box_number ?? 0);
     });
     setData(sortedRows);
-    sessionStorage.setItem("inventoryData", JSON.stringify(sortedRows));
-    sessionStorage.setItem("inventoryDataUpdatedAt", new Date().toISOString());
+    localStorage.setItem("inventoryData", JSON.stringify(sortedRows));
+    localStorage.setItem("inventoryDataUpdatedAt", new Date().toISOString());
     setLastUpdated(new Date());
     setLoading(false);
   };
 
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   useEffect(() => {
-    const cached = sessionStorage.getItem("inventoryData");
-    const cachedAt = sessionStorage.getItem("inventoryDataUpdatedAt");
+    const cached = localStorage.getItem("inventoryData");
+    const cachedAt = localStorage.getItem("inventoryDataUpdatedAt");
     if (cached) {
       setData(JSON.parse(cached));
       if (cachedAt) setLastUpdated(new Date(cachedAt));
@@ -219,8 +219,8 @@ export default function Home() {
           variant="outline"
           className="flex items-center justify-center gap-2"
           onClick={() => {
-            sessionStorage.removeItem("inventoryData");
-            sessionStorage.removeItem("inventoryDataUpdatedAt");
+            localStorage.removeItem("inventoryData");
+            localStorage.removeItem("inventoryDataUpdatedAt");
             fetchAndCacheData();
           }}
           disabled={loading}
@@ -304,10 +304,7 @@ export default function Home() {
             if ((updated as any).deleted) {
               setData((prev) => {
                 const newData = prev.filter((item) => item.id !== updated.id);
-                sessionStorage.setItem(
-                  "inventoryData",
-                  JSON.stringify(newData),
-                );
+                localStorage.setItem("inventoryData", JSON.stringify(newData));
                 return newData;
               });
             } else {
@@ -315,10 +312,7 @@ export default function Home() {
                 const newData = prev.map((item) =>
                   item.id === updated.id ? updated : item,
                 );
-                sessionStorage.setItem(
-                  "inventoryData",
-                  JSON.stringify(newData),
-                );
+                localStorage.setItem("inventoryData", JSON.stringify(newData));
                 return newData;
               });
               try {
@@ -367,8 +361,8 @@ export default function Home() {
           onAdd={(newItem) => {
             setData((prev) => {
               const newData = [newItem, ...prev];
-              sessionStorage.setItem("inventoryData", JSON.stringify(newData));
-              sessionStorage.setItem(
+              localStorage.setItem("inventoryData", JSON.stringify(newData));
+              localStorage.setItem(
                 "inventoryDataUpdatedAt",
                 new Date().toISOString(),
               );

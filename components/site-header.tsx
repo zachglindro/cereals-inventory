@@ -34,8 +34,8 @@ export function SiteHeader() {
     const auth = getAuth(app);
     try {
       // Clear cached inventory data on logout
-      sessionStorage.removeItem("inventoryData");
-      sessionStorage.removeItem("inventoryDataUpdatedAt");
+      localStorage.removeItem("inventoryData");
+      localStorage.removeItem("inventoryDataUpdatedAt");
       await signOut(auth);
       toast("Signed out successfully.");
       router.push("/");
