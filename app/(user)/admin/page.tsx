@@ -40,6 +40,7 @@ import {
   Activity,
   ChevronRight,
   Database,
+  Download,
   EllipsisVertical,
   ExternalLink,
   Github,
@@ -947,6 +948,21 @@ export default function Admin() {
             >
               <Database className="w-4 h-4 mr-2" />
               Database
+              <ExternalLink className="w-4 h-4 ml-2" />
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => {
+                const link = document.createElement("a");
+                link.href = "/docs/MANUAL.docx";
+                link.download = "MANUAL.docx";
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+              }}
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Download Manual
               <ExternalLink className="w-4 h-4 ml-2" />
             </Button>
           </div>
