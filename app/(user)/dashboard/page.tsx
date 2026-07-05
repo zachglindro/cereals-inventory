@@ -22,6 +22,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { useUser } from "@/context/UserContext";
 import { InventoryForm } from "@/components/inventory-form";
 
+
 export default function Home() {
   const { profile } = useUser();
   const [data, setData] = useState<InventoryFormValues[]>([]);
@@ -31,6 +32,18 @@ export default function Home() {
   const [chartWeightMode, setChartWeightMode] = useState<boolean>(false);
   const [showScanner, setShowScanner] = useState(false);
   const tableColumns = columns as ColumnDef<InventoryFormValues, unknown>[];
+
+  let showWarning = false;
+  const currentYear: number = new Date().getFullYear();
+  
+  for (let item of data) {
+    let nexpire = currentYear - parseInt(String(item.year));
+    if (nexpire >= 4) {
+      showWarning = true;
+      break;
+    }
+  }
+
 
   // Helper to fetch and cache data
   const fetchAndCacheData = async () => {
@@ -64,6 +77,8 @@ export default function Home() {
       fetchAndCacheData();
     }
   }, []);
+
+  
 
   // Advanced search function with support for operators
   const filterData = (
@@ -230,6 +245,11 @@ export default function Home() {
         </Button>
       </div>
 
+      {/* Warning Field */}
+      {showWarning && (
+        <div> Warning </div>
+      )}
+
       {/* Search Bar */}
       <div className="mb-6">
         <div className="relative">
@@ -350,10 +370,12 @@ export default function Home() {
       </div>
 
       {/* Add Inventory Form */}
+      {/* Accessible only to admin or agtech role */}
+      {profile?.role === "admin" && (
       <div className="mb-8 rounded-lg border-2 border-gray-300 overflow-hidden">
         <div className="m-4">
           <h2 className="text-xl font-semibold">Add Inventory</h2>
-          <p className="text-gray-600">
+          <p className="text-gray-600"> 
             Use this form to add a new inventory item.
           </p>
         </div>
@@ -372,6 +394,32 @@ export default function Home() {
           }}
         />
       </div>
+      )}
+      {profile?.role === "agtech" && (
+      <div className="mb-8 rounded-lg border-2 border-gray-300 overflow-hidden">
+        <div className="m-4">
+          <h2 className="text-xl font-semibold">Add Inventory</h2>
+          <p className="text-gray-600"> 
+            Use this form to add a new inventory item.
+          </p>
+        </div>
+        <InventoryForm
+          onAdd={(newItem) => {
+            setData((prev) => {
+              const newData = [newItem, ...prev];
+              localStorage.setItem("inventoryData", JSON.stringify(newData));
+              localStorage.setItem(
+                "inventoryDataUpdatedAt",
+                new Date().toISOString(),
+              );
+              return newData;
+            });
+            setLastUpdated(new Date());
+          }}
+        />
+      </div>
+      )}
+
 
       {/* Analytics */}
       <div className="hidden md:block">
